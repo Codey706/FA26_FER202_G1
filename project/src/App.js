@@ -1,24 +1,34 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Navbar, Nav, Container, Button } from "react-bootstrap";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Navbar bg="dark" variant="dark" expand="lg">
+      <Container>
+        {/* Logo / tên website */}
+        <Navbar.Brand href="/">
+          My React App
+        </Navbar.Brand>
+
+        {/* Nút menu khi màn hình nhỏ */}
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+
+        {/* Nội dung Navbar */}
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="me-auto">
+            <Nav.Link href="/">Home</Nav.Link>
+            <Nav.Link href="/products">Products</Nav.Link>
+            <Nav.Link href="/about">About</Nav.Link>
+            <Nav.Link href="/contact">Contact</Nav.Link>
+          </Nav>
+
+          {/* Nút bên phải */}
+          <Button variant="outline-light">
+            Login
+          </Button>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
   );
 }
 
