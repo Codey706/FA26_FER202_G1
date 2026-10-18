@@ -8,14 +8,15 @@ import {
   FaPaw,
   FaPhoneAlt,
   FaCheckCircle,
-  FaInfoCircle
+  FaInfoCircle,
+  FaShoppingCart
 } from 'react-icons/fa';
 import { formatCurrency } from '../../utils/formatters';
 
 const DEFAULT_FALLBACK_IMG =
   'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80';
 
-const PetCard = ({ pet }) => {
+const PetCard = ({ pet, onAddToCart }) => {
   const [showModal, setShowModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [imgSrc, setImgSrc] = useState(pet.image || DEFAULT_FALLBACK_IMG);
@@ -128,7 +129,15 @@ const PetCard = ({ pet }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="pet-card-actions">
+          <div className="pet-card-actions d-flex flex-column gap-2">
+            <button
+              type="button"
+              className="btn btn-card-action btn-cart-accessory"
+              onClick={() => onAddToCart && onAddToCart(pet)}
+            >
+              <FaShoppingCart className="small" />
+              Thêm Vào Giỏ
+            </button>
             <button
               type="button"
               className="btn btn-card-action btn-contact-pet"

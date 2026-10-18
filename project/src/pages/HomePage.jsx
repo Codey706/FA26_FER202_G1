@@ -32,7 +32,7 @@ const HomePage = ({ searchQuery, onAddToCart }) => {
       <CategorySection />
 
       {/* 3. Featured Pets */}
-      <FeaturedPets searchQuery={searchQuery} />
+      <FeaturedPets searchQuery={searchQuery} onAddToCart={handleAddToCart} />
 
       {/* 4. Why Choose Us */}
       <WhyChooseUs />

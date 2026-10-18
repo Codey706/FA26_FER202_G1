@@ -5,7 +5,7 @@ import productService from '../../services/productService';
 import PetCard from '../product/PetCard';
 import Loading from '../common/Loading';
 
-const FeaturedPets = ({ searchQuery = '' }) => {
+const FeaturedPets = ({ searchQuery = '', onAddToCart }) => {
   const [pets, setPets] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'dog' | 'cat'
   const [loading, setLoading] = useState(true);
@@ -157,7 +157,7 @@ const FeaturedPets = ({ searchQuery = '' }) => {
           <Row className="g-4">
             {filteredPets.map((pet) => (
               <Col key={pet.id} xs={12} sm={6} lg={3}>
-                <PetCard pet={pet} />
+                <PetCard pet={pet} onAddToCart={onAddToCart} />
               </Col>
             ))}
           </Row>
