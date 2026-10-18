@@ -6,7 +6,7 @@ import HomePage from './pages/HomePage';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [cartCount, setCartCount] = useState(3); // Initial sample cart count
+  const [cartCount, setCartCount] = useState(3);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -19,10 +19,11 @@ function App() {
   return (
     <BrowserRouter>
       <div className="d-flex flex-column min-vh-100">
-        {/* Common Header */}
-        <Header onSearch={handleSearch} cartCount={cartCount} />
+        <Header
+          onSearch={handleSearch}
+          cartCount={cartCount}
+        />
 
-        {/* Main Routes */}
         <div className="flex-grow-1">
           <Routes>
             <Route
@@ -34,7 +35,19 @@ function App() {
                 />
               }
             />
-            {/* Fallback route to HomePage */}
+
+            {/* /products cũng hiển thị HomePage */}
+            <Route
+              path="/products"
+              element={
+                <HomePage
+                  searchQuery={searchQuery}
+                  onAddToCart={handleAddToCart}
+                />
+              }
+            />
+
+            {/* Các đường dẫn không xác định */}
             <Route
               path="*"
               element={
@@ -47,7 +60,6 @@ function App() {
           </Routes>
         </div>
 
-        {/* Common Footer */}
         <Footer />
       </div>
     </BrowserRouter>
