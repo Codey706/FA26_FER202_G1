@@ -5,6 +5,7 @@ import Footer from './components/common/Footer';
 import HomePage from './pages/HomePage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
+import OrderManagementPage from './pages/OrderManagementPage';
 
 const CART_STORAGE_KEY = 'pet-shop-cart';
 
@@ -93,6 +94,54 @@ function AppContent() {
             element={<HomePage searchQuery={searchQuery} onAddToCart={handleAddToCart} />}
           />
         </Routes>
+    <BrowserRouter>
+      <div className="d-flex flex-column min-vh-100">
+        <Header
+          onSearch={handleSearch}
+          cartCount={cartCount}
+        />
+
+        <div className="flex-grow-1">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <HomePage
+                  searchQuery={searchQuery}
+                  onAddToCart={handleAddToCart}
+                />
+              }
+            />
+
+            {/* /products cũng hiển thị HomePage */}
+            <Route
+              path="/products"
+              element={
+                <HomePage
+                  searchQuery={searchQuery}
+                  onAddToCart={handleAddToCart}
+                />
+              }
+            />
+
+            {/* Các đường dẫn không xác định */}
+            <Route
+              path="/admin/orders"
+              element={<OrderManagementPage />}
+            />
+            <Route
+              path="*"
+              element={
+                <HomePage
+                  searchQuery={searchQuery}
+                  onAddToCart={handleAddToCart}
+                />
+              }
+            />
+          </Routes>
+        </div>
+
+        <Footer />
       </div>
       <Footer />
     </div>

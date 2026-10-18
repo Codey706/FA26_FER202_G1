@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   Navbar,
   Container,
@@ -114,7 +115,11 @@ const Header = ({ onSearch, cartCount = 0 }) => {
           <Navbar.Collapse id="main-navbar-nav">
             {/* Navigation Links */}
             <Nav className="mx-auto my-2 my-lg-0">
-              <Nav.Link href="#home" className="nav-link-custom active">
+              <Nav.Link
+                as={Link}
+                to="/"
+                className="nav-link-custom"
+              >
                 Trang Chủ
               </Nav.Link>
               <Nav.Link href="#categories" className="nav-link-custom">
@@ -134,6 +139,13 @@ const Header = ({ onSearch, cartCount = 0 }) => {
               </Nav.Link>
               <Nav.Link href="#testimonials" className="nav-link-custom">
                 Đánh Giá
+              </Nav.Link>
+              <Nav.Link
+                as={Link}
+                to="/admin/orders"
+                className="nav-link-custom"
+              >
+                Quản Lý Đơn Hàng
               </Nav.Link>
             </Nav>
 
