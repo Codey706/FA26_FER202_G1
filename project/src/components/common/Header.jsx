@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Navbar,
   Container,
@@ -24,6 +24,49 @@ const Header = ({ onSearch, cartCount = 3 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNoticeModal, setShowNoticeModal] = useState(false);
   const [noticeMessage, setNoticeMessage] = useState({ title: '', content: '' });
+  const [activeSection, setActiveSection] = useState('home');
+
+  useEffect(() => {
+    const sectionIds = [
+      'home',
+      'categories',
+      'featured-pets',
+      'popular-breeds',
+      'accessories-section',
+      'shopping-process',
+      'testimonials'
+    ];
+
+    const handleScroll = () => {
+      const marker = 160;
+      let currentSection = 'home';
+      let closestTop = -Infinity;
+
+      sectionIds.forEach((id) => {
+        const section = document.getElementById(id);
+
+        if (!section) return;
+
+        const top = section.getBoundingClientRect().top;
+
+        if (top <= marker && top > closestTop) {
+          closestTop = top;
+          currentSection = id;
+        }
+      });
+
+      setActiveSection(currentSection);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -121,27 +164,56 @@ const Header = ({ onSearch, cartCount = 3 }) => {
           <Navbar.Collapse id="main-navbar-nav">
             {/* Navigation Links */}
             <Nav className="mx-auto my-2 my-lg-0">
-              <Nav.Link href="#home" className="nav-link-custom active">
+
+              <Nav.Link
+                href="#home"
+                className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''}`}
+              >
                 Trang Chủ
               </Nav.Link>
-              <Nav.Link href="#categories" className="nav-link-custom">
+
+              <Nav.Link
+                href="#categories"
+                className={`nav-link-custom ${activeSection === 'categories' ? 'active' : ''}`}
+              >
                 Danh Mục
               </Nav.Link>
-              <Nav.Link href="#featured-pets" className="nav-link-custom">
+
+              <Nav.Link
+                href="#featured-pets"
+                className={`nav-link-custom ${activeSection === 'featured-pets' ? 'active' : ''}`}
+              >
                 Thú Cưng
               </Nav.Link>
-              <Nav.Link href="#popular-breeds" className="nav-link-custom">
-                Giống Cảnh
+
+              <Nav.Link
+                href="#popular-breeds"
+                className={`nav-link-custom ${activeSection === 'popular-breeds' ? 'active' : ''}`}
+              >
+                Yêu Thích
               </Nav.Link>
-              <Nav.Link href="#accessories-section" className="nav-link-custom">
-                Phụ Kiện
+
+              <Nav.Link
+                href="#accessories-section"
+                className={`nav-link-custom ${activeSection === 'accessories-section' ? 'active' : ''}`}
+              >
+                Tiện Ích
               </Nav.Link>
-              <Nav.Link href="#shopping-process" className="nav-link-custom">
+
+              <Nav.Link
+                href="#shopping-process"
+                className={`nav-link-custom ${activeSection === 'shopping-process' ? 'active' : ''}`}
+              >
                 Quy Trình
               </Nav.Link>
-              <Nav.Link href="#testimonials" className="nav-link-custom">
+
+              <Nav.Link
+                href="#testimonials"
+                className={`nav-link-custom ${activeSection === 'testimonials' ? 'active' : ''}`}
+              >
                 Đánh Giá
               </Nav.Link>
+
             </Nav>
 
             {/* Search Box & Quick Actions */}

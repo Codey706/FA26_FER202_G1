@@ -1,18 +1,38 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import { FaPaw, FaDog, FaCat, FaThLarge, FaSearch, FaSyncAlt } from 'react-icons/fa';
+import {
+  FaPaw,
+  FaDog,
+  FaCat,
+  FaThLarge,
+  FaSearch,
+  FaSyncAlt
+} from 'react-icons/fa';
 import productService from '../../services/productService';
 import PetCard from '../product/PetCard';
 import Loading from '../common/Loading';
 
-const FeaturedPets = ({ searchQuery = '' }) => {
+const FeaturedPets = ({
+  searchQuery = '',
+  selectedCategory = null,
+  onClearCategory
+}) => {
   const [pets, setPets] = useState([]);
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'dog' | 'cat'
+  const [activeFilter, setActiveFilter] = useState('all');
+  useEffect(() => {
+    if (!selectedCategory || selectedCategory.petType === 'accessory') {
+      setActiveFilter('all');
+    } else {
+      setActiveFilter(selectedCategory.petType);
+    }
+  }, [selectedCategory]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryTrigger, setRetryTrigger] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const petsListRef = useRef(null);
 
-  // Fetch pets whenever filter or retryTrigger changes
   useEffect(() => {
     let isMounted = true;
 
@@ -20,7 +40,9 @@ const FeaturedPets = ({ searchQuery = '' }) => {
       try {
         setLoading(true);
         setError(null);
-        const data = await productService.getFeaturedPets(activeFilter);
+
+        const data = await productService.getPets();
+
         if (isMounted) {
           setPets(data);
           setError(null);
@@ -30,7 +52,7 @@ const FeaturedPets = ({ searchQuery = '' }) => {
           console.error('Failed to load featured pets:', err);
           setError(
             err.message ||
-              'Không thể kết nối đến JSON Server. Vui lòng kiểm tra cổng 3001.'
+            'Không thể kết nối đến JSON Server. Vui lòng kiểm tra cổng 3001.'
           );
         }
       } finally {
@@ -45,23 +67,53 @@ const FeaturedPets = ({ searchQuery = '' }) => {
     return () => {
       isMounted = false;
     };
-  }, [activeFilter, retryTrigger]);
+  }, [retryTrigger]);
 
   const handleRetry = () => {
     setRetryTrigger((prev) => prev + 1);
   };
 
-  // Client-side search filtering if user typed in header
   const filteredPets = pets.filter((pet) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase().trim();
-    return (
-      pet.name?.toLowerCase().includes(query) ||
-      pet.color?.toLowerCase().includes(query) ||
-      pet.origin?.toLowerCase().includes(query) ||
-      pet.description?.toLowerCase().includes(query)
-    );
+
+    if (
+      (!selectedCategory || selectedCategory.petType !== 'accessory') &&
+      activeFilter !== 'all' &&
+      pet.petType !== activeFilter
+    ) {
+      return false;
+    }
+
+
+    if (
+      selectedCategory &&
+      selectedCategory.petType !== 'accessory' &&
+      String(pet.categoryId) !== String(selectedCategory.id)
+    ) {
+      return false;
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase().trim();
+
+      const matchesSearch =
+        pet.name?.toLowerCase().includes(query) ||
+        pet.color?.toLowerCase().includes(query) ||
+        pet.origin?.toLowerCase().includes(query) ||
+        pet.description?.toLowerCase().includes(query);
+
+      if (!matchesSearch) {
+        return false;
+      }
+    }
+
+    return true;
   });
+
+  // Reset về trang đầu khi thay đổi bộ lọc hoặc tìm kiếm
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [activeFilter, selectedCategory, searchQuery]);
 
   return (
     <section className="py-5" id="featured-pets">
@@ -71,9 +123,11 @@ const FeaturedPets = ({ searchQuery = '' }) => {
           <span className="section-badge">
             <FaPaw /> Thú Cưng Đang Chờ Chủ Mới
           </span>
+
           <h2 className="section-title">
             Thú Cưng <span>Nổi Bật Nhất</span>
           </h2>
+
           <p className="section-subtitle">
             Tất cả các bé đều được bác sĩ thú y chứng nhận sức khỏe, tiêm phòng 2 mũi vắc-xin,
             tẩy giun định kỳ và gắn microchip định danh trước khi về nhà mới.
@@ -85,21 +139,32 @@ const FeaturedPets = ({ searchQuery = '' }) => {
           <button
             type="button"
             className={`filter-tab-btn ${activeFilter === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('all')}
+            onClick={() => {
+              setActiveFilter('all');
+              onClearCategory?.();
+            }}
           >
             <FaThLarge /> Tất Cả Thú Cưng
           </button>
+
           <button
             type="button"
             className={`filter-tab-btn ${activeFilter === 'dog' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('dog')}
+            onClick={() => {
+              setActiveFilter('dog');
+              onClearCategory?.();
+            }}
           >
             <FaDog /> Chó Cảnh Thuần Chủng
           </button>
+
           <button
             type="button"
             className={`filter-tab-btn ${activeFilter === 'cat' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('cat')}
+            onClick={() => {
+              setActiveFilter('cat');
+              onClearCategory?.();
+            }}
           >
             <FaCat /> Mèo Cảnh Quý Tộc
           </button>
@@ -119,9 +184,11 @@ const FeaturedPets = ({ searchQuery = '' }) => {
         )}
 
         {/* Loading State */}
-        {loading && <Loading message="Đang tải danh sách thú cưng nổi bật..." />}
+        {loading && (
+          <Loading message="Đang tải danh sách thú cưng nổi bật..." />
+        )}
 
-        {/* Error State with Instructions and Retry */}
+        {/* Error State */}
         {!loading && error && (
           <div className="error-banner flex-column flex-md-row align-items-center text-center text-md-start">
             <div>
@@ -130,6 +197,7 @@ const FeaturedPets = ({ searchQuery = '' }) => {
                 Khởi động máy chủ: Mở terminal chạy <code>npm run server</code> (hoặc <code>npm start</code> để chạy cùng lúc cả Server và Web).
               </div>
             </div>
+
             <button
               className="btn btn-sm btn-outline-danger mt-2 mt-md-0 fw-bold px-3 py-2 text-nowrap d-inline-flex align-items-center gap-2"
               onClick={handleRetry}
@@ -145,23 +213,130 @@ const FeaturedPets = ({ searchQuery = '' }) => {
             <div className="empty-state-icon">
               <FaPaw />
             </div>
-            <h5 className="fw-bold text-dark">Chưa có thú cưng nào phù hợp</h5>
+
+            <h5 className="fw-bold text-dark">
+              Chưa có thú cưng nào phù hợp
+            </h5>
+
             <p className="text-muted small">
               Vui lòng thử tìm kiếm với từ khóa khác hoặc chọn bộ lọc "Tất Cả Thú Cưng".
             </p>
           </div>
         )}
 
+
         {/* Products Grid */}
-        {!loading && !error && filteredPets.length > 0 && (
-          <Row className="g-4">
-            {filteredPets.map((pet) => (
-              <Col key={pet.id} xs={12} sm={6} lg={3}>
-                <PetCard pet={pet} />
-              </Col>
-            ))}
-          </Row>
-        )}
+        {!loading && !error && filteredPets.length > 0 && (() => {
+          const itemsPerPage = 8;
+          const totalPages = Math.ceil(filteredPets.length / itemsPerPage);
+          const startIndex = currentPage * itemsPerPage;
+          const currentPets = filteredPets.slice(
+            startIndex,
+            startIndex + itemsPerPage
+          );
+
+          return (
+            <>
+              <Row className="g-4" ref={petsListRef}>
+                {currentPets.map((pet) => (
+                  <Col key={pet.id} xs={12} sm={6} lg={3}>
+                    <PetCard pet={pet} />
+                  </Col>
+                ))}
+              </Row>
+
+              {totalPages > 1 && (
+                <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
+                  <button
+                    type="button"
+                    className="btn btn-link p-1"
+                    disabled={currentPage === 0}
+                    onClick={() => {
+                      setCurrentPage((prev) => Math.max(0, prev - 1));
+
+                      requestAnimationFrame(() => {
+                        if (petsListRef.current) {
+                          const top =
+                            petsListRef.current.getBoundingClientRect().top +
+                            window.scrollY - 120;
+
+                          window.scrollTo({
+                            top: Math.max(0, top),
+                            behavior: 'smooth'
+                          });
+                        }
+                      });
+                    }}
+                    aria-label="Trang trước"
+                    style={{
+                      color: currentPage === 0 ? '#ccc' : '#f4a261',
+                      textDecoration: 'none',
+                      opacity: currentPage === 0 ? 0.5 : 1,
+                      cursor: currentPage === 0 ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    <span style={{ fontSize: '24px' }}>❮</span>
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setCurrentPage(index)}
+                      aria-label={`Trang ${index + 1}`}
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        padding: 0,
+                        border: 'none',
+                        borderRadius: '50%',
+                        backgroundColor:
+                          currentPage === index ? '#f4a261' : '#d6d6d6',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  ))}
+
+                  <button
+                    type="button"
+                    className="btn btn-link p-1"
+                    disabled={currentPage === totalPages - 1}
+                    onClick={() => {
+                      setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1));
+
+                      requestAnimationFrame(() => {
+                        if (petsListRef.current) {
+                          const top =
+                            petsListRef.current.getBoundingClientRect().top +
+                            window.scrollY - 120;
+
+                          window.scrollTo({
+                            top: Math.max(0, top),
+                            behavior: 'smooth'
+                          });
+                        }
+                      });
+                    }}
+                    aria-label="Trang tiếp theo"
+                    style={{
+                      color:
+                        currentPage === totalPages - 1 ? '#ccc' : '#f4a261',
+                      textDecoration: 'none',
+                      opacity: currentPage === totalPages - 1 ? 0.5 : 1,
+                      cursor:
+                        currentPage === totalPages - 1
+                          ? 'not-allowed'
+                          : 'pointer'
+                    }}
+                  >
+                    <span style={{ fontSize: '24px' }}>❯</span>
+                  </button>
+                </div>
+              )}
+            </>
+          );
+        })()}
+
       </Container>
     </section>
   );
