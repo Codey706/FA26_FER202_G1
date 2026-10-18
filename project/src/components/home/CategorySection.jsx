@@ -1,7 +1,10 @@
+
+import React, { useState, useEffect } from 'react';
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { FaPaw, FaCheckCircle } from 'react-icons/fa';
 import categoryService from '../../services/categoryService';
+import productService from '../../services/productService';
 import Loading from '../common/Loading';
 
 const ACCESSORY_CATEGORY_IDS = [
@@ -23,6 +26,7 @@ const CategorySection = ({
   selectedCategory = null,
 }) => {
   const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryTrigger, setRetryTrigger] = useState(0);
@@ -35,10 +39,15 @@ const CategorySection = ({
         setLoading(true);
         setError(null);
 
-        const data = await categoryService.getCategories();
+        const [categoryData, productData] = await Promise.all([
+          categoryService.getCategories(),
+          productService.getProducts()
+        ]);
 
         if (isMounted) {
-          setCategories(Array.isArray(data) ? data : []);
+          setCategories(categoryData);
+          setProducts(productData);
+          setError(null);
         }
       } catch (err) {
         if (isMounted) {
@@ -66,6 +75,19 @@ const CategorySection = ({
     ACCESSORY_CATEGORY_IDS.includes(category?.id);
 
   const handleCategoryClick = (category) => {
+    if (onSelectCategory) {
+      onSelectCategory(category);
+    }
+
+    const targetId =
+      category.petType === 'accessory'
+        ? 'accessories-section'
+        : 'featured-pets';
+
+    document.getElementById(targetId)?.scrollIntoView({
+      behavior: 'smooth'
+    });
+  };
     const isSelected = selectedCategory?.id === category.id;
     const nextCategory = isSelected ? null : category;
 
@@ -84,7 +106,11 @@ const CategorySection = ({
   };
 
   return (
-    <section className="py-5" id="category-section">
+    <section
+      className="py-5"
+      id="categories"
+      style={{ backgroundColor: '#fffdfa' }}
+    >
       <Container>
         <div className="text-center mb-5">
           <span className="section-badge">
@@ -100,6 +126,39 @@ const CategorySection = ({
           </p>
         </div>
 
+        <Row className="g-4 justify-content-center">
+          {categories.map((cat) => {
+            const itemCount = products.filter(
+              (product) => String(product.categoryId) === String(cat.id)
+            ).length;
+
+            return (
+              <Col key={cat.id} xs={6} md={4} lg={true} className="col-lg">
+                <div
+                  className="category-card"
+                  onClick={() => handleCategoryClick(cat)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      handleCategoryClick(cat);
+                    }
+                  }}
+                >
+                  <div className="category-img-box">
+                    <img src={cat.image} alt={cat.name} loading="lazy" />
+                  </div>
+
+                  <h6 className="category-name">{cat.name}</h6>
+                  <span className="category-count">
+                    {itemCount} sản phẩm
+                  </span>
+                </div>
+              </Col>
+            );
+          })}
+        </Row>
         {loading && (
           <Loading message="Đang tải danh mục..." />
         )}

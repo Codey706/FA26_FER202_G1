@@ -1,3 +1,5 @@
+
+import React, { useState, useEffect } from 'react';
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { FaPaw } from 'react-icons/fa';
@@ -5,6 +7,10 @@ import productService from '../../services/productService';
 import ProductCard from '../product/ProductCard';
 import Loading from '../common/Loading';
 
+const AccessoriesSection = ({
+  onAddToCart,
+  selectedCategory = null,
+  onClearCategory
 const ACCESSORY_CATEGORY_IDS = [
   'cat-food',
   'cat-accessories',
@@ -39,7 +45,7 @@ const AccessoriesSection = ({
         if (isMounted) {
           console.error('Failed to load accessories:', err);
           setError(
-            err.message || 'Không thể tải danh sách phụ kiện.'
+            err.message || 'Không thể tải danh sách phụ kiện từ máy chủ.'
           );
         }
       } finally {
@@ -107,7 +113,16 @@ const AccessoriesSection = ({
           </span>
 
           <h2 className="section-title">
-            Phụ Kiện Thú Cưng <span>Chính Hãng</span>
+            {!selectedCategory
+              ? <>Phụ Kiện Thú Cưng <span>Chính Hãng</span></>
+              : selectedCategory.id === 'cat-food'
+                ? <>Thức Ăn <span>Thú Cưng</span></>
+                : selectedCategory.id === 'cat-cages'
+                  ? <>Chuồng Nệm <span>& Vận Chuyển</span></>
+                  : selectedCategory.id === 'cat-accessories'
+                    ? <>Phụ Kiện <span>& Đồ Chơi</span></>
+                    : <>Phụ Kiện Thú Cưng <span>Chính Hãng</span></>
+            }
           </h2>
 
           <p className="section-subtitle">
@@ -116,13 +131,14 @@ const AccessoriesSection = ({
           </p>
         </div>
 
+        {/* Loading State */}
         {loading && (
-          <Loading message="Đang tải danh sách phụ kiện..." />
+          <Loading message="Đang tải danh sách phụ kiện chính hãng..." />
         )}
 
         {!loading && error && (
-          <div className="text-center py-4">
-            <p className="text-danger">{error}</p>
+          <div className="error-banner flex-column flex-md-row align-items-center text-center text-md-start">
+            <div>{error}</div>
 
             <button
               type="button"
@@ -134,6 +150,7 @@ const AccessoriesSection = ({
           </div>
         )}
 
+        {/* Accessories Grid */}
         {!loading && !error && filteredAccessories.length > 0 && (
           <Row className="g-4">
             {filteredAccessories.map((item) => (
@@ -147,12 +164,31 @@ const AccessoriesSection = ({
           </Row>
         )}
 
+        {/* Empty State */}
         {!loading && !error && filteredAccessories.length === 0 && (
-          <p className="text-center text-muted py-4">
-            {selectedCategory || searchQuery.trim()
-              ? 'Không tìm thấy sản phẩm phù hợp.'
-              : 'Chưa có phụ kiện nào để hiển thị.'}
-          </p>
+          <div className="empty-state-box text-center">
+            <div className="empty-state-icon">
+              <FaPaw />
+            </div>
+
+            <h5 className="fw-bold text-dark">
+              Không có sản phẩm trong danh mục này
+            </h5>
+
+            <p className="text-muted small">
+              Hãy chọn danh mục khác để xem thêm sản phẩm.
+            </p>
+
+            {selectedCategory && (
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={onClearCategory}
+              >
+                Xem tất cả phụ kiện
+              </button>
+            )}
+          </div>
         )}
       </Container>
     </section>

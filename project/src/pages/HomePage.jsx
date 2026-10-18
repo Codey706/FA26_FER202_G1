@@ -33,13 +33,33 @@ const HomePage = ({ searchQuery = '', onAddToCart }) => {
     }, 3000);
   };
 
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) {
-        clearTimeout(toastTimerRef.current);
+
+  const handleSelectCategory = (category) => {
+    setSelectedCategory(category);
+
+    const targetId =
+      category.petType === 'accessory'
+        ? 'accessories-section'
+        : 'featured-pets';
+
+    requestAnimationFrame(() => {
+      const element = document.getElementById(targetId);
+
+      if (element) {
+        const navbarHeight = 90;
+        const top =
+          element.getBoundingClientRect().top +
+          window.scrollY -
+          navbarHeight;
+
+        window.scrollTo({
+          top: Math.max(0, top),
+          behavior: 'smooth'
+        });
       }
-    };
-  }, []);
+    });
+  };
+
 
   return (
     <main className="homepage-wrapper">
@@ -63,8 +83,8 @@ const HomePage = ({ searchQuery = '', onAddToCart }) => {
 
       <AccessoriesSection
         onAddToCart={handleAddToCart}
-        searchQuery={searchQuery}
         selectedCategory={selectedCategory}
+        onClearCategory={() => setSelectedCategory(null)}
       />
 
       <ShoppingProcess />
