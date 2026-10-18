@@ -1,41 +1,27 @@
 {
-  "name": "project",
-  "version": "0.1.0",
+  "name": "pet-shop",
+  "version": "1.0.0",
   "private": true,
-  "dependencies": {
-    "@testing-library/dom": "^10.4.2",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.3",
-    "@testing-library/user-event": "^13.5.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "react-scripts": "5.0.1"
-  },
+  "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "concurrently -k -n \"SERVER,VITE\" -c \"yellow,blue\" \"npm run server\" \"npm run dev\"",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "json-server --watch db.json --port 3001 --host 0.0.0.0"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "json-server": "^0.17.4",
+    "react": "^19.3.0",
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "^19.3.0",
+    "react-icons": "^5.7.0",
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
-    "web-vitals": "^6.2.2"
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^9.1.2",
+    "vite": "^8.3.4"
   }
 }
