@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   Navbar,
   Container,
@@ -20,7 +23,8 @@ import {
   FaInfoCircle
 } from 'react-icons/fa';
 
-const Header = ({ onSearch, cartCount = 3 }) => {
+const Header = ({ onSearch, cartCount = 0 }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNoticeModal, setShowNoticeModal] = useState(false);
   const [noticeMessage, setNoticeMessage] = useState({ title: '', content: '' });
@@ -78,15 +82,6 @@ const Header = ({ onSearch, cartCount = 3 }) => {
     if (target) {
       target.scrollIntoView({ behavior: 'smooth' });
     }
-  };
-
-  const handleCartClick = () => {
-    setNoticeMessage({
-      title: 'Giỏ hàng của bạn (3 món)',
-      content:
-        'Bạn đang có 3 sản phẩm trong giỏ hàng mẫu. Chức năng Quản lý giỏ hàng và Thanh toán (Checkout) sẽ được triển khai chi tiết ở giai đoạn tiếp theo!'
-    });
-    setShowNoticeModal(true);
   };
 
   const handleUserClick = () => {
@@ -213,7 +208,13 @@ const Header = ({ onSearch, cartCount = 3 }) => {
               >
                 Đánh Giá
               </Nav.Link>
-
+              <Nav.Link
+                as={Link}
+                to="/admin/orders"
+                className="nav-link-custom"
+              >
+                Quản Lý Đơn Hàng
+              </Nav.Link>
             </Nav>
 
             {/* Search Box & Quick Actions */}
@@ -248,7 +249,7 @@ const Header = ({ onSearch, cartCount = 3 }) => {
               {/* Shopping Cart Button with Badge */}
               <button
                 className="cart-icon-btn"
-                onClick={handleCartClick}
+                onClick={() => navigate('/cart')}
                 title="Giỏ hàng"
                 type="button"
               >

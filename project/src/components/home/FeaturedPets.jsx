@@ -9,6 +9,9 @@ import {
   FaSearch,
   FaSyncAlt
 } from 'react-icons/fa';
+  FaSyncAlt,
+} from 'react-icons/fa';
+
 import productService from '../../services/productService';
 import PetCard from '../product/PetCard';
 import Loading from '../common/Loading';
@@ -27,12 +30,20 @@ const FeaturedPets = ({
       setActiveFilter(selectedCategory.petType);
     }
   }, [selectedCategory]);
+const FeaturedPets = ({ searchQuery = '', onAddToCart }) => {
+const FeaturedPets = ({
+  searchQuery = '',
+  selectedCategory = null,
+}) => {
+  const [pets, setPets] = useState([]);
+  const [activeFilter, setActiveFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryTrigger, setRetryTrigger] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const petsListRef = useRef(null);
 
+  // Tải danh sách thú cưng theo bộ lọc hiện tại
   useEffect(() => {
     let isMounted = true;
 
@@ -41,15 +52,24 @@ const FeaturedPets = ({
         setLoading(true);
         setError(null);
 
-        const data = await productService.getPets();
+        // Khi tìm kiếm hoặc chọn danh mục chó/mèo,
+        // tải tất cả thú cưng, không chỉ sản phẩm nổi bật.
+        const shouldLoadAllPets =
+          selectedCategory?.petType === 'dog' ||
+          selectedCategory?.petType === 'cat' ||
+          searchQuery.trim() !== '';
+
+        const data = shouldLoadAllPets
+          ? await productService.getPets()
+          : await productService.getFeaturedPets(activeFilter);
 
         if (isMounted) {
           setPets(data);
-          setError(null);
         }
       } catch (err) {
         if (isMounted) {
-          console.error('Failed to load featured pets:', err);
+          console.error('Failed to load pets:', err);
+
           setError(
             err.message ||
             'Không thể kết nối đến JSON Server. Vui lòng kiểm tra cổng 3001.'
@@ -67,7 +87,7 @@ const FeaturedPets = ({
     return () => {
       isMounted = false;
     };
-  }, [retryTrigger]);
+  }, [activeFilter, retryTrigger, selectedCategory, searchQuery]);
 
   const handleRetry = () => {
     setRetryTrigger((prev) => prev + 1);
@@ -79,6 +99,14 @@ const FeaturedPets = ({
       (!selectedCategory || selectedCategory.petType !== 'accessory') &&
       activeFilter !== 'all' &&
       pet.petType !== activeFilter
+  // Lọc thú cưng theo danh mục, tab và từ khóa tìm kiếm
+  const filteredPets = pets.filter((pet) => {
+    // Nếu chọn danh mục chó hoặc mèo, lọc chính xác theo categoryId.
+    if (
+      selectedCategory &&
+      (selectedCategory.petType === 'dog' ||
+        selectedCategory.petType === 'cat') &&
+      pet.categoryId !== selectedCategory.id
     ) {
       return false;
     }
@@ -88,6 +116,16 @@ const FeaturedPets = ({
       selectedCategory &&
       selectedCategory.petType !== 'accessory' &&
       String(pet.categoryId) !== String(selectedCategory.id)
+    // Khi chọn danh mục phụ kiện, không hiển thị thú cưng.
+    if (selectedCategory?.petType === 'accessory') {
+      return false;
+    }
+
+    // Khi không chọn danh mục, áp dụng bộ lọc tab chó/mèo.
+    if (
+      !selectedCategory &&
+      activeFilter !== 'all' &&
+      pet.petType !== activeFilter
     ) {
       return false;
     }
@@ -118,7 +156,7 @@ const FeaturedPets = ({
   return (
     <section className="py-5" id="featured-pets">
       <Container>
-        {/* Section Header */}
+        {/* Tiêu đề */}
         <div className="text-center mb-4">
           <span className="section-badge">
             <FaPaw /> Thú Cưng Đang Chờ Chủ Mới
@@ -129,12 +167,13 @@ const FeaturedPets = ({
           </h2>
 
           <p className="section-subtitle">
-            Tất cả các bé đều được bác sĩ thú y chứng nhận sức khỏe, tiêm phòng 2 mũi vắc-xin,
-            tẩy giun định kỳ và gắn microchip định danh trước khi về nhà mới.
+            Tất cả các bé đều được bác sĩ thú y chứng nhận sức khỏe,
+            tiêm phòng 2 mũi vắc-xin, tẩy giun định kỳ và gắn
+            microchip định danh trước khi về nhà mới.
           </p>
         </div>
 
-        {/* Filter Tabs */}
+        {/* Bộ lọc chó/mèo */}
         <div className="filter-tabs-wrapper">
           <button
             type="button"
@@ -170,14 +209,16 @@ const FeaturedPets = ({
           </button>
         </div>
 
-        {/* Search Query Indicator */}
-        {searchQuery && (
-          <div className="d-flex justify-content-center mb-4">
+        {/* Thông báo tìm kiếm */}
+        {searchQuery.trim() !== '' && (
+          <div className="d-flex justify-content-center mb-4 mt-3">
             <div className="alert alert-light border d-inline-flex align-items-center gap-2 py-2 px-3 rounded-pill small">
               <FaSearch className="text-warning" />
+
               <span>
-                Kết quả tìm kiếm cho từ khóa: <strong>"{searchQuery}"</strong> (
-                {filteredPets.length} kết quả)
+                Kết quả tìm kiếm cho từ khóa:{' '}
+                <strong>"{searchQuery}"</strong>{' '}
+                ({filteredPets.length} kết quả)
               </span>
             </div>
           </div>
@@ -189,16 +230,26 @@ const FeaturedPets = ({
         )}
 
         {/* Error State */}
+        {/* Đang tải */}
+        {loading && (
+          <Loading message="Đang tải danh sách thú cưng..." />
+        )}
+
+        {/* Lỗi kết nối */}
         {!loading && error && (
           <div className="error-banner flex-column flex-md-row align-items-center text-center text-md-start">
             <div>
               <div className="fw-bold mb-1">{error}</div>
+
               <div className="small text-muted">
-                Khởi động máy chủ: Mở terminal chạy <code>npm run server</code> (hoặc <code>npm start</code> để chạy cùng lúc cả Server và Web).
+                Khởi động máy chủ bằng lệnh{' '}
+                <code>npm run server</code> hoặc chạy lệnh
+                khởi động dự án theo cấu hình của bạn.
               </div>
             </div>
 
             <button
+              type="button"
               className="btn btn-sm btn-outline-danger mt-2 mt-md-0 fw-bold px-3 py-2 text-nowrap d-inline-flex align-items-center gap-2"
               onClick={handleRetry}
             >
@@ -207,9 +258,9 @@ const FeaturedPets = ({
           </div>
         )}
 
-        {/* Empty State */}
+        {/* Không có kết quả */}
         {!loading && !error && filteredPets.length === 0 && (
-          <div className="empty-state-box">
+          <div className="empty-state-box text-center">
             <div className="empty-state-icon">
               <FaPaw />
             </div>
@@ -219,7 +270,8 @@ const FeaturedPets = ({
             </h5>
 
             <p className="text-muted small">
-              Vui lòng thử tìm kiếm với từ khóa khác hoặc chọn bộ lọc "Tất Cả Thú Cưng".
+              Vui lòng thử từ khóa khác hoặc chọn bộ lọc
+              "Tất Cả Thú Cưng".
             </p>
           </div>
         )}
@@ -337,6 +389,16 @@ const FeaturedPets = ({
           );
         })()}
 
+        {/* Danh sách thú cưng */}
+        {!loading && !error && filteredPets.length > 0 && (
+          <Row className="g-4">
+            {filteredPets.map((pet) => (
+              <Col key={pet.id} xs={12} sm={6} lg={3}>
+                <PetCard pet={pet} onAddToCart={onAddToCart} />
+              </Col>
+            ))}
+          </Row>
+        )}
       </Container>
     </section>
   );

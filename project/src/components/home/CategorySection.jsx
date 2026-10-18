@@ -1,12 +1,30 @@
 
 import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import { FaPaw } from 'react-icons/fa';
+import { FaPaw, FaCheckCircle } from 'react-icons/fa';
 import categoryService from '../../services/categoryService';
 import productService from '../../services/productService';
 import Loading from '../common/Loading';
 
-const CategorySection = ({ onSelectCategory }) => {
+const ACCESSORY_CATEGORY_IDS = [
+  'cat-food',
+  'cat-accessories',
+  'cat-cages',
+];
+
+const CATEGORY_IMAGES = {
+  'cat-dogs': '/images/categories/dogs.jpg',
+  'cat-cats': '/images/categories/cats.jpg',
+  'cat-food': '/images/categories/food.jpg',
+  'cat-accessories': '/images/categories/accessories.jpg',
+  'cat-cages': '/images/categories/cages.jpg',
+};
+
+const CategorySection = ({
+  onSelectCategory,
+  selectedCategory = null,
+}) => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +52,9 @@ const CategorySection = ({ onSelectCategory }) => {
       } catch (err) {
         if (isMounted) {
           console.error('Failed to load categories:', err);
-          setError(err.message || 'Không thể tải danh mục từ máy chủ.');
+          setError(
+            err.message || 'Không thể tải danh mục sản phẩm.'
+          );
         }
       } finally {
         if (isMounted) {
@@ -50,6 +70,10 @@ const CategorySection = ({ onSelectCategory }) => {
     };
   }, [retryTrigger]);
 
+  const isAccessoryCategory = (category) =>
+    category?.petType === 'accessory' ||
+    ACCESSORY_CATEGORY_IDS.includes(category?.id);
+
   const handleCategoryClick = (category) => {
     if (onSelectCategory) {
       onSelectCategory(category);
@@ -64,30 +88,22 @@ const CategorySection = ({ onSelectCategory }) => {
       behavior: 'smooth'
     });
   };
+    const isSelected = selectedCategory?.id === category.id;
+    const nextCategory = isSelected ? null : category;
 
-  if (loading) {
-    return (
-      <Container className="my-5">
-        <Loading message="Đang tải danh mục thú cưng & phụ kiện..." />
-      </Container>
-    );
-  }
+    onSelectCategory?.(nextCategory);
 
-  if (error) {
-    return (
-      <Container className="my-5">
-        <div className="error-banner flex-column flex-md-row align-items-center text-center text-md-start">
-          <div>{error}</div>
-          <button
-            className="btn btn-sm btn-outline-danger mt-2 mt-md-0 fw-bold px-3 py-2 text-nowrap"
-            onClick={() => setRetryTrigger((prev) => prev + 1)}
-          >
-            Thử Lại
-          </button>
-        </div>
-      </Container>
-    );
-  }
+    const targetId = isAccessoryCategory(category)
+      ? 'accessories-section'
+      : 'featured-pets';
+
+    requestAnimationFrame(() => {
+      document.getElementById(targetId)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+  };
 
   return (
     <section
@@ -98,16 +114,15 @@ const CategorySection = ({ onSelectCategory }) => {
       <Container>
         <div className="text-center mb-5">
           <span className="section-badge">
-            <FaPaw /> Danh Mục Nổi Bật
+            <FaPaw /> DANH MỤC
           </span>
 
           <h2 className="section-title">
-            Khám Phá Theo <span>Danh Mục</span>
+            Khám Phá <span>Danh Mục</span>
           </h2>
 
           <p className="section-subtitle">
-            Hàng trăm bé thú cưng thuần chủng và phụ kiện chính hãng, được phân loại
-            khoa học để bạn dễ dàng lựa chọn người bạn 4 chân phù hợp nhất.
+            Chọn danh mục để tìm sản phẩm phù hợp với thú cưng của bạn.
           </p>
         </div>
 
@@ -144,6 +159,110 @@ const CategorySection = ({ onSelectCategory }) => {
             );
           })}
         </Row>
+        {loading && (
+          <Loading message="Đang tải danh mục..." />
+        )}
+
+        {!loading && error && (
+          <div className="text-center py-4">
+            <p className="text-danger">{error}</p>
+            <button
+              type="button"
+              className="btn btn-outline-danger"
+              onClick={() => setRetryTrigger((prev) => prev + 1)}
+            >
+              Thử lại
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && categories.length === 0 && (
+          <p className="text-center text-muted py-4">
+            Chưa có danh mục sản phẩm.
+          </p>
+        )}
+
+        {!loading && !error && categories.length > 0 && (
+          <Row className="g-4">
+            {categories.map((category) => {
+              const active = selectedCategory?.id === category.id;
+
+              // Ưu tiên ảnh từ API, sau đó dùng đường dẫn dự phòng.
+              const imageSrc =
+                category.image ||
+                category.imageUrl ||
+                category.imageURL ||
+                CATEGORY_IMAGES[category.id];
+
+              return (
+                <Col
+                  key={category.id}
+                  xs={12}
+                  sm={6}
+                  lg={4}
+                >
+                  <button
+                    type="button"
+                    className={`category-card w-100 h-100 ${
+                      active ? 'active' : ''
+                    }`}
+                    onClick={() => handleCategoryClick(category)}
+                    aria-pressed={active}
+                  >
+                    <div className="category-card-content">
+                      <div className="category-image-wrapper">
+                        {imageSrc ? (
+                          <img
+                            src={imageSrc}
+                            alt={category.name}
+                            className="category-image"
+                            onError={(event) => {
+                              event.currentTarget.style.display = 'none';
+                              event.currentTarget.nextElementSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+
+                        <div
+                          className="category-image-fallback"
+                          style={{
+                            display: imageSrc ? 'none' : 'flex',
+                          }}
+                        >
+                          <FaPaw />
+                        </div>
+                      </div>
+
+                      <div className="category-info">
+                        <h5>{category.name}</h5>
+
+                        {category.itemCount != null && (
+                          <p>{category.itemCount} sản phẩm</p>
+                        )}
+                      </div>
+
+                      {active && (
+                        <FaCheckCircle className="category-check" />
+                      )}
+                    </div>
+                  </button>
+                </Col>
+              );
+            })}
+          </Row>
+        )}
+
+        {selectedCategory && (
+          <div className="text-center mt-4">
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => onSelectCategory?.(null)}
+            >
+              Bỏ chọn danh mục
+            </button>
+          </div>
+        )}
       </Container>
     </section>
   );

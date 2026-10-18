@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { FaPaw } from 'react-icons/fa';
 import productService from '../../services/productService';
@@ -10,12 +11,23 @@ const AccessoriesSection = ({
   onAddToCart,
   selectedCategory = null,
   onClearCategory
+const ACCESSORY_CATEGORY_IDS = [
+  'cat-food',
+  'cat-accessories',
+  'cat-cages',
+];
+
+const AccessoriesSection = ({
+  onAddToCart,
+  searchQuery = '',
+  selectedCategory = null,
 }) => {
   const [accessories, setAccessories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryTrigger, setRetryTrigger] = useState(0);
 
+  // Tải dữ liệu phụ kiện từ API
   useEffect(() => {
     let isMounted = true;
 
@@ -27,8 +39,7 @@ const AccessoriesSection = ({
         const data = await productService.getAccessories();
 
         if (isMounted) {
-          setAccessories(data);
-          setError(null);
+          setAccessories(Array.isArray(data) ? data : []);
         }
       } catch (err) {
         if (isMounted) {
@@ -51,12 +62,42 @@ const AccessoriesSection = ({
     };
   }, [retryTrigger]);
 
+  // Lọc theo danh mục và từ khóa
   const filteredAccessories = accessories.filter((item) => {
-    if (!selectedCategory) {
+    const selectedId = selectedCategory?.id;
+
+    const selectedIsAccessory =
+      selectedCategory?.petType === 'accessory' ||
+      ACCESSORY_CATEGORY_IDS.includes(selectedId);
+
+    // Đang chọn chó/mèo thì không hiển thị phụ kiện
+    if (selectedCategory && !selectedIsAccessory) {
+      return false;
+    }
+
+    // Đang chọn một danh mục phụ kiện cụ thể
+    if (
+      selectedIsAccessory &&
+      item.categoryId !== selectedId
+    ) {
+      return false;
+    }
+
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) {
       return true;
     }
 
-    return String(item.categoryId) === String(selectedCategory.id);
+    return [
+      item.name,
+      item.description,
+      item.brand,
+      item.type,
+      item.categoryId,
+    ].some((value) =>
+      String(value ?? '').toLowerCase().includes(query)
+    );
   });
 
   return (
@@ -66,10 +107,9 @@ const AccessoriesSection = ({
       style={{ backgroundColor: '#fffdfa' }}
     >
       <Container>
-        {/* Section Header */}
         <div className="text-center mb-5">
           <span className="section-badge">
-            <FaPaw /> Phụ Kiện & Dinh Dưỡng
+            <FaPaw /> Phụ Kiện &amp; Dinh Dưỡng
           </span>
 
           <h2 className="section-title">
@@ -86,8 +126,8 @@ const AccessoriesSection = ({
           </h2>
 
           <p className="section-subtitle">
-            Cung cấp đầy đủ thức ăn dinh dưỡng nhập khẩu, đồ chơi giải trí, balo phi hành gia
-            và đệm nằm ấm áp giúp các bé cưng phát triển khỏe mạnh toàn diện.
+            Cung cấp thức ăn dinh dưỡng, đồ chơi, balo vận chuyển
+            và chuồng nệm giúp thú cưng phát triển khỏe mạnh.
           </p>
         </div>
 
@@ -96,16 +136,16 @@ const AccessoriesSection = ({
           <Loading message="Đang tải danh sách phụ kiện chính hãng..." />
         )}
 
-        {/* Error State */}
         {!loading && error && (
           <div className="error-banner flex-column flex-md-row align-items-center text-center text-md-start">
             <div>{error}</div>
 
             <button
-              className="btn btn-sm btn-outline-danger mt-2 mt-md-0 fw-bold px-3 py-2 text-nowrap"
+              type="button"
+              className="btn btn-outline-danger"
               onClick={() => setRetryTrigger((prev) => prev + 1)}
             >
-              Thử Lại
+              Thử lại
             </button>
           </div>
         )}
