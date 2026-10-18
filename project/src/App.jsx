@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import HomePage from './pages/HomePage';
+import OrderManagementPage from './pages/OrderManagementPage';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,6 +49,10 @@ function App() {
             />
 
             {/* Các đường dẫn không xác định */}
+            <Route
+              path="/admin/orders"
+              element={<OrderManagementPage />}
+            />
             <Route
               path="*"
               element={
