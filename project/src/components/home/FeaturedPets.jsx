@@ -14,6 +14,7 @@ import productService from '../../services/productService';
 import PetCard from '../product/PetCard';
 import Loading from '../common/Loading';
 
+const FeaturedPets = ({ searchQuery = '', onAddToCart }) => {
 const FeaturedPets = ({
   searchQuery = '',
   selectedCategory = null,
@@ -236,7 +237,7 @@ const FeaturedPets = ({
           <Row className="g-4">
             {filteredPets.map((pet) => (
               <Col key={pet.id} xs={12} sm={6} lg={3}>
-                <PetCard pet={pet} />
+                <PetCard pet={pet} onAddToCart={onAddToCart} />
               </Col>
             ))}
           </Row>

@@ -50,6 +50,8 @@ const HomePage = ({ searchQuery = '', onAddToCart }) => {
         onSelectCategory={setSelectedCategory}
       />
 
+      {/* 3. Featured Pets */}
+      <FeaturedPets searchQuery={searchQuery} onAddToCart={handleAddToCart} />
       <FeaturedPets
         searchQuery={searchQuery}
         selectedCategory={selectedCategory}
