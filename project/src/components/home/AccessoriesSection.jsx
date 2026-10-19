@@ -1,16 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
-import React, { useEffect, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { FaPaw } from 'react-icons/fa';
 import productService from '../../services/productService';
 import ProductCard from '../product/ProductCard';
 import Loading from '../common/Loading';
 
-const AccessoriesSection = ({
-  onAddToCart,
-  selectedCategory = null,
-  onClearCategory
 const ACCESSORY_CATEGORY_IDS = [
   'cat-food',
   'cat-accessories',
@@ -21,6 +15,7 @@ const AccessoriesSection = ({
   onAddToCart,
   searchQuery = '',
   selectedCategory = null,
+  onClearCategory,
 }) => {
   const [accessories, setAccessories] = useState([]);
   const [loading, setLoading] = useState(true);

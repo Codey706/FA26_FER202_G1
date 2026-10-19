@@ -16,15 +16,26 @@ export const productService = {
    * Get featured pets with optional type filter ('dog', 'cat', 'all')
    * @param {string} petType - 'all' | 'dog' | 'cat'
    */
+
+  /**
+   * Get featured pets with optional type filter ('dog', 'cat', 'all')
+   * @param {string} petType - 'all' | 'dog' | 'cat'
+   */
   getFeaturedPets: async (petType = 'all') => {
-    const params = { isFeatured: true };
+    const params = {};
+
     if (petType && petType !== 'all') {
       params.petType = petType;
     }
+
     const products = await api.get('/products', params);
-    // Ensure we only return pets (not accessories) for the pet section
-    return products.filter((p) => p.petType === 'dog' || p.petType === 'cat');
+
+    // Only return pets (not accessories) for the pet section
+    return products.filter(
+      (p) => p.petType === 'dog' || p.petType === 'cat'
+    );
   },
+
 
   /**
    * Get all pets (dogs and cats) with optional filters

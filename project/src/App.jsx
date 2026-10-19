@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/common/Header';
@@ -11,6 +12,7 @@ const CART_STORAGE_KEY = 'pet-shop-cart';
 
 function AppContent() {
   const [searchQuery, setSearchQuery] = useState('');
+
   const [cartItems, setCartItems] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]');
@@ -19,43 +21,62 @@ function AppContent() {
     }
   });
 
+  // Lưu giỏ hàng vào localStorage khi giỏ hàng thay đổi
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
   }, [cartItems]);
 
+  // Tính tổng số lượng sản phẩm trong giỏ hàng
   const cartCount = useMemo(
     () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
     [cartItems]
   );
 
+  // Thêm sản phẩm vào giỏ hàng
   const handleAddToCart = (product) => {
     setCartItems((current) => {
-      const existing = current.find((item) => String(item.id) === String(product.id));
+      const existing = current.find(
+        (item) => String(item.id) === String(product.id)
+      );
+
       if (existing) {
         // Thú cưng là sản phẩm độc nhất, không tăng số lượng vượt quá 1.
-        if (product.petType === 'dog' || product.petType === 'cat') return current;
+        if (product.petType === 'dog' || product.petType === 'cat') {
+          return current;
+        }
+
         return current.map((item) =>
           String(item.id) === String(product.id)
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
+
       return [...current, { ...product, quantity: 1 }];
     });
   };
 
+  // Cập nhật số lượng sản phẩm trong giỏ hàng
   const updateCartQuantity = (id, quantity) => {
     setCartItems((current) =>
       current
-        .map((item) => String(item.id) === String(id) ? { ...item, quantity } : item)
+        .map((item) =>
+          String(item.id) === String(id)
+            ? { ...item, quantity }
+            : item
+        )
         .filter((item) => item.quantity > 0)
     );
   };
 
+  // Xóa một sản phẩm khỏi giỏ hàng
   const removeFromCart = (id) => {
-    setCartItems((current) => current.filter((item) => String(item.id) !== String(id)));
+    setCartItems((current) =>
+      current.filter((item) => String(item.id) !== String(id))
+    );
   };
 
+  // Xóa toàn bộ giỏ hàng sau khi checkout
   const clearCart = () => setCartItems([]);
 
   return (
@@ -64,12 +85,32 @@ function AppContent() {
         onSearch={setSearchQuery}
         cartCount={cartCount}
       />
+
       <div className="flex-grow-1">
         <Routes>
+          {/* Trang chủ */}
           <Route
             path="/"
-            element={<HomePage searchQuery={searchQuery} onAddToCart={handleAddToCart} />}
+            element={
+              <HomePage
+                searchQuery={searchQuery}
+                onAddToCart={handleAddToCart}
+              />
+            }
           />
+
+          {/* Trang sản phẩm */}
+          <Route
+            path="/products"
+            element={
+              <HomePage
+                searchQuery={searchQuery}
+                onAddToCart={handleAddToCart}
+              />
+            }
+          />
+
+          {/* Trang giỏ hàng */}
           <Route
             path="/cart"
             element={
@@ -80,6 +121,8 @@ function AppContent() {
               />
             }
           />
+
+          {/* Trang thanh toán */}
           <Route
             path="/checkout"
             element={
@@ -89,60 +132,26 @@ function AppContent() {
               />
             }
           />
+
+          {/* Quản lý đơn hàng */}
+          <Route
+            path="/admin/orders"
+            element={<OrderManagementPage />}
+          />
+
+          {/* Các đường dẫn không xác định */}
           <Route
             path="*"
-            element={<HomePage searchQuery={searchQuery} onAddToCart={handleAddToCart} />}
+            element={
+              <HomePage
+                searchQuery={searchQuery}
+                onAddToCart={handleAddToCart}
+              />
+            }
           />
         </Routes>
-    <BrowserRouter>
-      <div className="d-flex flex-column min-vh-100">
-        <Header
-          onSearch={handleSearch}
-          cartCount={cartCount}
-        />
-
-        <div className="flex-grow-1">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <HomePage
-                  searchQuery={searchQuery}
-                  onAddToCart={handleAddToCart}
-                />
-              }
-            />
-
-            {/* /products cũng hiển thị HomePage */}
-            <Route
-              path="/products"
-              element={
-                <HomePage
-                  searchQuery={searchQuery}
-                  onAddToCart={handleAddToCart}
-                />
-              }
-            />
-
-            {/* Các đường dẫn không xác định */}
-            <Route
-              path="/admin/orders"
-              element={<OrderManagementPage />}
-            />
-            <Route
-              path="*"
-              element={
-                <HomePage
-                  searchQuery={searchQuery}
-                  onAddToCart={handleAddToCart}
-                />
-              }
-            />
-          </Routes>
-        </div>
-
-        <Footer />
       </div>
+
       <Footer />
     </div>
   );
