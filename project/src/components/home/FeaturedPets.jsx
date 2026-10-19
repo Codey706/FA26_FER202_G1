@@ -9,8 +9,6 @@ import {
   FaSearch,
   FaSyncAlt
 } from 'react-icons/fa';
-  FaSyncAlt,
-} from 'react-icons/fa';
 
 import productService from '../../services/productService';
 import PetCard from '../product/PetCard';
@@ -19,21 +17,8 @@ import Loading from '../common/Loading';
 const FeaturedPets = ({
   searchQuery = '',
   selectedCategory = null,
-  onClearCategory
-}) => {
-  const [pets, setPets] = useState([]);
-  const [activeFilter, setActiveFilter] = useState('all');
-  useEffect(() => {
-    if (!selectedCategory || selectedCategory.petType === 'accessory') {
-      setActiveFilter('all');
-    } else {
-      setActiveFilter(selectedCategory.petType);
-    }
-  }, [selectedCategory]);
-const FeaturedPets = ({ searchQuery = '', onAddToCart }) => {
-const FeaturedPets = ({
-  searchQuery = '',
-  selectedCategory = null,
+  onClearCategory,
+  onAddToCart
 }) => {
   const [pets, setPets] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -42,6 +27,19 @@ const FeaturedPets = ({
   const [retryTrigger, setRetryTrigger] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const petsListRef = useRef(null);
+
+  // Cập nhật bộ lọc khi chọn danh mục chó hoặc mèo.
+  // Khi selectedCategory là null, giữ nguyên tab người dùng đã chọn.
+  useEffect(() => {
+    if (
+      selectedCategory?.petType === 'dog' ||
+      selectedCategory?.petType === 'cat'
+    ) {
+      setActiveFilter(selectedCategory.petType);
+    } else if (selectedCategory?.petType === 'accessory') {
+      setActiveFilter('all');
+    }
+  }, [selectedCategory]);
 
   // Tải danh sách thú cưng theo bộ lọc hiện tại
   useEffect(() => {
@@ -93,31 +91,18 @@ const FeaturedPets = ({
     setRetryTrigger((prev) => prev + 1);
   };
 
-  const filteredPets = pets.filter((pet) => {
-
-    if (
-      (!selectedCategory || selectedCategory.petType !== 'accessory') &&
-      activeFilter !== 'all' &&
-      pet.petType !== activeFilter
   // Lọc thú cưng theo danh mục, tab và từ khóa tìm kiếm
   const filteredPets = pets.filter((pet) => {
-    // Nếu chọn danh mục chó hoặc mèo, lọc chính xác theo categoryId.
-    if (
-      selectedCategory &&
-      (selectedCategory.petType === 'dog' ||
-        selectedCategory.petType === 'cat') &&
-      pet.categoryId !== selectedCategory.id
-    ) {
+    // Khi chọn danh mục phụ kiện, không hiển thị thú cưng.
+    if (selectedCategory?.petType === 'accessory') {
       return false;
     }
 
-
+    // Khi chọn danh mục, lọc chính xác theo categoryId.
     if (
       selectedCategory &&
-      selectedCategory.petType !== 'accessory' &&
       String(pet.categoryId) !== String(selectedCategory.id)
-    // Khi chọn danh mục phụ kiện, không hiển thị thú cưng.
-    if (selectedCategory?.petType === 'accessory') {
+    ) {
       return false;
     }
 
@@ -131,7 +116,7 @@ const FeaturedPets = ({
     }
 
     // Filter by search query
-    if (searchQuery) {
+    if (searchQuery.trim() !== '') {
       const query = searchQuery.toLowerCase().trim();
 
       const matchesSearch =
@@ -152,6 +137,31 @@ const FeaturedPets = ({
   useEffect(() => {
     setCurrentPage(0);
   }, [activeFilter, selectedCategory, searchQuery]);
+
+  // Phân trang: mỗi trang hiển thị 8 sản phẩm
+  const itemsPerPage = 8;
+  const totalPages = Math.ceil(filteredPets.length / itemsPerPage);
+  const startIndex = currentPage * itemsPerPage;
+  const currentPets = filteredPets.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
+  // Cuộn đến danh sách khi chuyển trang
+  const scrollToPetsList = () => {
+    requestAnimationFrame(() => {
+      if (petsListRef.current) {
+        const top =
+          petsListRef.current.getBoundingClientRect().top +
+          window.scrollY - 120;
+
+        window.scrollTo({
+          top: Math.max(0, top),
+          behavior: 'smooth'
+        });
+      }
+    });
+  };
 
   return (
     <section className="py-5" id="featured-pets">
@@ -226,16 +236,10 @@ const FeaturedPets = ({
 
         {/* Loading State */}
         {loading && (
-          <Loading message="Đang tải danh sách thú cưng nổi bật..." />
-        )}
-
-        {/* Error State */}
-        {/* Đang tải */}
-        {loading && (
           <Loading message="Đang tải danh sách thú cưng..." />
         )}
 
-        {/* Lỗi kết nối */}
+        {/* Error State */}
         {!loading && error && (
           <div className="error-banner flex-column flex-md-row align-items-center text-center text-md-start">
             <div>
@@ -276,128 +280,91 @@ const FeaturedPets = ({
           </div>
         )}
 
-
-        {/* Products Grid */}
-        {!loading && !error && filteredPets.length > 0 && (() => {
-          const itemsPerPage = 8;
-          const totalPages = Math.ceil(filteredPets.length / itemsPerPage);
-          const startIndex = currentPage * itemsPerPage;
-          const currentPets = filteredPets.slice(
-            startIndex,
-            startIndex + itemsPerPage
-          );
-
-          return (
-            <>
-              <Row className="g-4" ref={petsListRef}>
-                {currentPets.map((pet) => (
-                  <Col key={pet.id} xs={12} sm={6} lg={3}>
-                    <PetCard pet={pet} />
-                  </Col>
-                ))}
-              </Row>
-
-              {totalPages > 1 && (
-                <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
-                  <button
-                    type="button"
-                    className="btn btn-link p-1"
-                    disabled={currentPage === 0}
-                    onClick={() => {
-                      setCurrentPage((prev) => Math.max(0, prev - 1));
-
-                      requestAnimationFrame(() => {
-                        if (petsListRef.current) {
-                          const top =
-                            petsListRef.current.getBoundingClientRect().top +
-                            window.scrollY - 120;
-
-                          window.scrollTo({
-                            top: Math.max(0, top),
-                            behavior: 'smooth'
-                          });
-                        }
-                      });
-                    }}
-                    aria-label="Trang trước"
-                    style={{
-                      color: currentPage === 0 ? '#ccc' : '#f4a261',
-                      textDecoration: 'none',
-                      opacity: currentPage === 0 ? 0.5 : 1,
-                      cursor: currentPage === 0 ? 'not-allowed' : 'pointer'
-                    }}
-                  >
-                    <span style={{ fontSize: '24px' }}>❮</span>
-                  </button>
-
-                  {Array.from({ length: totalPages }, (_, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => setCurrentPage(index)}
-                      aria-label={`Trang ${index + 1}`}
-                      style={{
-                        width: '10px',
-                        height: '10px',
-                        padding: 0,
-                        border: 'none',
-                        borderRadius: '50%',
-                        backgroundColor:
-                          currentPage === index ? '#f4a261' : '#d6d6d6',
-                        cursor: 'pointer'
-                      }}
-                    />
-                  ))}
-
-                  <button
-                    type="button"
-                    className="btn btn-link p-1"
-                    disabled={currentPage === totalPages - 1}
-                    onClick={() => {
-                      setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1));
-
-                      requestAnimationFrame(() => {
-                        if (petsListRef.current) {
-                          const top =
-                            petsListRef.current.getBoundingClientRect().top +
-                            window.scrollY - 120;
-
-                          window.scrollTo({
-                            top: Math.max(0, top),
-                            behavior: 'smooth'
-                          });
-                        }
-                      });
-                    }}
-                    aria-label="Trang tiếp theo"
-                    style={{
-                      color:
-                        currentPage === totalPages - 1 ? '#ccc' : '#f4a261',
-                      textDecoration: 'none',
-                      opacity: currentPage === totalPages - 1 ? 0.5 : 1,
-                      cursor:
-                        currentPage === totalPages - 1
-                          ? 'not-allowed'
-                          : 'pointer'
-                    }}
-                  >
-                    <span style={{ fontSize: '24px' }}>❯</span>
-                  </button>
-                </div>
-              )}
-            </>
-          );
-        })()}
-
-        {/* Danh sách thú cưng */}
+        {/* Products Grid - 8 sản phẩm mỗi trang */}
         {!loading && !error && filteredPets.length > 0 && (
-          <Row className="g-4">
-            {filteredPets.map((pet) => (
-              <Col key={pet.id} xs={12} sm={6} lg={3}>
-                <PetCard pet={pet} onAddToCart={onAddToCart} />
-              </Col>
-            ))}
-          </Row>
+          <>
+            <Row className="g-4" ref={petsListRef}>
+              {currentPets.map((pet) => (
+                <Col key={pet.id} xs={12} sm={6} lg={3}>
+                  <PetCard
+                    pet={pet}
+                    onAddToCart={onAddToCart}
+                  />
+                </Col>
+              ))}
+            </Row>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
+                <button
+                  type="button"
+                  className="btn btn-link p-1"
+                  disabled={currentPage === 0}
+                  onClick={() => {
+                    setCurrentPage((prev) => Math.max(0, prev - 1));
+                    scrollToPetsList();
+                  }}
+                  aria-label="Trang trước"
+                  style={{
+                    color: currentPage === 0 ? '#ccc' : '#f4a261',
+                    textDecoration: 'none',
+                    opacity: currentPage === 0 ? 0.5 : 1,
+                    cursor: currentPage === 0 ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  <span style={{ fontSize: '24px' }}>❮</span>
+                </button>
+
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => {
+                      setCurrentPage(index);
+                      scrollToPetsList();
+                    }}
+                    aria-label={`Trang ${index + 1}`}
+                    style={{
+                      width: '10px',
+                      height: '10px',
+                      padding: 0,
+                      border: 'none',
+                      borderRadius: '50%',
+                      backgroundColor:
+                        currentPage === index ? '#f4a261' : '#d6d6d6',
+                      cursor: 'pointer'
+                    }}
+                  />
+                ))}
+
+                <button
+                  type="button"
+                  className="btn btn-link p-1"
+                  disabled={currentPage === totalPages - 1}
+                  onClick={() => {
+                    setCurrentPage((prev) =>
+                      Math.min(totalPages - 1, prev + 1)
+                    );
+                    scrollToPetsList();
+                  }}
+                  aria-label="Trang tiếp theo"
+                  style={{
+                    color:
+                      currentPage === totalPages - 1 ? '#ccc' : '#f4a261',
+                    textDecoration: 'none',
+                    opacity: currentPage === totalPages - 1 ? 0.5 : 1,
+                    cursor:
+                      currentPage === totalPages - 1
+                        ? 'not-allowed'
+                        : 'pointer'
+                  }}
+                >
+                  <span style={{ fontSize: '24px' }}>❯</span>
+                </button>
+              </div>
+            )}
+          </>
         )}
       </Container>
     </section>

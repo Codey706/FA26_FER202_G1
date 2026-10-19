@@ -34,11 +34,18 @@ const HomePage = ({ searchQuery = '', onAddToCart }) => {
   };
 
 
+
   const handleSelectCategory = (category) => {
     setSelectedCategory(category);
 
+    // Không cuộn đến danh sách nếu người dùng bỏ chọn danh mục.
+    if (!category) {
+      return;
+    }
+
     const targetId =
-      category.petType === 'accessory'
+      category.petType === 'accessory' ||
+        ['cat-food', 'cat-accessories', 'cat-cages'].includes(category.id)
         ? 'accessories-section'
         : 'featured-pets';
 
@@ -54,11 +61,12 @@ const HomePage = ({ searchQuery = '', onAddToCart }) => {
 
         window.scrollTo({
           top: Math.max(0, top),
-          behavior: 'smooth'
+          behavior: 'smooth',
         });
       }
     });
   };
+
 
 
   return (
@@ -67,15 +75,18 @@ const HomePage = ({ searchQuery = '', onAddToCart }) => {
 
       <CategorySection
         selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
+        onSelectCategory={handleSelectCategory}
       />
 
       {/* 3. Featured Pets */}
-      <FeaturedPets searchQuery={searchQuery} onAddToCart={handleAddToCart} />
+
       <FeaturedPets
         searchQuery={searchQuery}
         selectedCategory={selectedCategory}
+        onClearCategory={() => setSelectedCategory(null)}
+        onAddToCart={handleAddToCart}
       />
+
 
       <WhyChooseUs />
 
