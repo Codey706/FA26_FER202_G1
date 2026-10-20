@@ -113,15 +113,15 @@ const AccessoriesSection = ({
               : selectedCategory.id === 'cat-food'
                 ? <>Thức Ăn <span>Thú Cưng</span></>
                 : selectedCategory.id === 'cat-cages'
-                  ? <>Chuồng Nệm <span>& Vận Chuyển</span></>
+                  ? <>Vận chuyển <span>& Giường nệm</span></>
                   : selectedCategory.id === 'cat-accessories'
-                    ? <>Phụ Kiện <span>& Đồ Chơi</span></>
+                    ? <>Phụ Kiện <span>& Chăm sóc</span></>
                     : <>Phụ Kiện Thú Cưng <span>Chính Hãng</span></>
             }
           </h2>
 
           <p className="section-subtitle">
-            Cung cấp thức ăn dinh dưỡng, đồ chơi, balo vận chuyển
+            Cung cấp thức ăn dinh dưỡng, balo vận chuyển
             và chuồng nệm giúp thú cưng phát triển khỏe mạnh.
           </p>
         </div>

@@ -1307,3 +1307,230 @@ a:hover {
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* ================= Search: nút trên header ================= */
+.search-trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+  min-width: 220px;
+  padding: 8px 40px 8px 18px;
+  border: 1.5px solid #fed7aa;
+  border-radius: 50px;
+  background-color: #fffaf5;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: text;
+  transition: var(--transition);
+}
+
+.search-trigger:hover,
+.search-trigger:focus-visible {
+  border-color: var(--primary-color);
+  background-color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.15);
+}
+
+.search-trigger-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.search-trigger-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary-color);
+  font-size: 1.05rem;
+}
+
+/* ================= Search: hộp tìm kiếm nổi ================= */
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 14vh 16px 16px;
+  background: rgba(30, 41, 59, 0.35);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: search-fade-in 0.18s ease-out;
+}
+
+.search-overlay-box {
+  width: 100%;
+  max-width: 620px;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: search-pop-in 0.2s ease-out;
+}
+
+.search-overlay-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.search-overlay-icon {
+  flex-shrink: 0;
+  color: var(--primary-color);
+  font-size: 1.15rem;
+}
+
+.search-overlay-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1.1rem;
+  color: var(--text-dark);
+}
+
+.search-overlay-input::placeholder {
+  color: #94a3b8;
+}
+
+.search-overlay-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.search-overlay-close:hover {
+  background: var(--primary-light);
+  color: var(--primary-color);
+}
+
+.search-overlay-suggest {
+  padding: 18px 20px 22px;
+}
+
+.search-overlay-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.search-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-chip {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1.5px solid #fed7aa;
+  border-radius: 50px;
+  background: #fffaf5;
+  color: var(--text-dark);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.search-chip:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-light);
+  color: var(--primary-color);
+}
+
+@keyframes search-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes search-pop-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ================= Search: trang kết quả ================= */
+.search-page {
+  padding: 40px 0 64px;
+  background-color: var(--bg-warm-light);
+  min-height: 60vh;
+}
+
+.search-page-head {
+  margin-bottom: 28px;
+}
+
+.search-page-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-color);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.search-page-title {
+  margin: 6px 0 4px;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  word-break: break-word;
+}
+
+.search-page-count {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.search-empty {
+  padding: 56px 16px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.search-empty-icon {
+  margin-bottom: 12px;
+  font-size: 2.6rem;
+  color: #fdba74;
+}
+
+@media (max-width: 991.98px) {
+  .search-trigger {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .search-overlay {
+    padding-top: 10vh;
+  }
+}
