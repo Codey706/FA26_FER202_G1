@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import HomePage from './pages/HomePage';
+import OrderManagementPage from './pages/OrderManagementPage';
+import OrderDetailPage from './pages/OrderDetailPage';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,6 +26,7 @@ function App() {
 
         {/* Main Routes */}
         <div className="flex-grow-1">
+
           <Routes>
             <Route
               path="/"
@@ -34,7 +37,18 @@ function App() {
                 />
               }
             />
-            {/* Fallback route to HomePage */}
+
+            <Route
+              path="/admin/orders"
+              element={<OrderManagementPage />}
+            />
+
+            <Route
+              path="/admin/orders/:id"
+              element={<OrderDetailPage />}
+            />
+
+            {/* Fallback route must be last */}
             <Route
               path="*"
               element={
@@ -45,6 +59,7 @@ function App() {
               }
             />
           </Routes>
+
         </div>
 
         {/* Common Footer */}

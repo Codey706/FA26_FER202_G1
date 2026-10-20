@@ -187,11 +187,14 @@ export default function OrderManagementPage() {
                         <tbody>
                             {filteredOrders.map((order) => (
                                 <tr key={order.id}>
-                                    <td className="fw-semibold">{order.id}</td>
+                                    {/* Cot Ma don */}
+                                    <td className="text-nowrap">
+                                        {order.id}
+                                    </td>
 
                                     <td>
                                         <div>{order.customerName || 'Chưa có tên'}</div>
-                                        <small className="text-muted">
+                                        <small className="text-nowrap">
                                             {order.phone || 'Chưa có số điện thoại'}
                                         </small>
                                     </td>
