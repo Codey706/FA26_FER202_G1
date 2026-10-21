@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import HeroBanner from '../components/home/HeroBanner';
 import CategorySection from '../components/home/CategorySection';
 import FeaturedPets from '../components/home/FeaturedPets';
@@ -8,53 +8,108 @@ import AccessoriesSection from '../components/home/AccessoriesSection';
 import ShoppingProcess from '../components/home/ShoppingProcess';
 import Testimonials from '../components/home/Testimonials';
 import CTASection from '../components/home/CTASection';
-import { FaCheckCircle, FaShoppingCart } from 'react-icons/fa';
+import { FaCheckCircle } from 'react-icons/fa';
 
-const HomePage = ({ searchQuery, onAddToCart }) => {
+const HomePage = ({ searchQuery = '', onAddToCart }) => {
   const [toastMessage, setToastMessage] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const toastTimerRef = useRef(null);
 
   const handleAddToCart = (product) => {
     if (onAddToCart) {
       onAddToCart(product);
     }
+
     setToastMessage(`Đã thêm "${product.name}" vào giỏ hàng!`);
-    setTimeout(() => {
+
+    // Xóa timer cũ trước khi tạo timer mới
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+
+    toastTimerRef.current = setTimeout(() => {
       setToastMessage(null);
+      toastTimerRef.current = null;
     }, 3000);
   };
 
+
+
+  const handleSelectCategory = (category) => {
+    setSelectedCategory(category);
+
+    // Không cuộn đến danh sách nếu người dùng bỏ chọn danh mục.
+    if (!category) {
+      return;
+    }
+
+    const targetId =
+      category.petType === 'accessory' ||
+        ['cat-food', 'cat-accessories', 'cat-cages'].includes(category.id)
+        ? 'accessories-section'
+        : 'featured-pets';
+
+    requestAnimationFrame(() => {
+      const element = document.getElementById(targetId);
+
+      if (element) {
+        const navbarHeight = 90;
+        const top =
+          element.getBoundingClientRect().top +
+          window.scrollY -
+          navbarHeight;
+
+        window.scrollTo({
+          top: Math.max(0, top),
+          behavior: 'smooth',
+        });
+      }
+    });
+  };
+
+
+
   return (
     <main className="homepage-wrapper">
-      {/* 1. Hero Banner */}
       <HeroBanner />
 
-      {/* 2. Shop By Category */}
-      <CategorySection />
+      <CategorySection
+        selectedCategory={selectedCategory}
+        onSelectCategory={handleSelectCategory}
+      />
 
       {/* 3. Featured Pets */}
-      <FeaturedPets searchQuery={searchQuery} />
 
-      {/* 4. Why Choose Us */}
+      <FeaturedPets
+        searchQuery={searchQuery}
+        selectedCategory={selectedCategory}
+        onClearCategory={() => setSelectedCategory(null)}
+        onAddToCart={handleAddToCart}
+      />
+
+
       <WhyChooseUs />
 
-      {/* 5. Popular Breeds */}
       <PopularBreeds />
 
-      {/* 6. Pet Accessories */}
-      <AccessoriesSection onAddToCart={handleAddToCart} />
+      <AccessoriesSection
+        onAddToCart={handleAddToCart}
+        selectedCategory={selectedCategory}
+        onClearCategory={() => setSelectedCategory(null)}
+      />
 
-      {/* 7. Shopping Process */}
       <ShoppingProcess />
 
-      {/* 8. Customer Reviews */}
       <Testimonials />
 
-      {/* 9. Call To Action */}
       <CTASection />
 
-      {/* Toast Notification when adding to cart */}
       {toastMessage && (
-        <div className="toast-notice">
+        <div
+          className="toast-notice"
+          role="status"
+          aria-live="polite"
+        >
           <FaCheckCircle className="text-success fs-5" />
           <span>{toastMessage}</span>
         </div>
