@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import HomePage from './pages/HomePage';
+import SearchPage from './pages/SearchPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderManagementPage from './pages/OrderManagementPage';
@@ -11,8 +12,6 @@ import OrderManagementPage from './pages/OrderManagementPage';
 const CART_STORAGE_KEY = 'pet-shop-cart';
 
 function AppContent() {
-  const [searchQuery, setSearchQuery] = useState('');
-
   const [cartItems, setCartItems] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]');
@@ -81,10 +80,7 @@ function AppContent() {
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Header
-        onSearch={setSearchQuery}
-        cartCount={cartCount}
-      />
+      <Header cartCount={cartCount} />
 
       <div className="flex-grow-1">
         <Routes>
@@ -93,7 +89,6 @@ function AppContent() {
             path="/"
             element={
               <HomePage
-                searchQuery={searchQuery}
                 onAddToCart={handleAddToCart}
               />
             }
@@ -104,10 +99,15 @@ function AppContent() {
             path="/products"
             element={
               <HomePage
-                searchQuery={searchQuery}
                 onAddToCart={handleAddToCart}
               />
             }
+          />
+
+          {/* Trang kết quả tìm kiếm: /search?q=từ-khóa */}
+          <Route
+            path="/search"
+            element={<SearchPage onAddToCart={handleAddToCart} />}
           />
 
           {/* Trang giỏ hàng */}
@@ -144,7 +144,6 @@ function AppContent() {
             path="*"
             element={
               <HomePage
-                searchQuery={searchQuery}
                 onAddToCart={handleAddToCart}
               />
             }
