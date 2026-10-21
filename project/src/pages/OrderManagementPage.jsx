@@ -195,6 +195,11 @@ export default function OrderManagementPage() {
                                     <td>
                                         <div>{order.customerName || 'Chưa có tên'}</div>
                                         <small className="text-nowrap">
+                                    <td className="fw-semibold">{order.id}</td>
+
+                                    <td>
+                                        <div>{order.customerName || 'Chưa có tên'}</div>
+                                        <small className="text-muted">
                                             {order.phone || 'Chưa có số điện thoại'}
                                         </small>
                                     </td>

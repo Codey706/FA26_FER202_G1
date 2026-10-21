@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import {
   Navbar,
   Container,
   Nav,
-  Form,
-  Badge,
   Modal,
   Button
 } from 'react-bootstrap';
@@ -20,32 +20,56 @@ import {
   FaShieldAlt,
   FaInfoCircle
 } from 'react-icons/fa';
+import SearchOverlay from './SearchOverlay';
 
-const Header = ({ onSearch, cartCount = 3 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+const Header = ({ cartCount = 0 }) => {
+  const navigate = useNavigate();
+  const [showSearch, setShowSearch] = useState(false);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
   const [noticeMessage, setNoticeMessage] = useState({ title: '', content: '' });
+  const [activeSection, setActiveSection] = useState('home');
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (onSearch) {
-      onSearch(searchTerm);
-    }
-    // Scroll to products section if searching
-    const target = document.getElementById('featured-pets');
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  useEffect(() => {
+    const sectionIds = [
+      'home',
+      'categories',
+      'featured-pets',
+      'popular-breeds',
+      'accessories-section',
+      'shopping-process',
+      'testimonials'
+    ];
 
-  const handleCartClick = () => {
-    setNoticeMessage({
-      title: 'Giỏ hàng của bạn (3 món)',
-      content:
-        'Bạn đang có 3 sản phẩm trong giỏ hàng mẫu. Chức năng Quản lý giỏ hàng và Thanh toán (Checkout) sẽ được triển khai chi tiết ở giai đoạn tiếp theo!'
-    });
-    setShowNoticeModal(true);
-  };
+    const handleScroll = () => {
+      const marker = 160;
+      let currentSection = 'home';
+      let closestTop = -Infinity;
+
+      sectionIds.forEach((id) => {
+        const section = document.getElementById(id);
+
+        if (!section) return;
+
+        const top = section.getBoundingClientRect().top;
+
+        if (top <= marker && top > closestTop) {
+          closestTop = top;
+          currentSection = id;
+        }
+      });
+
+      setActiveSection(currentSection);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []);
 
   const handleUserClick = () => {
     setNoticeMessage({
@@ -126,25 +150,53 @@ const Header = ({ onSearch, cartCount = 3 }) => {
                 as={Link}
                 to="/"
                 className="nav-link-custom"
+
+              <Nav.Link
+                href="#home"
+                className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''}`}
               >
                 Trang Chủ
               </Nav.Link>
-              <Nav.Link href="#categories" className="nav-link-custom">
+
+              <Nav.Link
+                href="#categories"
+                className={`nav-link-custom ${activeSection === 'categories' ? 'active' : ''}`}
+              >
                 Danh Mục
               </Nav.Link>
-              <Nav.Link href="#featured-pets" className="nav-link-custom">
+
+              <Nav.Link
+                href="#featured-pets"
+                className={`nav-link-custom ${activeSection === 'featured-pets' ? 'active' : ''}`}
+              >
                 Thú Cưng
               </Nav.Link>
-              <Nav.Link href="#popular-breeds" className="nav-link-custom">
-                Giống Cảnh
+
+              <Nav.Link
+                href="#popular-breeds"
+                className={`nav-link-custom ${activeSection === 'popular-breeds' ? 'active' : ''}`}
+              >
+                Yêu Thích
               </Nav.Link>
-              <Nav.Link href="#accessories-section" className="nav-link-custom">
-                Phụ Kiện
+
+              <Nav.Link
+                href="#accessories-section"
+                className={`nav-link-custom ${activeSection === 'accessories-section' ? 'active' : ''}`}
+              >
+                Tiện Ích
               </Nav.Link>
-              <Nav.Link href="#shopping-process" className="nav-link-custom">
+
+              <Nav.Link
+                href="#shopping-process"
+                className={`nav-link-custom ${activeSection === 'shopping-process' ? 'active' : ''}`}
+              >
                 Quy Trình
               </Nav.Link>
-              <Nav.Link href="#testimonials" className="nav-link-custom">
+
+              <Nav.Link
+                href="#testimonials"
+                className={`nav-link-custom ${activeSection === 'testimonials' ? 'active' : ''}`}
+              >
                 Đánh Giá
               </Nav.Link>
               <Nav.Link
@@ -153,27 +205,23 @@ const Header = ({ onSearch, cartCount = 3 }) => {
                 className="nav-link-custom"
               >
                 Quản lý đơn hàng
+                Quản Lý Đơn Hàng
               </Nav.Link>
             </Nav>
 
             {/* Search Box & Quick Actions */}
             <div className="d-flex align-items-center gap-3">
-              <Form className="search-form-box" onSubmit={handleSearchSubmit}>
-                <Form.Control
-                  type="text"
-                  placeholder="Tìm cún cưng, mèo, phụ kiện..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input-custom"
-                />
-                <button
-                  type="submit"
-                  className="search-btn-icon"
-                  title="Tìm kiếm"
-                >
-                  <FaSearch />
-                </button>
-              </Form>
+              <button
+                type="button"
+                className="search-trigger"
+                onClick={() => setShowSearch(true)}
+                aria-label="Mở hộp tìm kiếm"
+              >
+                <span className="search-trigger-text">
+                  Tìm cún cưng, mèo, phụ kiện...
+                </span>
+                <FaSearch className="search-trigger-icon" />
+              </button>
 
               {/* User Account Button */}
               <button
@@ -188,7 +236,7 @@ const Header = ({ onSearch, cartCount = 3 }) => {
               {/* Shopping Cart Button with Badge */}
               <button
                 className="cart-icon-btn"
-                onClick={handleCartClick}
+                onClick={() => navigate('/cart')}
                 title="Giỏ hàng"
                 type="button"
               >
@@ -199,6 +247,9 @@ const Header = ({ onSearch, cartCount = 3 }) => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
+
+      {/* Hộp tìm kiếm nổi */}
+      <SearchOverlay show={showSearch} onClose={() => setShowSearch(false)} />
 
       {/* Notice Modal for Non-Phase 1 Features */}
       <Modal
