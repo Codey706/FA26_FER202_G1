@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from 'react';
 import orderService from '../services/orderService';
 import { Link } from 'react-router-dom';
@@ -174,6 +173,7 @@ export default function OrderManagementPage() {
                     <table className="table table-hover align-middle mb-0">
                         <thead className="table-light">
                             <tr>
+
                                 <th>Mã đơn</th>
                                 <th>Khách hàng</th>
                                 <th>Ngày đặt</th>
@@ -192,25 +192,25 @@ export default function OrderManagementPage() {
                                         {order.id}
                                     </td>
 
+                                    {/* Thong tin khach hang */}
                                     <td>
-                                        <div>{order.customerName || 'Chưa có tên'}</div>
-                                        <small className="text-nowrap">
-                                    <td className="fw-semibold">{order.id}</td>
-
-                                    <td>
-                                        <div>{order.customerName || 'Chưa có tên'}</div>
+                                        <div>
+                                            {order.customerName || 'Chưa có tên'}
+                                        </div>
                                         <small className="text-muted">
                                             {order.phone || 'Chưa có số điện thoại'}
                                         </small>
                                     </td>
 
+                                    {/* Ngay dat */}
                                     <td>{formatDate(order.orderDate)}</td>
 
+                                    {/* Tong tien */}
                                     <td className="text-nowrap">
                                         {formatCurrency(order.totalAmount)}
                                     </td>
 
-
+                                    {/* Trang thai */}
                                     <td>
                                         <span
                                             className={`badge ${{
@@ -228,7 +228,7 @@ export default function OrderManagementPage() {
                                         </span>
                                     </td>
 
-
+                                    {/* Cap nhat trang thai */}
                                     <td>
                                         <select
                                             className="form-select form-select-sm"
@@ -253,9 +253,13 @@ export default function OrderManagementPage() {
                                         </select>
 
                                         {updatingId === order.id && (
-                                            <small className="text-muted">Đang lưu...</small>
+                                            <small className="text-muted">
+                                                Đang lưu...
+                                            </small>
                                         )}
                                     </td>
+
+                                    {/* Thao tac */}
                                     <td>
                                         <Link
                                             to={`/admin/orders/${order.id}`}

@@ -8,8 +8,6 @@ import OrderManagementPage from './pages/OrderManagementPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import SearchPage from './pages/SearchPage';
 import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import OrderManagementPage from './pages/OrderManagementPage';
 
 const CART_STORAGE_KEY = 'pet-shop-cart';
 
@@ -21,7 +19,11 @@ function AppContent() {
       return [];
     }
   });
+  const [searchQuery, setSearchQuery] = useState('');
 
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
   // Lưu giỏ hàng vào localStorage khi giỏ hàng thay đổi
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
@@ -81,7 +83,6 @@ function AppContent() {
   const clearCart = () => setCartItems([]);
 
   return (
-    <BrowserRouter>
       <div className="d-flex flex-column min-vh-100">
         {/* Common Header */}
         <Header onSearch={handleSearch} cartCount={cartCount} />
@@ -127,18 +128,15 @@ function AppContent() {
         {/* Common Footer */}
         <Footer />
       </div>
-
-      <Footer />
-    </div>
-  );
+      );
 }
 
-function App() {
+      function App() {
   return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
-  );
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+      );
 }
 
-export default App;
+      export default App;

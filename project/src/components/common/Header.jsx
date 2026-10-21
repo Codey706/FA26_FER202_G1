@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Navbar,
   Container,
@@ -24,9 +22,13 @@ import SearchOverlay from './SearchOverlay';
 
 const Header = ({ cartCount = 0 }) => {
   const navigate = useNavigate();
+
   const [showSearch, setShowSearch] = useState(false);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
-  const [noticeMessage, setNoticeMessage] = useState({ title: '', content: '' });
+  const [noticeMessage, setNoticeMessage] = useState({
+    title: '',
+    content: ''
+  });
   const [activeSection, setActiveSection] = useState('home');
 
   useEffect(() => {
@@ -61,8 +63,11 @@ const Header = ({ cartCount = 0 }) => {
       setActiveSection(currentSection);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll, {
+      passive: true
+    });
     window.addEventListener('resize', handleScroll);
+
     handleScroll();
 
     return () => {
@@ -77,6 +82,7 @@ const Header = ({ cartCount = 0 }) => {
       content:
         'Hệ thống Đăng nhập / Đăng ký và Quản lý tài khoản (User Management) sẽ được triển khai ở giai đoạn tiếp theo theo phân công thành viên nhóm.'
     });
+
     setShowNoticeModal(true);
   };
 
@@ -90,18 +96,24 @@ const Header = ({ cartCount = 0 }) => {
               <span className="top-bar-item">
                 <FaPhoneAlt className="text-warning" />
                 <span>
-                  Hotline tư vấn: <strong>0987.654.321</strong> (24/7)
+                  Hotline tư vấn:{' '}
+                  <strong>0987.654.321</strong> (24/7)
                 </span>
               </span>
+
               <span className="top-bar-item d-none d-md-inline-flex">
                 <FaMapMarkerAlt className="text-warning" />
-                <span>Hà Nội - TP. Hồ Chí Minh - Đà Nẵng</span>
+                <span>
+                  Hà Nội - TP. Hồ Chí Minh - Đà Nẵng
+                </span>
               </span>
+
               <span className="top-bar-item d-none d-lg-inline-flex">
                 <FaClock className="text-warning" />
                 <span>Mở cửa: 08:00 - 21:30</span>
               </span>
             </div>
+
             <div className="d-flex align-items-center gap-3">
               <span className="top-bar-item">
                 <FaShieldAlt className="text-success" />
@@ -116,15 +128,21 @@ const Header = ({ cartCount = 0 }) => {
       <Navbar expand="lg" className="header-sticky">
         <Container>
           {/* Brand Logo */}
-          <Navbar.Brand href="#home" className="brand-logo">
+          <Navbar.Brand
+            as={Link}
+            to="/"
+            className="brand-logo"
+          >
             <div className="brand-icon-box">
               <FaPaw />
             </div>
+
             <div>
               <div className="d-flex align-items-center gap-1">
                 <span>PET</span>
                 <span className="text-dark">SHOP</span>
               </div>
+
               <small
                 style={{
                   fontSize: '0.65rem',
@@ -147,65 +165,67 @@ const Header = ({ cartCount = 0 }) => {
             {/* Navigation Links */}
             <Nav className="mx-auto my-2 my-lg-0">
               <Nav.Link
-                as={Link}
-                to="/"
-                className="nav-link-custom"
-
-              <Nav.Link
-                href="#home"
-                className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''}`}
+                href="/#home"
+                className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''
+                  }`}
               >
                 Trang Chủ
               </Nav.Link>
 
               <Nav.Link
-                href="#categories"
-                className={`nav-link-custom ${activeSection === 'categories' ? 'active' : ''}`}
+                href="/#categories"
+                className={`nav-link-custom ${activeSection === 'categories' ? 'active' : ''
+                  }`}
               >
                 Danh Mục
               </Nav.Link>
 
               <Nav.Link
-                href="#featured-pets"
-                className={`nav-link-custom ${activeSection === 'featured-pets' ? 'active' : ''}`}
+                href="/#featured-pets"
+                className={`nav-link-custom ${activeSection === 'featured-pets' ? 'active' : ''
+                  }`}
               >
                 Thú Cưng
               </Nav.Link>
 
               <Nav.Link
-                href="#popular-breeds"
-                className={`nav-link-custom ${activeSection === 'popular-breeds' ? 'active' : ''}`}
+                href="/#popular-breeds"
+                className={`nav-link-custom ${activeSection === 'popular-breeds' ? 'active' : ''
+                  }`}
               >
                 Yêu Thích
               </Nav.Link>
 
               <Nav.Link
-                href="#accessories-section"
-                className={`nav-link-custom ${activeSection === 'accessories-section' ? 'active' : ''}`}
+                href="/#accessories-section"
+                className={`nav-link-custom ${activeSection === 'accessories-section' ? 'active' : ''
+                  }`}
               >
                 Tiện Ích
               </Nav.Link>
 
               <Nav.Link
-                href="#shopping-process"
-                className={`nav-link-custom ${activeSection === 'shopping-process' ? 'active' : ''}`}
+                href="/#shopping-process"
+                className={`nav-link-custom ${activeSection === 'shopping-process' ? 'active' : ''
+                  }`}
               >
                 Quy Trình
               </Nav.Link>
 
               <Nav.Link
-                href="#testimonials"
-                className={`nav-link-custom ${activeSection === 'testimonials' ? 'active' : ''}`}
+                href="/#testimonials"
+                className={`nav-link-custom ${activeSection === 'testimonials' ? 'active' : ''
+                  }`}
               >
                 Đánh Giá
               </Nav.Link>
+
               <Nav.Link
                 as={Link}
                 to="/admin/orders"
                 className="nav-link-custom"
               >
                 Quản lý đơn hàng
-                Quản Lý Đơn Hàng
               </Nav.Link>
             </Nav>
 
@@ -233,7 +253,7 @@ const Header = ({ cartCount = 0 }) => {
                 <FaUserAlt />
               </button>
 
-              {/* Shopping Cart Button with Badge */}
+              {/* Shopping Cart Button */}
               <button
                 className="cart-icon-btn"
                 onClick={() => navigate('/cart')}
@@ -241,7 +261,9 @@ const Header = ({ cartCount = 0 }) => {
                 type="button"
               >
                 <FaShoppingCart />
-                <span className="cart-badge-count">{cartCount}</span>
+                <span className="cart-badge-count">
+                  {cartCount}
+                </span>
               </button>
             </div>
           </Navbar.Collapse>
@@ -249,7 +271,10 @@ const Header = ({ cartCount = 0 }) => {
       </Navbar>
 
       {/* Hộp tìm kiếm nổi */}
-      <SearchOverlay show={showSearch} onClose={() => setShowSearch(false)} />
+      <SearchOverlay
+        show={showSearch}
+        onClose={() => setShowSearch(false)}
+      />
 
       {/* Notice Modal for Non-Phase 1 Features */}
       <Modal
@@ -263,9 +288,11 @@ const Header = ({ cartCount = 0 }) => {
             {noticeMessage.title}
           </Modal.Title>
         </Modal.Header>
+
         <Modal.Body className="py-3 text-secondary">
           <p className="mb-0">{noticeMessage.content}</p>
         </Modal.Body>
+
         <Modal.Footer className="border-0 pt-0">
           <Button
             variant="warning"
