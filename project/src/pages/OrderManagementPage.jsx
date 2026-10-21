@@ -1,6 +1,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import orderService from '../services/orderService';
+import { Link } from 'react-router-dom';
 
 const statusLabels = {
     pending: 'Chờ xác nhận',
@@ -179,12 +180,21 @@ export default function OrderManagementPage() {
                                 <th>Tổng tiền</th>
                                 <th>Trạng thái</th>
                                 <th>Cập nhật trạng thái</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             {filteredOrders.map((order) => (
                                 <tr key={order.id}>
+                                    {/* Cot Ma don */}
+                                    <td className="text-nowrap">
+                                        {order.id}
+                                    </td>
+
+                                    <td>
+                                        <div>{order.customerName || 'Chưa có tên'}</div>
+                                        <small className="text-nowrap">
                                     <td className="fw-semibold">{order.id}</td>
 
                                     <td>
@@ -204,12 +214,12 @@ export default function OrderManagementPage() {
                                     <td>
                                         <span
                                             className={`badge ${{
-                                                    pending: 'status-pending',
-                                                    processing: 'status-processing',
-                                                    shipping: 'status-shipping',
-                                                    delivered: 'status-delivered',
-                                                    cancelled: 'status-cancelled',
-                                                }[order.orderStatus] || 'status-default'
+                                                pending: 'status-pending',
+                                                processing: 'status-processing',
+                                                shipping: 'status-shipping',
+                                                delivered: 'status-delivered',
+                                                cancelled: 'status-cancelled',
+                                            }[order.orderStatus] || 'status-default'
                                                 }`}
                                         >
                                             {statusLabels[order.orderStatus] ||
@@ -245,6 +255,14 @@ export default function OrderManagementPage() {
                                         {updatingId === order.id && (
                                             <small className="text-muted">Đang lưu...</small>
                                         )}
+                                    </td>
+                                    <td>
+                                        <Link
+                                            to={`/admin/orders/${order.id}`}
+                                            className="btn btn-sm btn-outline-primary"
+                                        >
+                                            Xem chi tiết
+                                        </Link>
                                     </td>
                                 </tr>
                             ))}

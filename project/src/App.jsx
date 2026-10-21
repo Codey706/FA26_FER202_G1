@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import HomePage from './pages/HomePage';
+import OrderManagementPage from './pages/OrderManagementPage';
+import OrderDetailPage from './pages/OrderDetailPage';
 import SearchPage from './pages/SearchPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
@@ -79,76 +81,51 @@ function AppContent() {
   const clearCart = () => setCartItems([]);
 
   return (
-    <div className="d-flex flex-column min-vh-100">
-      <Header cartCount={cartCount} />
+    <BrowserRouter>
+      <div className="d-flex flex-column min-vh-100">
+        {/* Common Header */}
+        <Header onSearch={handleSearch} cartCount={cartCount} />
 
-      <div className="flex-grow-1">
-        <Routes>
-          {/* Trang chủ */}
-          <Route
-            path="/"
-            element={
-              <HomePage
-                onAddToCart={handleAddToCart}
-              />
-            }
-          />
+        {/* Main Routes */}
+        <div className="flex-grow-1">
 
-          {/* Trang sản phẩm */}
-          <Route
-            path="/products"
-            element={
-              <HomePage
-                onAddToCart={handleAddToCart}
-              />
-            }
-          />
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <HomePage
+                  searchQuery={searchQuery}
+                  onAddToCart={handleAddToCart}
+                />
+              }
+            />
 
-          {/* Trang kết quả tìm kiếm: /search?q=từ-khóa */}
-          <Route
-            path="/search"
-            element={<SearchPage onAddToCart={handleAddToCart} />}
-          />
+            <Route
+              path="/admin/orders"
+              element={<OrderManagementPage />}
+            />
 
-          {/* Trang giỏ hàng */}
-          <Route
-            path="/cart"
-            element={
-              <CartPage
-                cartItems={cartItems}
-                onUpdateQuantity={updateCartQuantity}
-                onRemove={removeFromCart}
-              />
-            }
-          />
+            <Route
+              path="/admin/orders/:id"
+              element={<OrderDetailPage />}
+            />
 
-          {/* Trang thanh toán */}
-          <Route
-            path="/checkout"
-            element={
-              <CheckoutPage
-                cartItems={cartItems}
-                onClearCart={clearCart}
-              />
-            }
-          />
+            {/* Fallback route must be last */}
+            <Route
+              path="*"
+              element={
+                <HomePage
+                  searchQuery={searchQuery}
+                  onAddToCart={handleAddToCart}
+                />
+              }
+            />
+          </Routes>
 
-          {/* Quản lý đơn hàng */}
-          <Route
-            path="/admin/orders"
-            element={<OrderManagementPage />}
-          />
+        </div>
 
-          {/* Các đường dẫn không xác định */}
-          <Route
-            path="*"
-            element={
-              <HomePage
-                onAddToCart={handleAddToCart}
-              />
-            }
-          />
-        </Routes>
+        {/* Common Footer */}
+        <Footer />
       </div>
 
       <Footer />
