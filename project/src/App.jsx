@@ -1,14 +1,17 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
+
 import HomePage from './pages/HomePage';
-import OrderManagementPage from './pages/OrderManagementPage';
-import OrderDetailPage from './pages/OrderDetailPage';
 import SearchPage from './pages/SearchPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
+
+import OrderHistoryPage from './pages/OrderHistoryPage';
+import OrderDetailPage from './pages/OrderDetailPage';
 import OrderManagementPage from './pages/OrderManagementPage';
 
 const CART_STORAGE_KEY = 'pet-shop-cart';
@@ -22,18 +25,24 @@ function AppContent() {
     }
   });
 
-  // Lưu giỏ hàng vào localStorage khi giỏ hàng thay đổi
+  // Save cart to localStorage
   useEffect(() => {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+    localStorage.setItem(
+      CART_STORAGE_KEY,
+      JSON.stringify(cartItems)
+    );
   }, [cartItems]);
 
-  // Tính tổng số lượng sản phẩm trong giỏ hàng
+  // Calculate cart count
   const cartCount = useMemo(
-    () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    () => cartItems.reduce(
+      (sum, item) => sum + Number(item.quantity || 0),
+      0
+    ),
     [cartItems]
   );
 
-  // Thêm sản phẩm vào giỏ hàng
+  // Add product to cart
   const handleAddToCart = (product) => {
     setCartItems((current) => {
       const existing = current.find(
@@ -41,23 +50,32 @@ function AppContent() {
       );
 
       if (existing) {
-        // Thú cưng là sản phẩm độc nhất, không tăng số lượng vượt quá 1.
-        if (product.petType === 'dog' || product.petType === 'cat') {
+        // Pets cannot have quantity greater than 1
+        if (
+          product.petType === 'dog' ||
+          product.petType === 'cat'
+        ) {
           return current;
         }
 
         return current.map((item) =>
           String(item.id) === String(product.id)
-            ? { ...item, quantity: item.quantity + 1 }
+            ? {
+              ...item,
+              quantity: item.quantity + 1
+            }
             : item
         );
       }
 
-      return [...current, { ...product, quantity: 1 }];
+      return [
+        ...current,
+        { ...product, quantity: 1 }
+      ];
     });
   };
 
-  // Cập nhật số lượng sản phẩm trong giỏ hàng
+  // Update cart quantity
   const updateCartQuantity = (id, quantity) => {
     setCartItems((current) =>
       current
@@ -70,65 +88,113 @@ function AppContent() {
     );
   };
 
-  // Xóa một sản phẩm khỏi giỏ hàng
+  // Remove product from cart
   const removeFromCart = (id) => {
     setCartItems((current) =>
-      current.filter((item) => String(item.id) !== String(id))
+      current.filter(
+        (item) => String(item.id) !== String(id)
+      )
     );
   };
 
-  // Xóa toàn bộ giỏ hàng sau khi checkout
-  const clearCart = () => setCartItems([]);
+  // Clear cart after checkout
+  const clearCart = () => {
+    setCartItems([]);
+  };
 
   return (
-    <BrowserRouter>
-      <div className="d-flex flex-column min-vh-100">
-        {/* Common Header */}
-        <Header onSearch={handleSearch} cartCount={cartCount} />
+    <div className="d-flex flex-column min-vh-100">
 
-        {/* Main Routes */}
-        <div className="flex-grow-1">
+      {/* Common Header */}
+      <Header cartCount={cartCount} />
 
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <HomePage
-                  searchQuery={searchQuery}
-                  onAddToCart={handleAddToCart}
-                />
-              }
-            />
+      {/* Main Routes */}
+      <main className="flex-grow-1">
+        <Routes>
 
-            <Route
-              path="/admin/orders"
-              element={<OrderManagementPage />}
-            />
+          {/* Home */}
+          <Route
+            path="/"
+            element={
+              <HomePage
+                onAddToCart={handleAddToCart}
+              />
+            }
+          />
 
-            <Route
-              path="/admin/orders/:id"
-              element={<OrderDetailPage />}
-            />
+          {/* Search */}
+          <Route
+            path="/search"
+            element={
+              <SearchPage
+                onAddToCart={handleAddToCart}
+              />
+            }
+          />
 
-            {/* Fallback route must be last */}
-            <Route
-              path="*"
-              element={
-                <HomePage
-                  searchQuery={searchQuery}
-                  onAddToCart={handleAddToCart}
-                />
-              }
-            />
-          </Routes>
+          {/* Shopping Cart */}
+          <Route
+            path="/cart"
+            element={
+              <CartPage
+                cartItems={cartItems}
+                onUpdateQuantity={updateCartQuantity}
+                onRemove={removeFromCart}
+              />
+            }
+          />
 
-        </div>
+          {/* Checkout */}
+          <Route
+            path="/checkout"
+            element={
+              <CheckoutPage
+                cartItems={cartItems}
+                onClearCart={clearCart}
+              />
+            }
+          />
 
-        {/* Common Footer */}
-        <Footer />
-      </div>
+          {/* Customer Order History */}
+          <Route
+            path="/orders"
+            element={<OrderHistoryPage />}
+          />
 
+          {/* Customer Order Detail */}
+          <Route
+            path="/orders/:id"
+            element={<OrderDetailPage />}
+          />
+
+          {/* Admin Order Management */}
+          <Route
+            path="/admin/orders"
+            element={<OrderManagementPage />}
+          />
+
+          {/* Admin Order Detail */}
+          <Route
+            path="/admin/orders/:id"
+            element={<OrderDetailPage />}
+          />
+
+          {/* Fallback */}
+          <Route
+            path="*"
+            element={
+              <HomePage
+                onAddToCart={handleAddToCart}
+              />
+            }
+          />
+
+        </Routes>
+      </main>
+
+      {/* Common Footer */}
       <Footer />
+
     </div>
   );
 }

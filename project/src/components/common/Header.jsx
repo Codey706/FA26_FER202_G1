@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+
 import {
   Navbar,
   Container,
@@ -146,67 +145,75 @@ const Header = ({ cartCount = 0 }) => {
           <Navbar.Collapse id="main-navbar-nav">
             {/* Navigation Links */}
             <Nav className="mx-auto my-2 my-lg-0">
+
               <Nav.Link
                 as={Link}
                 to="/"
                 className="nav-link-custom"
-
-              <Nav.Link
-                href="#home"
-                className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''}`}
               >
                 Trang Chủ
               </Nav.Link>
 
               <Nav.Link
-                href="#categories"
-                className={`nav-link-custom ${activeSection === 'categories' ? 'active' : ''}`}
+                href="/#categories"
+                className="nav-link-custom"
               >
                 Danh Mục
               </Nav.Link>
 
               <Nav.Link
-                href="#featured-pets"
-                className={`nav-link-custom ${activeSection === 'featured-pets' ? 'active' : ''}`}
+                href="/#featured-pets"
+                className="nav-link-custom"
               >
                 Thú Cưng
               </Nav.Link>
 
               <Nav.Link
-                href="#popular-breeds"
-                className={`nav-link-custom ${activeSection === 'popular-breeds' ? 'active' : ''}`}
+                href="/#popular-breeds"
+                className="nav-link-custom"
               >
                 Yêu Thích
               </Nav.Link>
 
               <Nav.Link
-                href="#accessories-section"
-                className={`nav-link-custom ${activeSection === 'accessories-section' ? 'active' : ''}`}
+                href="/#accessories-section"
+                className="nav-link-custom"
               >
                 Tiện Ích
               </Nav.Link>
 
               <Nav.Link
-                href="#shopping-process"
-                className={`nav-link-custom ${activeSection === 'shopping-process' ? 'active' : ''}`}
+                href="/#shopping-process"
+                className="nav-link-custom"
               >
                 Quy Trình
               </Nav.Link>
 
               <Nav.Link
-                href="#testimonials"
-                className={`nav-link-custom ${activeSection === 'testimonials' ? 'active' : ''}`}
+                href="/#testimonials"
+                className="nav-link-custom"
               >
                 Đánh Giá
               </Nav.Link>
+
+              {/* Order History */}
+              <Nav.Link
+                as={Link}
+                to="/orders"
+                className="nav-link-custom"
+              >
+                Lịch sử đơn hàng
+              </Nav.Link>
+
+              {/* Order Management */}
               <Nav.Link
                 as={Link}
                 to="/admin/orders"
                 className="nav-link-custom"
               >
                 Quản lý đơn hàng
-                Quản Lý Đơn Hàng
               </Nav.Link>
+
             </Nav>
 
             {/* Search Box & Quick Actions */}
