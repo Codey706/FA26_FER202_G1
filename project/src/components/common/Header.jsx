@@ -6,7 +6,6 @@ import {
   Container,
   Nav,
   Form,
-  Badge,
   Modal,
   Button
 } from 'react-bootstrap';
@@ -107,7 +106,7 @@ const Header = ({ onSearch, cartCount = 0 }) => {
               </span>
               <span className="top-bar-item d-none d-md-inline-flex">
                 <FaMapMarkerAlt className="text-warning" />
-                <span>Hà Nội - TP. Hồ Chí Minh - Đà Nẵng</span>
+                <span>Cần Thơ</span>
               </span>
               <span className="top-bar-item d-none d-lg-inline-flex">
                 <FaClock className="text-warning" />
@@ -253,7 +252,9 @@ const Header = ({ onSearch, cartCount = 0 }) => {
                 type="button"
               >
                 <FaShoppingCart />
-                <span className="cart-badge-count">{cartCount}</span>
+                {cartCount > 0 && (
+                  <span className="cart-badge-count">{cartCount}</span>
+                )}
               </button>
             </div>
           </Navbar.Collapse>
