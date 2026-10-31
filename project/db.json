@@ -571,6 +571,24 @@
         "pet-27"
       ],
       "popular": false
+    },
+    {
+      "id": "breed-1793440680302",
+      "name": "Chó lala",
+      "petType": "dog",
+      "personality": "Thì là vậy đó"
+    },
+    {
+      "id": "breed-1793441654075",
+      "name": "2",
+      "petType": "dog",
+      "personality": "3333"
+    },
+    {
+      "id": "breed-1793450909645",
+      "name": "a",
+      "petType": "dog",
+      "personality": "a"
     }
   ],
   "products": [
@@ -668,7 +686,7 @@
       "healthCheck": true,
       "origin": "Trại giống trong nước",
       "color": "Đen - nâu đỏ",
-      "description": "Chó Dachshund (Lạp xưởng) màu đen - nâu đỏ. Bé ngồi trên bờ đá giữa đồng cỏ, lông ngắn đen bóng, chân và mõm nâu đỏ, đeo vòng cổ đỏ. Thông minh, tò mò, can đảm. Thân dài chân ngắn đặc trưng, cần tránh nhảy cao để bảo vệ cột sống.",
+      "description": "Thông minh, tò mò, can đảm. Thân dài chân ngắn đặc trưng, cần tránh nhảy cao để bảo vệ cột sống.",
       "image": "/images/pets/dogs/dog-03.jpg",
       "imageAlt": "Chó Dachshund Đen Nâu - Bé ngồi trên bờ đá giữa đồng cỏ, lông ngắn đen bóng, chân và mõm nâu đỏ, đeo vòng cổ đỏ",
       "rating": 4.8,
@@ -1819,6 +1837,52 @@
       "isFeatured": false,
       "status": "available",
       "inStock": 20
+    },
+    {
+      "name": "aa",
+      "categoryId": "cat-choaa",
+      "breedId": null,
+      "petType": "accessory",
+      "price": 1,
+      "brand": "aa",
+      "type": "â",
+      "typeLabel": "aa",
+      "weight": "â",
+      "forPets": [
+        "dog"
+      ],
+      "description": "a",
+      "image": "",
+      "inStock": 1,
+      "status": "available",
+      "originalPrice": 1,
+      "discount": 0,
+      "rating": 0,
+      "reviewCount": 0,
+      "isFeatured": false,
+      "id": "acc-1793450160581"
+    },
+    {
+      "name": "Bánh nhai Pedigree Dentastix Original cho chó lớn",
+      "categoryId": "cat-food",
+      "breedId": null,
+      "petType": "accessory",
+      "price": 50,
+      "brand": null,
+      "type": "",
+      "typeLabel": "",
+      "weight": null,
+      "forPets": [],
+      "description": "a",
+      "image": "",
+      "inStock": 1,
+      "status": "available",
+      "originalPrice": 50,
+      "discount": 0,
+      "rating": 0,
+      "reviewCount": 0,
+      "isFeatured": false,
+      "id": "acc-1793453995757"
     }
   ],
   "reviews": [

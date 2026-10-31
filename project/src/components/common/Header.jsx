@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -146,11 +145,6 @@ const Header = ({ cartCount = 0 }) => {
           <Navbar.Collapse id="main-navbar-nav">
             {/* Navigation Links */}
             <Nav className="mx-auto my-2 my-lg-0">
-              <Nav.Link
-                as={Link}
-                to="/"
-                className="nav-link-custom"
-
               <Nav.Link
                 href="#home"
                 className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''}`}
