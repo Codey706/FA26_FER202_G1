@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
@@ -9,10 +8,8 @@ import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
-import OrderManagementPage from './pages/OrderManagementPage';
 import LoginPage from './pages/LoginPage';
-import RequireAuth from './components/auth/RequireAuth';
-import { AuthProvider } from './context/AuthContext';
+import ProfilePage from './pages/ProfilePage';
 
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import OrderDetailPage from './pages/OrderDetailPage';
@@ -22,6 +19,8 @@ import CategoryManagementPage from './pages/CategoryManagementPage';
 import ProductManagementPage from './pages/ProductManagementPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 
+import RequireAuth from './components/auth/RequireAuth';
+import { AuthProvider } from './context/AuthContext';
 import { CartProvider, useCart } from './context/CartContext';
 
 function AppContent() {
@@ -32,8 +31,6 @@ function AppContent() {
 
   const handleSearch = (query) => {
     setSearchQuery(query);
-
-    // Chuyển sang trang tìm kiếm khi có từ khóa
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query)}`);
     }
@@ -41,8 +38,7 @@ function AppContent() {
 
   return (
     <div className="d-flex flex-column min-vh-100">
-
-      {/* Common Header */}
+      {/* Header */}
       <Header
         onSearch={handleSearch}
         cartCount={cartCount}
@@ -51,7 +47,6 @@ function AppContent() {
       {/* Main Routes */}
       <main className="flex-grow-1">
         <Routes>
-
           {/* Home */}
           <Route
             path="/"
@@ -73,7 +68,7 @@ function AppContent() {
             }
           />
 
-          {/* Product detail */}
+          {/* Product Detail */}
           <Route
             path="/products/:id"
             element={
@@ -83,7 +78,7 @@ function AppContent() {
             }
           />
 
-          {/* Product list: use Home page */}
+          {/* Products List (Home page) */}
           <Route
             path="/products"
             element={
@@ -106,32 +101,60 @@ function AppContent() {
             element={<CheckoutPage />}
           />
 
-          {/* Đăng nhập */}
-          <Route path="/login" element={<LoginPage />} />
+          {/* Login */}
+          <Route
+            path="/login"
+            element={<LoginPage />}
+          />
 
-          {/* Quản lý đơn hàng (chỉ admin / nhân viên) */}
+          {/* User Profile */}
+          <Route
+            path="/profile"
+            element={
+              <RequireAuth>
+                <ProfilePage />
+              </RequireAuth>
+            }
+          />
+
           {/* Customer Order History */}
           <Route
             path="/orders"
-            element={<OrderHistoryPage />}
+            element={
+              <RequireAuth>
+                <OrderHistoryPage />
+              </RequireAuth>
+            }
           />
 
           {/* Customer Order Detail */}
           <Route
             path="/orders/:id"
-            element={<OrderDetailPage />}
+            element={
+              <RequireAuth>
+                <OrderDetailPage />
+              </RequireAuth>
+            }
           />
 
           {/* Admin Category Management */}
           <Route
             path="/admin/categories"
-            element={<CategoryManagementPage />}
+            element={
+              <RequireAuth roles={['admin', 'staff']}>
+                <CategoryManagementPage />
+              </RequireAuth>
+            }
           />
 
           {/* Admin Product Management */}
           <Route
             path="/admin/categories/:categoryId/products"
-            element={<ProductManagementPage />}
+            element={
+              <RequireAuth roles={['admin', 'staff']}>
+                <ProductManagementPage />
+              </RequireAuth>
+            }
           />
 
           {/* Admin Order Management */}
@@ -147,7 +170,11 @@ function AppContent() {
           {/* Admin Order Detail */}
           <Route
             path="/admin/orders/:id"
-            element={<OrderDetailPage />}
+            element={
+              <RequireAuth roles={['admin', 'staff']}>
+                <OrderDetailPage />
+              </RequireAuth>
+            }
           />
 
           {/* Fallback */}
@@ -160,13 +187,11 @@ function AppContent() {
               />
             }
           />
-
         </Routes>
       </main>
 
-      {/* Common Footer */}
+      {/* Footer */}
       <Footer />
-
     </div>
   );
 }
@@ -175,11 +200,10 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppContent />
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
       </AuthProvider>
-      <CartProvider>
-        <AppContent />
-      </CartProvider>
     </BrowserRouter>
   );
 }

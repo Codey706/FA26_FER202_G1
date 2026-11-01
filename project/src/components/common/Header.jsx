@@ -2,357 +2,487 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 import {
-  Navbar,
-  Container,
-  Nav,
-  Form,
-  Dropdown
-  Modal,
-  Button
+    Navbar,
+    Container,
+    Nav,
+    Dropdown,
+    Modal,
+    Button
 } from 'react-bootstrap';
-import {
-  FaPaw,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaClock,
-  FaSearch,
-  FaShoppingCart,
-  FaUserAlt,
-  FaShieldAlt,
-  FaSignInAlt,
-  FaSignOutAlt,
-  FaClipboardList
-} from 'react-icons/fa';
-import { useAuth } from '../../context/AuthContext';
 
-const ROLE_LABELS = {
-  admin: 'Quản trị viên',
-  staff: 'Nhân viên',
-  customer: 'Khách hàng'
-};
+import {
+    FaPaw,
+    FaPhoneAlt,
+    FaMapMarkerAlt,
+    FaClock,
+    FaSearch,
+    FaShoppingCart,
+    FaUserAlt,
+    FaShieldAlt,
+    FaSignInAlt,
+    FaSignOutAlt,
+    FaClipboardList,
+    FaInfoCircle,
+    FaShoppingBag,
+    FaUserCircle,
+    FaThList
+} from 'react-icons/fa';
+
+import { useAuth } from '../../context/AuthContext';
 import SearchOverlay from './SearchOverlay';
 
-const Header = ({ cartCount = 0 }) => {
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const { user, isStaffOrAdmin, logout } = useAuth();
-  const [showSearch, setShowSearch] = useState(false);
-  const [showNoticeModal, setShowNoticeModal] = useState(false);
-  const [noticeMessage, setNoticeMessage] = useState({ title: '', content: '' });
-  const [activeSection, setActiveSection] = useState('home');
+const ROLE_LABELS = {
+    admin: 'Quản trị viên (Admin)',
+    staff: 'Nhân viên (Staff)',
+    customer: 'Khách hàng'
+};
 
-  useEffect(() => {
-    const sectionIds = [
-      'home',
-      'categories',
-      'featured-pets',
-      'popular-breeds',
-      'accessories-section',
-      'shopping-process',
-      'testimonials'
-    ];
+const Header = ({ cartCount = 0, onSearch }) => {
+    const navigate = useNavigate();
+    const { user, isStaffOrAdmin, logout } = useAuth();
+    const isAdmin = user?.role === 'admin';
+    const isStaff = user?.role === 'staff';
 
-    const handleScroll = () => {
-      const marker = 160;
-      let currentSection = 'home';
-      let closestTop = -Infinity;
-
-      sectionIds.forEach((id) => {
-        const section = document.getElementById(id);
-
-        if (!section) return;
-
-        const top = section.getBoundingClientRect().top;
-
-        if (top <= marker && top > closestTop) {
-          closestTop = top;
-          currentSection = id;
-        }
-      });
-
-      setActiveSection(currentSection);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
-    handleScroll();
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-    };
-  }, []);
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (onSearch) {
-      onSearch(searchTerm);
-    }
-    // Scroll to products section if searching
-    const target = document.getElementById('featured-pets');
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  const handleUserClick = () => {
-    setNoticeMessage({
-      title: 'Tài khoản người dùng',
-      content:
-        'Hệ thống Đăng nhập / Đăng ký và Quản lý tài khoản (User Management) sẽ được triển khai ở giai đoạn tiếp theo theo phân công thành viên nhóm.'
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showSearch, setShowSearch] = useState(false);
+    const [showNoticeModal, setShowNoticeModal] = useState(false);
+    const [noticeMessage, setNoticeMessage] = useState({
+        title: '',
+        content: ''
     });
-    setShowNoticeModal(true);
-  };
+    const [activeSection, setActiveSection] = useState('home');
 
-  return (
-    <>
-      {/* Top Bar */}
-      <div className="top-bar">
-        <Container>
-          <div className="d-flex flex-wrap justify-content-between align-items-center">
-            <div className="d-flex flex-wrap align-items-center gap-3">
-              <span className="top-bar-item">
-                <FaPhoneAlt className="text-warning" />
-                <span>
-                  Hotline tư vấn: <strong>0987.654.321</strong> (24/7)
-                </span>
-              </span>
-              <span className="top-bar-item d-none d-md-inline-flex">
-                <FaMapMarkerAlt className="text-warning" />
-                <span>Cần Thơ</span>
-              </span>
-              <span className="top-bar-item d-none d-lg-inline-flex">
-                <FaClock className="text-warning" />
-                <span>Mở cửa: 08:00 - 21:30</span>
-              </span>
-            </div>
-            <div className="d-flex align-items-center gap-3">
-              <span className="top-bar-item">
-                <FaShieldAlt className="text-success" />
-                <span>Cam kết 100% Thuần chủng</span>
-              </span>
-            </div>
-          </div>
-        </Container>
-      </div>
+    useEffect(() => {
+        const sectionIds = [
+            'home',
+            'categories',
+            'featured-pets',
+            'popular-breeds',
+            'accessories-section',
+            'shopping-process',
+            'testimonials'
+        ];
 
-      {/* Main Header / Navbar */}
-      <Navbar expand="lg" className="header-sticky">
-        <Container>
-          {/* Brand Logo */}
-          <Navbar.Brand href="#home" className="brand-logo">
-            <div className="brand-icon-box">
-              <FaPaw />
-            </div>
-            <div>
-              <div className="d-flex align-items-center gap-1">
-                <span>PET</span>
-                <span className="text-dark">SHOP</span>
-              </div>
-              <small
-                style={{
-                  fontSize: '0.65rem',
-                  color: '#64748b',
-                  display: 'block',
-                  fontWeight: 600,
-                  marginTop: '-4px',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                THÚ CƯNG & PHỤ KIỆN CAO CẤP
-              </small>
-            </div>
-          </Navbar.Brand>
+        const handleScroll = () => {
+            const marker = 160;
+            let currentSection = 'home';
+            let closestTop = -Infinity;
 
-          {/* Mobile Hamburger Toggle */}
-          <Navbar.Toggle aria-controls="main-navbar-nav" />
+            sectionIds.forEach((id) => {
+                const section = document.getElementById(id);
 
-          <Navbar.Collapse id="main-navbar-nav">
-            {/* Navigation Links */}
-            <Nav className="mx-auto my-2 my-lg-0">
+                if (!section) return;
 
-              <Nav.Link
-                as={Link}
-                to="/"
-                className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''}`}
-              >
-                Trang Chủ
-              </Nav.Link>
+                const top = section.getBoundingClientRect().top;
 
-              <Nav.Link
-                href="/#categories"
-                className="nav-link-custom"
-              >
-                Danh Mục
-              </Nav.Link>
+                if (top <= marker && top > closestTop) {
+                    closestTop = top;
+                    currentSection = id;
+                }
+            });
 
-              <Nav.Link
-                href="/#featured-pets"
-                className="nav-link-custom"
-              >
-                Thú Cưng
-              </Nav.Link>
+            setActiveSection(currentSection);
+        };
 
-              <Nav.Link
-                href="/#popular-breeds"
-                className="nav-link-custom"
-              >
-                Yêu Thích
-              </Nav.Link>
+        window.addEventListener('scroll', handleScroll, {
+            passive: true
+        });
+        window.addEventListener('resize', handleScroll);
 
-              <Nav.Link
-                href="/#accessories-section"
-                className="nav-link-custom"
-              >
-                Tiện Ích
-              </Nav.Link>
+        handleScroll();
 
-              <Nav.Link
-                href="/#shopping-process"
-                className="nav-link-custom"
-              >
-                Quy Trình
-              </Nav.Link>
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleScroll);
+        };
+    }, []);
 
-              <Nav.Link
-                href="/#testimonials"
-                className="nav-link-custom"
-              >
-                Đánh Giá
-              </Nav.Link>
-              {isStaffOrAdmin && (
-                <Nav.Link
-                  as={Link}
-                  to="/admin/orders"
-                  className="nav-link-custom"
-                >
-                  Quản Lý Đơn Hàng
-                </Nav.Link>
-              )}
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
 
-              {/* Order History */}
-              <Nav.Link
-                as={Link}
-                to="/orders"
-                className="nav-link-custom"
-              >
-                Lịch sử đơn hàng
-              </Nav.Link>
+        if (onSearch) {
+            onSearch(searchTerm);
+        }
 
-              {/* Order Management */}
-              <Nav.Link
-                as={Link}
-                to="/admin/orders"
-                className="nav-link-custom"
-              >
-                Quản lý đơn hàng
-              </Nav.Link>
+        setShowSearch(false);
 
-            </Nav>
+        if (window.location.pathname !== '/search') {
+            navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+        }
+    };
 
-            {/* Search Box & Quick Actions */}
-            <div className="d-flex align-items-center gap-3">
-              <button
-                type="button"
-                className="search-trigger"
-                onClick={() => setShowSearch(true)}
-                aria-label="Mở hộp tìm kiếm"
-              >
-                <span className="search-trigger-text">
-                  Tìm cún cưng, mèo, phụ kiện...
-                </span>
-                <FaSearch className="search-trigger-icon" />
-              </button>
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
 
-              {/* User Account: nút Đăng nhập hoặc menu tài khoản */}
-              {user ? (
-                <Dropdown align="end">
-                  <Dropdown.Toggle
-                    as="button"
-                    type="button"
-                    id="user-menu-toggle"
-                    className="user-icon-btn user-avatar-btn"
-                    title={user.fullName}
-                  >
-                    <FaUserAlt />
-                  </Dropdown.Toggle>
+    return (
+        <>
+            {/* Top Bar */}
+            <div className="top-bar">
+                <Container>
+                    <div className="d-flex flex-wrap justify-content-between align-items-center">
+                        <div className="d-flex flex-wrap align-items-center gap-3">
+                            <span className="top-bar-item">
+                                <FaPhoneAlt className="text-warning" />
+                                <span>
+                                    Hotline tư vấn: <strong>0987.654.321</strong> (24/7)
+                                </span>
+                            </span>
 
-                  <Dropdown.Menu className="user-menu shadow">
-                    <div className="user-menu-header">
-                      <div className="fw-bold text-truncate">{user.fullName}</div>
-                      <small className="text-muted d-block text-truncate">{user.email}</small>
-                      <span className="user-role-badge">
-                        {ROLE_LABELS[user.role] || user.role}
-                      </span>
+                            <span className="top-bar-item d-none d-md-inline-flex">
+                                <FaMapMarkerAlt className="text-warning" />
+                                <span>Cần Thơ</span>
+                            </span>
+
+                            <span className="top-bar-item d-none d-lg-inline-flex">
+                                <FaClock className="text-warning" />
+                                <span>Mở cửa: 08:00 - 21:30</span>
+                            </span>
+                        </div>
+
+                        <div className="d-flex align-items-center gap-3">
+                            <span className="top-bar-item">
+                                <FaShieldAlt className="text-success" />
+                                <span>Cam kết 100% Thuần chủng</span>
+                            </span>
+                        </div>
                     </div>
-                    <Dropdown.Divider />
-                    {isStaffOrAdmin && (
-                      <Dropdown.Item as={Link} to="/admin/orders">
-                        <FaClipboardList className="me-2 text-warning" /> Quản lý đơn hàng
-                      </Dropdown.Item>
-                    )}
-                    <Dropdown.Item onClick={handleLogout} className="text-danger">
-                      <FaSignOutAlt className="me-2" /> Đăng xuất
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              ) : (
-                <Link to="/login" className="btn-primary-orange btn-login-header">
-                  <FaSignInAlt /> Đăng nhập
-                </Link>
-              )}
-
-              {/* Shopping Cart Button with Badge */}
-              <button
-                className="cart-icon-btn"
-                onClick={() => navigate('/cart')}
-                title="Giỏ hàng"
-                type="button"
-              >
-                <FaShoppingCart />
-                {cartCount > 0 && (
-                  <span className="cart-badge-count">{cartCount}</span>
-                )}
-              </button>
+                </Container>
             </div>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
 
-      {/* Hộp tìm kiếm nổi */}
-      <SearchOverlay show={showSearch} onClose={() => setShowSearch(false)} />
+            {/* Main Navbar */}
+            <Navbar expand="lg" className="header-sticky">
+                <Container>
+                    <Navbar.Brand as={Link} to="/" className="brand-logo">
+                        <div className="brand-icon-box">
+                            <FaPaw />
+                        </div>
 
-      {/* Notice Modal for Non-Phase 1 Features */}
-      <Modal
-        show={showNoticeModal}
-        onHide={() => setShowNoticeModal(false)}
-        centered
-      >
-        <Modal.Header closeButton className="border-0 pb-0">
-          <Modal.Title className="fw-bold d-flex align-items-center gap-2 text-primary">
-            <FaInfoCircle className="text-warning" />
-            {noticeMessage.title}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="py-3 text-secondary">
-          <p className="mb-0">{noticeMessage.content}</p>
-        </Modal.Body>
-        <Modal.Footer className="border-0 pt-0">
-          <Button
-            variant="warning"
-            className="fw-bold text-white px-4"
-            style={{ borderRadius: '50px' }}
-            onClick={() => setShowNoticeModal(false)}
-          >
-            Đã hiểu
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
-  );
+                        <div>
+                            <div className="d-flex align-items-center gap-1">
+                                <span>PET</span>
+                                <span className="text-dark">SHOP</span>
+                            </div>
+
+                            <small
+                                style={{
+                                    fontSize: '0.65rem',
+                                    color: '#64748b',
+                                    display: 'block',
+                                    fontWeight: 600,
+                                    marginTop: '-4px',
+                                    letterSpacing: '0.5px'
+                                }}
+                            >
+                                THÚ CƯNG & PHỤ KIỆN CAO CẤP
+                            </small>
+                        </div>
+                    </Navbar.Brand>
+
+                    <Navbar.Toggle aria-controls="main-navbar-nav" />
+
+                    <Navbar.Collapse id="main-navbar-nav">
+                        <Nav className="mx-auto my-2 my-lg-0">
+                            <Nav.Link
+                                as={Link}
+                                to="/"
+                                className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''}`}
+                            >
+                                Trang Chủ
+                            </Nav.Link>
+
+                            <Nav.Link href="/#categories" className="nav-link-custom">
+                                Danh Mục
+                            </Nav.Link>
+
+                            <Nav.Link href="/#featured-pets" className="nav-link-custom">
+                                Thú Cưng
+                            </Nav.Link>
+
+                            <Nav.Link href="/#popular-breeds" className="nav-link-custom">
+                                Yêu Thích
+                            </Nav.Link>
+
+                            <Nav.Link href="/#accessories-section" className="nav-link-custom">
+                                Tiện Ích
+                            </Nav.Link>
+
+                            <Nav.Link href="/#shopping-process" className="nav-link-custom">
+                                Quy Trình
+                            </Nav.Link>
+
+                            {/* Phân định chức năng trên Navbar giữa Admin và Staff */}
+                            {isAdmin && (
+                                <>
+                                    <Nav.Link
+                                        as={Link}
+                                        to="/admin/categories"
+                                        className="nav-link-custom fw-bold text-danger"
+                                    >
+                                        Quản lý danh mục
+                                    </Nav.Link>
+
+                                    <Nav.Link
+                                        as={Link}
+                                        to="/admin/orders"
+                                        className="nav-link-custom fw-bold text-danger"
+                                    >
+                                        Quản lý đơn hàng (Admin)
+                                    </Nav.Link>
+                                </>
+                            )}
+
+                            {isStaff && (
+                                <>
+                                    <Nav.Link
+                                        as={Link}
+                                        to="/admin/categories"
+                                        className="nav-link-custom text-primary"
+                                    >
+                                        Danh mục sản phẩm
+                                    </Nav.Link>
+
+                                    <Nav.Link
+                                        as={Link}
+                                        to="/admin/orders"
+                                        className="nav-link-custom text-primary"
+                                    >
+                                        Xử lý đơn hàng (Staff)
+                                    </Nav.Link>
+                                </>
+                            )}
+
+                            {/* Khách hàng thường xem đơn cá nhân */}
+                            {(!isStaffOrAdmin || user?.role === 'customer') && (
+                                <Nav.Link
+                                    as={Link}
+                                    to="/orders"
+                                    className="nav-link-custom"
+                                >
+                                    Lịch sử đơn hàng
+                                </Nav.Link>
+                            )}
+                        </Nav>
+
+                        <div className="d-flex align-items-center gap-3">
+                            <button
+                                type="button"
+                                className="search-trigger"
+                                onClick={() => setShowSearch(true)}
+                                aria-label="Mở hộp tìm kiếm"
+                            >
+                                <span className="search-trigger-text">
+                                    Tìm cún cưng, mèo, phụ kiện...
+                                </span>
+                                <FaSearch className="search-trigger-icon" />
+                            </button>
+
+                            {/* User Account Dropdown */}
+                            {user ? (
+                                <Dropdown align="end">
+                                    <Dropdown.Toggle
+                                        as="button"
+                                        type="button"
+                                        id="user-menu-toggle"
+                                        className="user-icon-btn user-avatar-btn p-0 overflow-hidden"
+                                        title={user.fullName}
+                                        style={{
+                                            width: 40,
+                                            height: 40,
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            border: `2px solid ${isAdmin ? '#ef4444' : isStaff ? '#3b82f6' : 'var(--primary-color, #ff7a00)'}`
+                                        }}
+                                    >
+                                        {user.avatar ? (
+                                            <img
+                                                src={user.avatar}
+                                                alt={user.fullName}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'cover'
+                                                }}
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                    e.target.nextSibling.style.display = 'flex';
+                                                }}
+                                            />
+                                        ) : null}
+                                        <span
+                                            style={{
+                                                display: user.avatar ? 'none' : 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                width: '100%',
+                                                height: '100%',
+                                                background: 'var(--primary-light, #fff4e6)',
+                                                color: 'var(--primary-color, #ff7a00)'
+                                            }}
+                                        >
+                                            <FaUserAlt size={16} />
+                                        </span>
+                                    </Dropdown.Toggle>
+
+                                    <Dropdown.Menu className="user-menu shadow">
+                                        <div className="user-menu-header">
+                                            <div className="fw-bold text-truncate">
+                                                {user.fullName}
+                                            </div>
+
+                                            <small className="text-muted d-block text-truncate">
+                                                {user.email}
+                                            </small>
+
+                                            <span className={`user-role-badge ${isAdmin ? 'bg-danger text-white' : isStaff ? 'bg-primary text-white' : ''}`}>
+                                                {ROLE_LABELS[user.role] || user.role}
+                                            </span>
+                                        </div>
+
+                                        <Dropdown.Divider />
+
+                                        {/* Link Hồ sơ cá nhân */}
+                                        <Dropdown.Item
+                                            as={Link}
+                                            to="/profile"
+                                            className="fw-semibold"
+                                        >
+                                            <FaUserCircle className="me-2 text-warning" />
+                                            Hồ sơ cá nhân
+                                        </Dropdown.Item>
+
+                                        {/* Phân quyền menu riêng biệt theo vai trò */}
+                                        {isAdmin && (
+                                            <>
+                                                <Dropdown.Item
+                                                    as={Link}
+                                                    to="/admin/categories"
+                                                >
+                                                    <FaThList className="me-2 text-danger" />
+                                                    Quản lý danh mục & SP
+                                                </Dropdown.Item>
+
+                                                <Dropdown.Item
+                                                    as={Link}
+                                                    to="/admin/orders"
+                                                >
+                                                    <FaClipboardList className="me-2 text-danger" />
+                                                    Quản lý đơn hàng (Admin)
+                                                </Dropdown.Item>
+                                            </>
+                                        )}
+
+                                        {isStaff && (
+                                            <>
+                                                <Dropdown.Item
+                                                    as={Link}
+                                                    to="/admin/orders"
+                                                >
+                                                    <FaClipboardList className="me-2 text-primary" />
+                                                    Xử lý đơn hàng (Staff)
+                                                </Dropdown.Item>
+
+                                                <Dropdown.Item
+                                                    as={Link}
+                                                    to="/admin/categories"
+                                                >
+                                                    <FaThList className="me-2 text-primary" />
+                                                    Xem danh mục sản phẩm
+                                                </Dropdown.Item>
+                                            </>
+                                        )}
+
+                                        {/* Link Đơn hàng của tôi */}
+                                        <Dropdown.Item
+                                            as={Link}
+                                            to="/orders"
+                                        >
+                                            <FaShoppingBag className="me-2 text-success" />
+                                            {isStaffOrAdmin ? 'Đơn hàng cá nhân' : 'Lịch sử đơn hàng'}
+                                        </Dropdown.Item>
+
+                                        <Dropdown.Divider />
+
+                                        <Dropdown.Item
+                                            onClick={handleLogout}
+                                            className="text-danger"
+                                        >
+                                            <FaSignOutAlt className="me-2" />
+                                            Đăng xuất
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
+                            ) : (
+                                <Link
+                                    to="/login"
+                                    className="btn-primary-orange btn-login-header"
+                                >
+                                    <FaSignInAlt /> Đăng nhập
+                                </Link>
+                            )}
+
+                            {/* Shopping Cart */}
+                            <button
+                                className="cart-icon-btn"
+                                onClick={() => navigate('/cart')}
+                                title="Giỏ hàng"
+                                type="button"
+                            >
+                                <FaShoppingCart />
+
+                                {cartCount > 0 && (
+                                    <span className="cart-badge-count">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+                    </Navbar.Collapse>
+                </Container>
+            </Navbar>
+
+            {/* Search Overlay */}
+            <SearchOverlay
+                show={showSearch}
+                onClose={() => setShowSearch(false)}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                onSubmit={handleSearchSubmit}
+            />
+
+            {/* Notice Modal */}
+            <Modal
+                show={showNoticeModal}
+                onHide={() => setShowNoticeModal(false)}
+                centered
+            >
+                <Modal.Header closeButton className="border-0 pb-0">
+                    <Modal.Title className="fw-bold d-flex align-items-center gap-2 text-primary">
+                        <FaInfoCircle className="text-warning" />
+                        {noticeMessage.title}
+                    </Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body className="py-3 text-secondary">
+                    <p className="mb-0">{noticeMessage.content}</p>
+                </Modal.Body>
+
+                <Modal.Footer className="border-0 pt-0">
+                    <Button
+                        variant="warning"
+                        className="fw-bold text-white px-4"
+                        style={{ borderRadius: '50px' }}
+                        onClick={() => setShowNoticeModal(false)}
+                    >
+                        Đã hiểu
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>
+    );
 };
 
 export default Header;

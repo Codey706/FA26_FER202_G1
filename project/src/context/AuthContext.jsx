@@ -41,15 +41,34 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const updateUser = useCallback((updatedData) => {
+    setUser((prevUser) => {
+      if (!prevUser) return null;
+      const updated = { ...prevUser, ...updatedData };
+
+      // Đồng bộ lại vào storage tương ứng
+      if (localStorage.getItem(AUTH_STORAGE_KEY)) {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updated));
+      } else if (sessionStorage.getItem(AUTH_STORAGE_KEY)) {
+        sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updated));
+      } else {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updated));
+      }
+
+      return updated;
+    });
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
       isAuthenticated: Boolean(user),
       isStaffOrAdmin: user?.role === 'admin' || user?.role === 'staff',
       login,
-      logout
+      logout,
+      updateUser
     }),
-    [user, login, logout]
+    [user, login, logout, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

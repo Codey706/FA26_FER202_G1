@@ -23,12 +23,14 @@ import {
     FaSyncAlt,
     FaPaw,
     FaBox,
-    FaSearch
+    FaSearch,
+    FaLock
 } from 'react-icons/fa';
 
 import categoryService from '../services/categoryService';
 import productService from '../services/productService';
 import breedService from '../services/breedService';
+import { useAuth } from '../context/AuthContext';
 
 import '../styles/ProductManagementPage.css';
 
@@ -54,6 +56,8 @@ const initialForm = {
 function ProductManagementPage() {
     const { categoryId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
 
     const [category, setCategory] = useState(null);
     const [products, setProducts] = useState([]);
@@ -366,6 +370,10 @@ function ProductManagementPage() {
 
     // Mở hộp thoại xác nhận xóa.
     const handleDelete = (product) => {
+        if (!isAdmin) {
+            alert('Chỉ Quản trị viên (Admin) mới có quyền xóa sản phẩm khỏi hệ thống.');
+            return;
+        }
         setDeletingProduct(product);
         setShowDeleteModal(true);
     };
@@ -373,6 +381,11 @@ function ProductManagementPage() {
     // Xác nhận xóa sản phẩm.
     const confirmDelete = async () => {
         if (!deletingProduct) return;
+        if (!isAdmin) {
+            alert('Thao tác bị từ chối: Chỉ Quản trị viên mới được xóa sản phẩm.');
+            setShowDeleteModal(false);
+            return;
+        }
 
         try {
             await productService.deleteProduct(deletingProduct.id);
@@ -433,7 +446,7 @@ function ProductManagementPage() {
                         <br /><br />
                         <div className="product-management-badge">
                             {isPet ? <FaPaw /> : <FaBox />}
-                            QUẢN TRỊ HỆ THỐNG
+                            {isAdmin ? 'QUẢN TRỊ VIÊN (ADMIN)' : 'NHÂN VIÊN CỬA HÀNG (STAFF)'}
                         </div>
 
                         <h1>
@@ -602,13 +615,25 @@ function ProductManagementPage() {
                                                             <FaEdit />
                                                         </Button>
 
-                                                        <Button
-                                                            className="product-delete-btn"
-                                                            onClick={() => handleDelete(product)}
-                                                            title="Xóa"
-                                                        >
-                                                            <FaTrash />
-                                                        </Button>
+                                                        {isAdmin ? (
+                                                            <Button
+                                                                className="product-delete-btn"
+                                                                onClick={() => handleDelete(product)}
+                                                                title="Xóa sản phẩm"
+                                                            >
+                                                                <FaTrash />
+                                                            </Button>
+                                                        ) : (
+                                                            <Button
+                                                                variant="light"
+                                                                className="text-muted border-0"
+                                                                disabled
+                                                                title="Chỉ Admin có quyền xóa sản phẩm"
+                                                                style={{ cursor: 'not-allowed', opacity: 0.5 }}
+                                                            >
+                                                                <FaLock size={12} />
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>

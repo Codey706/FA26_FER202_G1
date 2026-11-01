@@ -1,10 +1,11 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
 import { FaClipboardCheck, FaArrowLeft } from 'react-icons/fa';
 import orderService from '../services/orderService';
 import productService from '../services/productService';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { calcTotal, getMaxQuantity } from '../utils/cartUtils';
 import { formatCurrency } from '../utils/formatters';
 
@@ -22,16 +23,31 @@ const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { items, totalAmount, clearCart, refreshFromServer } = useCart();
 
   const [form, setForm] = useState({
-    customerName: '',
-    phone: '',
-    email: '',
-    shippingAddress: '',
+    customerName: user?.fullName || '',
+    phone: user?.phone || '',
+    email: user?.email || '',
+    shippingAddress: user?.address || '',
     paymentMethod: PAYMENT_METHODS[0],
     notes: ''
   });
+
+  // Tự động cập nhật form nếu user đăng nhập hoặc thay đổi
+  useEffect(() => {
+    if (user) {
+      setForm((prev) => ({
+        ...prev,
+        customerName: prev.customerName || user.fullName || '',
+        phone: prev.phone || user.phone || '',
+        email: prev.email || user.email || '',
+        shippingAddress: prev.shippingAddress || user.address || ''
+      }));
+    }
+  }, [user]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successOrder, setSuccessOrder] = useState(null);
@@ -60,23 +76,46 @@ const CheckoutPage = () => {
       notes: form.notes.trim()
     };
 
-    if (!customer.customerName) return setError('Vui lòng nhập họ và tên.');
-    if (!isValidEmail(customer.email)) return setError('Email không hợp lệ. Vui lòng kiểm tra lại.');
-    if (!isValidPhone(customer.phone)) return setError('Số điện thoại không hợp lệ (ví dụ: 0901234567).');
-    if (!customer.shippingAddress) return setError('Vui lòng nhập địa chỉ nhận hàng.');
-
-    submittingRef.current = true;
-    setLoading(true);
-    setError('');
+    if (!customer.customerName) {
+      setError('Vui lòng nhập họ và tên người nhận.');
+      return;
+    }
+    if (!isValidPhone(customer.phone)) {
+      setError('Số điện thoại không hợp lệ (cần 10-11 chữ số, bắt đầu bằng 0 hoặc +84).');
+      return;
+    }
+    if (!isValidEmail(customer.email)) {
+      setError('Địa chỉ email không đúng định dạng.');
+      return;
+    }
+    if (!customer.shippingAddress) {
+      setError('Vui lòng nhập địa chỉ nhận hàng.');
+      return;
+    }
 
     try {
-      // 1. Kiểm tra lại giá / tồn kho mới nhất trước khi tạo đơn.
-      const { items: freshItems, changes } = await refreshFromServer();
+      submittingRef.current = true;
+      setLoading(true);
+      setError('');
 
-      if (freshItems.length === 0) {
-        setError(`Giỏ hàng không còn sản phẩm hợp lệ. ${changes.join(' ')}`.trim());
+      // 1. Luôn đồng bộ dữ liệu mới nhất từ server trước khi trừ tồn kho.
+      const freshItems = await refreshFromServer();
+      if (!freshItems || freshItems.length === 0) {
+        setError('Giỏ hàng đang trống hoặc sản phẩm trong giỏ không còn tồn tại.');
         return;
       }
+
+      // Kiểm tra thay đổi giá hoặc số lượng tối đa so với thời điểm bấm đặt hàng.
+      const changes = [];
+      freshItems.forEach((fresh) => {
+        const local = items.find((it) => String(it.id) === String(fresh.id));
+        if (local && Number(local.price) !== Number(fresh.price)) {
+          changes.push(`Giá của "${fresh.name}" đã đổi sang ${formatCurrency(fresh.price)}.`);
+        }
+        if (fresh.quantity > getMaxQuantity(fresh)) {
+          changes.push(`"${fresh.name}" chỉ còn ${getMaxQuantity(fresh)} sản phẩm trong kho.`);
+        }
+      });
 
       if (changes.length > 0) {
         setError(`Giỏ hàng vừa thay đổi, vui lòng kiểm tra lại trước khi đặt: ${changes.join(' ')}`);
@@ -89,10 +128,10 @@ const CheckoutPage = () => {
         return;
       }
 
-      // 2. Chuẩn bị đơn hàng từ dữ liệu đã xác minh.
+      // 2. Chuẩn bị đơn hàng từ dữ liệu đã xác minh và gắn userId của người dùng
       const order = {
         id: `ord-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        userId: null,
+        userId: user ? user.id : null,
         ...customer,
         items: freshItems.map((item) => ({
           productId: item.id,
@@ -107,8 +146,6 @@ const CheckoutPage = () => {
       };
 
       // 3. Trừ tồn kho theo thứ tự để biết chính xác sản phẩm nào đã cập nhật.
-      // JSON Server không hỗ trợ transaction; nếu một bước lỗi, cố gắng hoàn tác
-      // các cập nhật đã thành công để tránh giữ tồn kho ở trạng thái dở dang.
       const stockUpdates = [];
       try {
         for (const item of freshItems) {
@@ -134,7 +171,6 @@ const CheckoutPage = () => {
       }
 
       // 4. Chỉ tạo đơn sau khi mọi cập nhật tồn kho thành công.
-      // Nếu tạo đơn thất bại, hoàn tác tồn kho đã trừ.
       let created;
       try {
         created = await orderService.create(order);
@@ -177,9 +213,14 @@ const CheckoutPage = () => {
               ))}
             </ul>
             <p>Đơn hàng đã được lưu vào hệ thống với trạng thái “Chờ xác nhận”.</p>
-            <Button variant="warning" className="text-white rounded-pill fw-bold" onClick={() => navigate('/')}>
-              Về trang chủ
-            </Button>
+            <div className="d-flex gap-2">
+              <Button variant="warning" className="text-white rounded-pill fw-bold" onClick={() => navigate('/orders')}>
+                Xem đơn hàng của bạn
+              </Button>
+              <Button variant="outline-secondary" className="rounded-pill fw-bold" onClick={() => navigate('/')}>
+                Về trang chủ
+              </Button>
+            </div>
           </Alert>
         ) : items.length === 0 ? (
           <Alert variant="info" className="rounded-4">

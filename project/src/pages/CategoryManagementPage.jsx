@@ -25,10 +25,13 @@ import {
     FaDog,
     FaCat,
     FaSyncAlt,
+    FaShieldAlt,
+    FaLock
 } from 'react-icons/fa';
 
 import categoryService from '../services/categoryService';
 import productService from '../services/productService';
+import { useAuth } from '../context/AuthContext';
 
 import "../styles/CategoryManagementPage.css";
 
@@ -43,6 +46,8 @@ const INITIAL_FORM = {
 
 const CategoryManagementPage = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
 
     const [categories, setCategories] = useState([]);
     const [products, setProducts] = useState([]);
@@ -104,8 +109,6 @@ const CategoryManagementPage = () => {
         ).length;
     };
 
-
-
     // Tìm kiếm danh mục.
     const filteredCategories = useMemo(() => {
         const keyword = searchTerm.trim().toLowerCase();
@@ -123,6 +126,10 @@ const CategoryManagementPage = () => {
 
     // Mở form thêm mới.
     const handleOpenCreate = () => {
+        if (!isAdmin) {
+            setError('Chỉ Quản trị viên (Admin) mới có quyền tạo thêm danh mục mới.');
+            return;
+        }
         setEditingCategory(null);
         setFormData(INITIAL_FORM);
         setFormError('');
@@ -212,6 +219,10 @@ const CategoryManagementPage = () => {
                     categoryData
                 );
             } else {
+                if (!isAdmin) {
+                    throw new Error('Chỉ Quản trị viên (Admin) mới có quyền tạo thêm danh mục mới.');
+                }
+
                 // Tạo ID dạng cat-ten-danh-muc.
                 const newId = `cat-${slug}`;
 
@@ -243,6 +254,10 @@ const CategoryManagementPage = () => {
 
     // Mở hộp thoại xác nhận xóa.
     const handleOpenDelete = (category) => {
+        if (!isAdmin) {
+            setError('Chỉ Quản trị viên (Admin) mới có quyền xóa danh mục.');
+            return;
+        }
         setDeletingCategory(category);
         setShowDeleteModal(true);
     };
@@ -250,6 +265,12 @@ const CategoryManagementPage = () => {
     // Xác nhận xóa danh mục.
     const confirmDelete = async () => {
         if (!deletingCategory) return;
+
+        if (!isAdmin) {
+            setError('Thao tác bị từ chối: Chỉ Quản trị viên (Admin) mới có quyền xóa danh mục.');
+            setShowDeleteModal(false);
+            return;
+        }
 
         try {
             await categoryService.deleteCategory(deletingCategory.id);
@@ -275,38 +296,24 @@ const CategoryManagementPage = () => {
         }
     };
 
-    // Hiển thị tên loại danh mục.
-    const getTypeLabel = (petType) => {
-        if (petType === 'dog') return 'Chó';
-        if (petType === 'cat') return 'Mèo';
-        if (petType === 'accessory') return 'Phụ kiện';
-
-        return petType || 'Khác';
-    };
-
-    const getTypeClass = (petType) => {
-        if (petType === 'dog') return 'category-type-dog';
-        if (petType === 'cat') return 'category-type-cat';
-        return 'category-type-accessory';
-    };
-
     return (
         <main className="category-management-page">
             <Container>
-                {/* Tiêu đề trang */}
+                {/* Tiêu đề trang & Phân quyền vai trò */}
                 <div className="category-management-heading">
                     <div>
                         <Button
                             variant="light"
                             className="product-back-btn-1"
-                            onClick={() => navigate('/home')}
+                            onClick={() => navigate('/')}
                         >
                             <FaArrowLeft className="me-2" />
                             Quay lại Trang Chủ
                         </Button>
                         <br /><br />
-                        <div className="category-management-badge">
-                            <FaPaw /> QUẢN TRỊ HỆ THỐNG
+                        <div className="category-management-badge d-inline-flex align-items-center gap-2">
+                            <FaPaw />
+                            {isAdmin ? 'QUẢN TRỊ VIÊN (ADMIN)' : 'NHÂN VIÊN CỬA HÀNG (STAFF)'}
                         </div>
 
                         <h1>
@@ -314,16 +321,24 @@ const CategoryManagementPage = () => {
                         </h1>
 
                         <p>
-                            Quản lý danh mục thú cưng và phụ kiện trong cửa hàng.
+                            {isAdmin
+                                ? 'Bạn có toàn quyền quản trị cấu trúc danh mục: Thêm mới, Chỉnh sửa và Xóa danh mục.'
+                                : 'Tài khoản Nhân viên: Xem danh mục, chỉnh sửa thông tin mô tả/hình ảnh và quản lý sản phẩm.'}
                         </p>
                     </div>
 
-                    <Button
-                        className="btn-primary-orange category-add-btn"
-                        onClick={handleOpenCreate}
-                    >
-                        <FaPlus /> Thêm danh mục
-                    </Button>
+                    {isAdmin ? (
+                        <Button
+                            className="btn-primary-orange category-add-btn"
+                            onClick={handleOpenCreate}
+                        >
+                            <FaPlus /> Thêm danh mục
+                        </Button>
+                    ) : (
+                        <Badge bg="secondary" className="px-3 py-2 rounded-pill fs-6 fw-semibold align-self-start">
+                            <FaLock className="me-1" /> Thêm danh mục: Chỉ Admin
+                        </Badge>
+                    )}
                 </div>
 
                 {error && (
@@ -331,12 +346,11 @@ const CategoryManagementPage = () => {
                         variant="danger"
                         dismissible
                         onClose={() => setError('')}
+                        className="rounded-4 shadow-sm"
                     >
                         {error}
                     </Alert>
                 )}
-
-
 
                 {/* Danh sách danh mục */}
                 <Card className="category-management-card">
@@ -454,13 +468,25 @@ const CategoryManagementPage = () => {
                                                                 <FaEdit />
                                                             </Button>
 
-                                                            <Button
-                                                                className="category-delete-btn"
-                                                                onClick={() => handleOpenDelete(category)}
-                                                                title="Xóa danh mục"
-                                                            >
-                                                                <FaTrash />
-                                                            </Button>
+                                                            {isAdmin ? (
+                                                                <Button
+                                                                    className="category-delete-btn"
+                                                                    onClick={() => handleOpenDelete(category)}
+                                                                    title="Xóa danh mục"
+                                                                >
+                                                                    <FaTrash />
+                                                                </Button>
+                                                            ) : (
+                                                                <Button
+                                                                    variant="light"
+                                                                    className="text-muted border-0"
+                                                                    disabled
+                                                                    title="Chỉ Admin mới có quyền xóa danh mục"
+                                                                    style={{ cursor: 'not-allowed', opacity: 0.5 }}
+                                                                >
+                                                                    <FaLock size={13} />
+                                                                </Button>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -477,7 +503,7 @@ const CategoryManagementPage = () => {
                 <Button
                     variant="light"
                     className="product-back-btn"
-                    onClick={() => navigate('/home')}
+                    onClick={() => navigate('/')}
                 >
                     <FaArrowLeft className="me-2" />
                     Quay lại Trang Chủ
@@ -494,7 +520,7 @@ const CategoryManagementPage = () => {
                 <Form onSubmit={handleSubmit}>
                     <Modal.Header closeButton>
                         <Modal.Title>
-                            {editingCategory ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}
+                            {editingCategory ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới (Admin)'}
                         </Modal.Title>
                     </Modal.Header>
 
@@ -579,14 +605,14 @@ const CategoryManagementPage = () => {
                 centered
             >
                 <Modal.Header closeButton>
-                    <Modal.Title>Xác nhận xóa</Modal.Title>
+                    <Modal.Title>Xác nhận xóa danh mục (Admin)</Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>
                     Bạn có chắc chắn muốn xóa danh mục{' '}
                     <strong>{deletingCategory?.name}</strong> không?
-                    <p className="text-muted mb-0 mt-2">
-                        Hành động này không thể hoàn tác.
+                    <p className="text-danger mb-0 mt-2 small">
+                        Cảnh báo: Hành động này chỉ Quản trị viên mới được thực hiện và không thể hoàn tác.
                     </p>
                 </Modal.Body>
 
