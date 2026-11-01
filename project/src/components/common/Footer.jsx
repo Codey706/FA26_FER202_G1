@@ -44,7 +44,7 @@ const Footer = () => {
               </div>
               <div className="d-flex align-items-center gap-2 text-white">
                 <FaTruck className="text-info" />
-                <span>Vận chuyển an toàn hỏa tốc trên 63 tỉnh thành</span>
+                <span>Vận chuyển an toàn hỏa tốc trên tất cả các tỉnh thành tại Việt Nam</span>
               </div>
             </div>
 
@@ -121,19 +121,13 @@ const Footer = () => {
             <div className="footer-contact-item">
               <FaMapMarkerAlt className="footer-contact-icon" />
               <span>
-                <strong>Cơ sở Hà Nội:</strong> 123 Cầu Giấy, Quận Cầu Giấy, Hà Nội
-              </span>
-            </div>
-            <div className="footer-contact-item">
-              <FaMapMarkerAlt className="footer-contact-icon" />
-              <span>
-                <strong>Cơ sở TP.HCM:</strong> 45 Nguyễn Trãi, Phường Bến Thành, Quận 1
+                <strong>Cơ sở Cần Thơ:</strong> 600 NGuyễn Văn Cừ nối dài, Phường An Bình, TP. Cần Thơ
               </span>
             </div>
             <div className="footer-contact-item">
               <FaPhoneAlt className="footer-contact-icon" />
               <span>
-                <strong>Hotline:</strong> 0987.654.321 / 0912.345.678
+                <strong>Hotline:</strong> 0987.654.321 / 0918.352.816
               </span>
             </div>
             <div className="footer-contact-item">

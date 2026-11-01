@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from 'react';
 import orderService from '../services/orderService';
 import { Link } from 'react-router-dom';
@@ -193,6 +192,7 @@ export default function OrderManagementPage() {
                                     </td>
 
                                     {/* Khách hàng */}
+                                    <td className="fw-semibold">{order.id}</td>
                                     <td>
                                         <div>{order.customerName || 'Chưa có tên'}</div>
                                         <small className="text-muted">

@@ -5,6 +5,7 @@ import {
   Navbar,
   Container,
   Nav,
+  Form,
   Modal,
   Button
 } from 'react-bootstrap';
@@ -94,7 +95,7 @@ const Header = ({ cartCount = 0 }) => {
               </span>
               <span className="top-bar-item d-none d-md-inline-flex">
                 <FaMapMarkerAlt className="text-warning" />
-                <span>Hà Nội - TP. Hồ Chí Minh - Đà Nẵng</span>
+                <span>Cần Thơ</span>
               </span>
               <span className="top-bar-item d-none d-lg-inline-flex">
                 <FaClock className="text-warning" />
@@ -147,9 +148,13 @@ const Header = ({ cartCount = 0 }) => {
             <Nav className="mx-auto my-2 my-lg-0">
 
               <Nav.Link
+
                 as={Link}
                 to="/"
                 className="nav-link-custom"
+
+                href="#home"
+                className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''}`}
               >
                 Trang Chủ
               </Nav.Link>
@@ -248,7 +253,9 @@ const Header = ({ cartCount = 0 }) => {
                 type="button"
               >
                 <FaShoppingCart />
-                <span className="cart-badge-count">{cartCount}</span>
+                {cartCount > 0 && (
+                  <span className="cart-badge-count">{cartCount}</span>
+                )}
               </button>
             </div>
           </Navbar.Collapse>
