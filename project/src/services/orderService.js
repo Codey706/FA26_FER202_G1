@@ -9,6 +9,8 @@ const orderService = {
 
   updateStatus: (id, orderStatus) =>
     api.patch(`/orders/${id}`, { orderStatus }),
+
+  delete: (id) => api.delete(`/orders/${id}`),
 };
 
 export default orderService;
