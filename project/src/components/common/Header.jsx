@@ -6,9 +6,7 @@ import {
   Container,
   Nav,
   Form,
-  Badge,
-  Modal,
-  Button
+  Dropdown
 } from 'react-bootstrap';
 import {
   FaPaw,
@@ -19,14 +17,22 @@ import {
   FaShoppingCart,
   FaUserAlt,
   FaShieldAlt,
-  FaInfoCircle
+  FaSignInAlt,
+  FaSignOutAlt,
+  FaClipboardList
 } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
+
+const ROLE_LABELS = {
+  admin: 'Quản trị viên',
+  staff: 'Nhân viên',
+  customer: 'Khách hàng'
+};
 
 const Header = ({ onSearch, cartCount = 0 }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [showNoticeModal, setShowNoticeModal] = useState(false);
-  const [noticeMessage, setNoticeMessage] = useState({ title: '', content: '' });
+  const { user, isStaffOrAdmin, logout } = useAuth();
   const [activeSection, setActiveSection] = useState('home');
 
   useEffect(() => {
@@ -83,13 +89,9 @@ const Header = ({ onSearch, cartCount = 0 }) => {
     }
   };
 
-  const handleUserClick = () => {
-    setNoticeMessage({
-      title: 'Tài khoản người dùng',
-      content:
-        'Hệ thống Đăng nhập / Đăng ký và Quản lý tài khoản (User Management) sẽ được triển khai ở giai đoạn tiếp theo theo phân công thành viên nhóm.'
-    });
-    setShowNoticeModal(true);
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   return (
@@ -207,13 +209,15 @@ const Header = ({ onSearch, cartCount = 0 }) => {
               >
                 Đánh Giá
               </Nav.Link>
-              <Nav.Link
-                as={Link}
-                to="/admin/orders"
-                className="nav-link-custom"
-              >
-                Quản Lý Đơn Hàng
-              </Nav.Link>
+              {isStaffOrAdmin && (
+                <Nav.Link
+                  as={Link}
+                  to="/admin/orders"
+                  className="nav-link-custom"
+                >
+                  Quản Lý Đơn Hàng
+                </Nav.Link>
+              )}
             </Nav>
 
             {/* Search Box & Quick Actions */}
@@ -235,15 +239,43 @@ const Header = ({ onSearch, cartCount = 0 }) => {
                 </button>
               </Form>
 
-              {/* User Account Button */}
-              <button
-                className="user-icon-btn"
-                onClick={handleUserClick}
-                title="Tài khoản người dùng"
-                type="button"
-              >
-                <FaUserAlt />
-              </button>
+              {/* User Account: nút Đăng nhập hoặc menu tài khoản */}
+              {user ? (
+                <Dropdown align="end">
+                  <Dropdown.Toggle
+                    as="button"
+                    type="button"
+                    id="user-menu-toggle"
+                    className="user-icon-btn user-avatar-btn"
+                    title={user.fullName}
+                  >
+                    <FaUserAlt />
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu className="user-menu shadow">
+                    <div className="user-menu-header">
+                      <div className="fw-bold text-truncate">{user.fullName}</div>
+                      <small className="text-muted d-block text-truncate">{user.email}</small>
+                      <span className="user-role-badge">
+                        {ROLE_LABELS[user.role] || user.role}
+                      </span>
+                    </div>
+                    <Dropdown.Divider />
+                    {isStaffOrAdmin && (
+                      <Dropdown.Item as={Link} to="/admin/orders">
+                        <FaClipboardList className="me-2 text-warning" /> Quản lý đơn hàng
+                      </Dropdown.Item>
+                    )}
+                    <Dropdown.Item onClick={handleLogout} className="text-danger">
+                      <FaSignOutAlt className="me-2" /> Đăng xuất
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              ) : (
+                <Link to="/login" className="btn-primary-orange btn-login-header">
+                  <FaSignInAlt /> Đăng nhập
+                </Link>
+              )}
 
               {/* Shopping Cart Button with Badge */}
               <button
@@ -259,33 +291,6 @@ const Header = ({ onSearch, cartCount = 0 }) => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-
-      {/* Notice Modal for Non-Phase 1 Features */}
-      <Modal
-        show={showNoticeModal}
-        onHide={() => setShowNoticeModal(false)}
-        centered
-      >
-        <Modal.Header closeButton className="border-0 pb-0">
-          <Modal.Title className="fw-bold d-flex align-items-center gap-2 text-primary">
-            <FaInfoCircle className="text-warning" />
-            {noticeMessage.title}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="py-3 text-secondary">
-          <p className="mb-0">{noticeMessage.content}</p>
-        </Modal.Body>
-        <Modal.Footer className="border-0 pt-0">
-          <Button
-            variant="warning"
-            className="fw-bold text-white px-4"
-            style={{ borderRadius: '50px' }}
-            onClick={() => setShowNoticeModal(false)}
-          >
-            Đã hiểu
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </>
   );
 };

@@ -7,6 +7,9 @@ import HomePage from './pages/HomePage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderManagementPage from './pages/OrderManagementPage';
+import LoginPage from './pages/LoginPage';
+import RequireAuth from './components/auth/RequireAuth';
+import { AuthProvider } from './context/AuthContext';
 
 const CART_STORAGE_KEY = 'pet-shop-cart';
 
@@ -133,10 +136,17 @@ function AppContent() {
             }
           />
 
-          {/* Quản lý đơn hàng */}
+          {/* Đăng nhập */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Quản lý đơn hàng (chỉ admin / nhân viên) */}
           <Route
             path="/admin/orders"
-            element={<OrderManagementPage />}
+            element={
+              <RequireAuth roles={['admin', 'staff']}>
+                <OrderManagementPage />
+              </RequireAuth>
+            }
           />
 
           {/* Các đường dẫn không xác định */}
@@ -160,7 +170,9 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

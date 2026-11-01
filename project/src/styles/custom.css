@@ -1307,3 +1307,280 @@ a:hover {
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* ===================================================
+   AUTH - TRANG ĐĂNG NHẬP & MENU TÀI KHOẢN
+   =================================================== */
+
+/* ----- Header: nút Đăng nhập + menu tài khoản ----- */
+.btn-login-header {
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.user-avatar-btn {
+  padding: 0;
+  overflow: hidden;
+}
+
+.user-avatar-btn::after {
+  display: none;
+}
+
+.user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-menu {
+  min-width: 240px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 6px;
+  margin-top: 10px !important;
+}
+
+.user-menu-header {
+  padding: 8px 12px 6px;
+  max-width: 280px;
+}
+
+.user-role-badge {
+  display: inline-block;
+  margin-top: 6px;
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 50px;
+}
+
+.user-menu .dropdown-item {
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  padding: 8px 12px;
+}
+
+.user-menu .dropdown-item:hover {
+  background-color: var(--primary-light);
+}
+
+/* ----- Trang đăng nhập ----- */
+.auth-page {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 122, 0, 0.1) 0, transparent 38%),
+    radial-gradient(circle at 90% 85%, rgba(255, 82, 0, 0.08) 0, transparent 36%),
+    var(--bg-cream);
+  padding: 3.5rem 0;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+}
+
+.auth-card {
+  max-width: 980px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.auth-side {
+  position: relative;
+  background: var(--primary-gradient);
+  color: #ffffff;
+  padding: 3rem 2.5rem;
+  align-items: center;
+  overflow: hidden;
+}
+
+.auth-side::before,
+.auth-side::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-side::before {
+  width: 240px;
+  height: 240px;
+  top: -80px;
+  right: -90px;
+}
+
+.auth-side::after {
+  width: 180px;
+  height: 180px;
+  bottom: -60px;
+  left: -50px;
+}
+
+.auth-side-content {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-side-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-side-title {
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.auth-side-text {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.75rem;
+}
+
+.auth-perks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-weight: 600;
+}
+
+.auth-perks li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-perk-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-form-wrap {
+  padding: 2.75rem 2.5rem;
+}
+
+.auth-form-wrap .section-title {
+  font-size: 1.8rem;
+}
+
+.auth-input-group .input-group-text {
+  background: var(--primary-light);
+  color: var(--primary-color);
+  border: 1.5px solid var(--border-color);
+  border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  padding: 0 16px;
+}
+
+.auth-input-group .form-control {
+  border: 1.5px solid var(--border-color);
+  border-left: none;
+  padding: 12px 14px;
+  box-shadow: none;
+}
+
+.auth-input-group .form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: none;
+}
+
+.auth-input-group:focus-within .input-group-text {
+  border-color: var(--primary-color);
+}
+
+.auth-input-group .auth-toggle-pw {
+  background: #ffffff;
+  color: var(--text-muted);
+  border: 1.5px solid var(--border-color);
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.auth-input-group:focus-within .auth-toggle-pw {
+  border-color: var(--primary-color);
+}
+
+.auth-input-group .auth-toggle-pw:hover {
+  color: var(--primary-color);
+}
+
+/* Khi không có nút ở cuối, bo góc phải cho ô nhập */
+.auth-input-group .form-control:last-child {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.auth-remember .form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.auth-remember .form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 122, 0, 0.2);
+  border-color: var(--primary-color);
+}
+
+.auth-demo {
+  margin-top: 1.75rem;
+  padding: 14px 16px;
+  border: 1.5px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-warm-light);
+}
+
+.auth-demo-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.auth-demo-chip {
+  border: 1.5px solid var(--primary-color);
+  background: #ffffff;
+  color: var(--primary-color);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 50px;
+  transition: var(--transition);
+}
+
+.auth-demo-chip:hover {
+  background: var(--primary-gradient);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+@media (max-width: 575.98px) {
+  .auth-page {
+    padding: 1.5rem 0;
+  }
+
+  .auth-form-wrap {
+    padding: 2rem 1.25rem;
+  }
+}
