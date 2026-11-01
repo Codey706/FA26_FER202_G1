@@ -35,8 +35,15 @@ const SearchPage = ({ onAddToCart }) => {
   useEffect(() => () => clearTimeout(toastTimerRef.current), []);
 
   const handleAddToCart = (product) => {
-    onAddToCart?.(product);
-    setToastMessage(`Đã thêm "${product.name}" vào giỏ hàng!`);
+    const result = onAddToCart?.(product);
+
+    setToastMessage(
+      result?.message ||
+      (result?.ok === false
+        ? "Không thể thêm sản phẩm vào giỏ hàng."
+        : `Đã thêm "${product.name}" vào giỏ hàng!`)
+    );
+
     clearTimeout(toastTimerRef.current);
     toastTimerRef.current = setTimeout(() => setToastMessage(null), 3000);
   };

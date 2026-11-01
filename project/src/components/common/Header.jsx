@@ -148,12 +148,8 @@ const Header = ({ cartCount = 0 }) => {
             <Nav className="mx-auto my-2 my-lg-0">
 
               <Nav.Link
-
                 as={Link}
                 to="/"
-                className="nav-link-custom"
-
-                href="#home"
                 className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''}`}
               >
                 Trang Chủ
