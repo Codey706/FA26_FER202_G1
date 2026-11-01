@@ -5,7 +5,7 @@
  * Dạng một item trong giỏ:
  * { id, name, price, image, petType, inStock, quantity }
  */
-import { formatCurrency } from './formatters';
+import { formatCurrency } from './formatters.js';
 
 export const MAX_QUANTITY_PER_ITEM = 99;
 
@@ -188,10 +188,63 @@ export const syncItemsWithProducts = (items, products) => {
   return { items: next, changes };
 };
 
+/** Gộp hai giỏ (cộng dồn số lượng, ép về giới hạn tồn kho). Dùng khi khách đăng nhập. */
+export const mergeCarts = (base, extra) => normalizeCart([...(base || []), ...(extra || [])]);
+
+/* ------------------------------------------------------------------ */
+/* Phí vận chuyển & đặt cọc                                            */
+/* ------------------------------------------------------------------ */
+
+/** Đơn chỉ có phụ kiện/thức ăn từ mức này trở lên được miễn phí vận chuyển. */
+export const FREE_SHIPPING_THRESHOLD = 500000;
+/** Phí vận chuyển cho đơn phụ kiện dưới mức miễn phí. */
+export const SHIPPING_FEE = 30000;
+/** Tỷ lệ đặt cọc để giữ bé khi mua thú cưng. */
+export const PET_DEPOSIT_RATE = 0.3;
+
+export const hasPet = (items) => items.some(isPet);
+
+export const calcPetSubtotal = (items) =>
+  items.filter(isPet).reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
+
+/**
+ * Thú cưng được giao tận nhà bằng xe chuyên dụng -> miễn phí.
+ * Đơn chỉ có phụ kiện: miễn phí từ FREE_SHIPPING_THRESHOLD, ngược lại SHIPPING_FEE.
+ */
+export const calcShippingFee = (items) => {
+  if (items.length === 0 || hasPet(items)) return 0;
+  return calcTotal(items) >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+};
+
+/** Tiền đặt cọc (làm tròn đến nghìn đồng), chỉ tính trên phần thú cưng. */
+export const calcDeposit = (items) =>
+  Math.round((calcPetSubtotal(items) * PET_DEPOSIT_RATE) / 1000) * 1000;
+
+/** Tổng hợp mọi con số hiển thị ở giỏ hàng / thanh toán / lưu vào đơn. */
+export const calcOrderSummary = (items) => {
+  const subtotal = calcTotal(items);
+  const shippingFee = calcShippingFee(items);
+  const total = subtotal + shippingFee;
+  const deposit = calcDeposit(items);
+  return {
+    count: calcCount(items),
+    subtotal,
+    shippingFee,
+    total,
+    deposit,
+    remaining: total - deposit,
+    // Còn thiếu bao nhiêu để được miễn phí vận chuyển (0 nếu đã đủ / không áp dụng)
+    freeShippingGap:
+      items.length > 0 && !hasPet(items) && shippingFee > 0
+        ? FREE_SHIPPING_THRESHOLD - subtotal
+        : 0,
+  };
+};
+
 /** Chuyển giỏ sang định dạng của collection `carts` trong db.json. */
-export const buildServerCart = (items, id) => ({
+export const buildServerCart = (items, id, userId = null) => ({
   ...(id ? { id } : {}),
-  userId: null,
+  userId: userId ?? null,
   items: items.map((item) => ({
     productId: item.id,
     name: item.name,

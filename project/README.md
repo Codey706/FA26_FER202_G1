@@ -86,7 +86,7 @@ File `db.json` được thiết kế chuẩn quan hệ để phục vụ CRUD �
 | `breeds` | 8 bản ghi | Corgi, Poodle, Golden, Husky, Mèo Aln, Ba Tư, Munchkin, Ragdoll |
 | `reviews` | 3 bản ghi | Đánh giá 5 sao từ khách hàng thực tế kèm ảnh và tên thú cưng |
 | `banners` | 2 bản ghi | Banner khuyến mãi, chỉ số thống kê uy tín |
-| `carts` | 2 bản ghi | Giỏ hàng của khách hàng với danh sách mặt hàng |
+| `carts` | 2 bản ghi mẫu | Giỏ hàng gắn với `userId` (khách chưa đăng nhập có `userId = null`, tự tạo/xóa khi mua sắm) |
 | `orders` | 5 bản ghi | Đơn hàng với các trạng thái: pending, processing, shipping, delivered |
 
 ---
@@ -101,7 +101,9 @@ Base URL: `http://localhost:3001` (qua biến môi trường `VITE_API_URL`)
 - `GET /breeds`: Lấy thông tin các giống chó mèo phổ biến.
 - `GET /reviews`: Lấy danh sách đánh giá của khách hàng.
 - `GET /banners`: Lấy danh sách banner khuyến mãi trang chủ.
-- `GET /users`, `GET /carts`, `GET /orders`: Sẵn sàng cho các module tiếp theo.
+- `GET /users`, `GET /orders`: Sẵn sàng cho các module tiếp theo.
+- `GET /carts?userId=...`, `POST /carts`, `PUT /carts/:id`, `DELETE /carts/:id`: CRUD giỏ hàng (do `CartContext` tự gọi).
+- `POST /orders`: Tạo đơn hàng khi thanh toán (có `subtotal`, `shippingFee`, `depositAmount`, `remainingAmount`, `totalAmount`).
 
 ---
 
@@ -146,3 +148,14 @@ Cấu trúc dự án và database đã được thiết kế sẵn sàng để n
 3. **Thành viên 3 - Module Quản lý Danh mục & Banner:** CRUD danh mục thú cưng, banner sự kiện (`/categories`, `/banners`).
 4. **Thành viên 4 - Module Giỏ hàng & Đặt hàng:** Quản lý giỏ hàng, đặt cọc/mua thú cưng, checkout, tính toán chi phí vận chuyển (`/carts`, `/orders`).
 5. **Thành viên 5 - Module Đơn hàng & Đánh giá:** Quản lý vòng đời đơn hàng, xác nhận tiêm chủng giao thú cưng, đánh giá & phản hồi (`/orders`, `/reviews`).
+
+---
+
+## 7. Module Giỏ hàng & Đặt hàng (chi tiết)
+
+- **Giỏ hàng gắn với tài khoản:** khi đăng nhập, giỏ của khách được gộp vào giỏ của tài khoản (`GET /carts?userId=`); đăng xuất thì dọn giỏ trên máy, giỏ vẫn còn trên server.
+- **Thanh toán bắt buộc đăng nhập** (`/checkout` được bọc bởi `RequireAuth`), đăng nhập xong tự quay lại trang thanh toán.
+- **Phí vận chuyển:** đơn có thú cưng được miễn phí; đơn chỉ có phụ kiện/thức ăn miễn phí từ 500.000đ, dưới mức đó phí 30.000đ.
+- **Đặt cọc:** đơn có thú cưng cần đặt cọc 30% giá trị thú cưng để giữ bé, phần còn lại thanh toán khi nhận.
+- **Hướng dẫn thanh toán:** COD / chuyển khoản / MoMo (thông tin tài khoản mẫu nằm trong `PAYMENT_GUIDE` ở `CheckoutPage.jsx`, cần thay bằng thông tin thật).
+- **Kiểm thử:** `npm test` chạy unit test cho `src/utils/cartUtils.js`.
