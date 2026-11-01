@@ -7,6 +7,10 @@ import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
+import OrderManagementPage from './pages/OrderManagementPage';
+import LoginPage from './pages/LoginPage';
+import RequireAuth from './components/auth/RequireAuth';
+import { AuthProvider } from './context/AuthContext';
 
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import OrderDetailPage from './pages/OrderDetailPage';
@@ -176,6 +180,10 @@ function AppContent() {
             }
           />
 
+          {/* Đăng nhập */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Quản lý đơn hàng (chỉ admin / nhân viên) */}
           {/* Customer Order History */}
           <Route
             path="/orders"
@@ -191,7 +199,11 @@ function AppContent() {
           {/* Admin Order Management */}
           <Route
             path="/admin/orders"
-            element={<OrderManagementPage />}
+            element={
+              <RequireAuth roles={['admin', 'staff']}>
+                <OrderManagementPage />
+              </RequireAuth>
+            }
           />
 
           {/* Admin Order Detail */}
@@ -296,6 +308,9 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
       <CartProvider>
         <AppContent />
       </CartProvider>
