@@ -20,10 +20,11 @@ import {
   FaShieldAlt,
   FaInfoCircle
 } from 'react-icons/fa';
+import SearchOverlay from './SearchOverlay';
 
-const Header = ({ onSearch, cartCount = 0 }) => {
+const Header = ({ cartCount = 0 }) => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
   const [noticeMessage, setNoticeMessage] = useState({ title: '', content: '' });
   const [activeSection, setActiveSection] = useState('home');
@@ -69,18 +70,6 @@ const Header = ({ onSearch, cartCount = 0 }) => {
       window.removeEventListener('resize', handleScroll);
     };
   }, []);
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (onSearch) {
-      onSearch(searchTerm);
-    }
-    // Scroll to products section if searching
-    const target = document.getElementById('featured-pets');
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 
   const handleUserClick = () => {
     setNoticeMessage({
@@ -157,7 +146,6 @@ const Header = ({ onSearch, cartCount = 0 }) => {
           <Navbar.Collapse id="main-navbar-nav">
             {/* Navigation Links */}
             <Nav className="mx-auto my-2 my-lg-0">
-
               <Nav.Link
                 href="#home"
                 className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''}`}
@@ -211,28 +199,24 @@ const Header = ({ onSearch, cartCount = 0 }) => {
                 to="/admin/orders"
                 className="nav-link-custom"
               >
+                Quản lý đơn hàng
                 Quản Lý Đơn Hàng
               </Nav.Link>
             </Nav>
 
             {/* Search Box & Quick Actions */}
             <div className="d-flex align-items-center gap-3">
-              <Form className="search-form-box" onSubmit={handleSearchSubmit}>
-                <Form.Control
-                  type="text"
-                  placeholder="Tìm cún cưng, mèo, phụ kiện..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input-custom"
-                />
-                <button
-                  type="submit"
-                  className="search-btn-icon"
-                  title="Tìm kiếm"
-                >
-                  <FaSearch />
-                </button>
-              </Form>
+              <button
+                type="button"
+                className="search-trigger"
+                onClick={() => setShowSearch(true)}
+                aria-label="Mở hộp tìm kiếm"
+              >
+                <span className="search-trigger-text">
+                  Tìm cún cưng, mèo, phụ kiện...
+                </span>
+                <FaSearch className="search-trigger-icon" />
+              </button>
 
               {/* User Account Button */}
               <button
@@ -260,6 +244,9 @@ const Header = ({ onSearch, cartCount = 0 }) => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
+
+      {/* Hộp tìm kiếm nổi */}
+      <SearchOverlay show={showSearch} onClose={() => setShowSearch(false)} />
 
       {/* Notice Modal for Non-Phase 1 Features */}
       <Modal

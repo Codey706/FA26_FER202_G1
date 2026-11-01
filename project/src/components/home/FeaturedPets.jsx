@@ -28,16 +28,14 @@ const FeaturedPets = ({
   const [currentPage, setCurrentPage] = useState(0);
   const petsListRef = useRef(null);
 
-  // Cập nhật bộ lọc khi chọn danh mục chó hoặc mèo.
-  // Khi selectedCategory là null, giữ nguyên tab người dùng đã chọn.
+  // Chỉ cập nhật bộ lọc thú cưng khi chọn danh mục chó hoặc mèo.
+  // Chọn danh mục phụ kiện thì giữ nguyên bộ lọc thú cưng hiện tại.
   useEffect(() => {
     if (
       selectedCategory?.petType === 'dog' ||
       selectedCategory?.petType === 'cat'
     ) {
       setActiveFilter(selectedCategory.petType);
-    } else if (selectedCategory?.petType === 'accessory') {
-      setActiveFilter('all');
     }
   }, [selectedCategory]);
 
@@ -93,14 +91,13 @@ const FeaturedPets = ({
 
   // Lọc thú cưng theo danh mục, tab và từ khóa tìm kiếm
   const filteredPets = pets.filter((pet) => {
-    // Khi chọn danh mục phụ kiện, không hiển thị thú cưng.
-    if (selectedCategory?.petType === 'accessory') {
-      return false;
-    }
+    // Chỉ lọc thú cưng khi chọn danh mục chó hoặc mèo.
+    const isPetCategory =
+      selectedCategory?.petType === 'dog' ||
+      selectedCategory?.petType === 'cat';
 
-    // Khi chọn danh mục, lọc chính xác theo categoryId.
     if (
-      selectedCategory &&
+      isPetCategory &&
       String(pet.categoryId) !== String(selectedCategory.id)
     ) {
       return false;
