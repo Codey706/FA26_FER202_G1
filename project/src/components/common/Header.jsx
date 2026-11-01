@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+
 import {
   Navbar,
   Container,
   Nav,
   Form,
   Dropdown
+  Modal,
+  Button
 } from 'react-bootstrap';
 import {
   FaPaw,
@@ -28,11 +30,15 @@ const ROLE_LABELS = {
   staff: 'Nhân viên',
   customer: 'Khách hàng'
 };
+import SearchOverlay from './SearchOverlay';
 
-const Header = ({ onSearch, cartCount = 0 }) => {
+const Header = ({ cartCount = 0 }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const { user, isStaffOrAdmin, logout } = useAuth();
+  const [showSearch, setShowSearch] = useState(false);
+  const [showNoticeModal, setShowNoticeModal] = useState(false);
+  const [noticeMessage, setNoticeMessage] = useState({ title: '', content: '' });
   const [activeSection, setActiveSection] = useState('home');
 
   useEffect(() => {
@@ -92,6 +98,13 @@ const Header = ({ onSearch, cartCount = 0 }) => {
   const handleLogout = () => {
     logout();
     navigate('/');
+  const handleUserClick = () => {
+    setNoticeMessage({
+      title: 'Tài khoản người dùng',
+      content:
+        'Hệ thống Đăng nhập / Đăng ký và Quản lý tài khoản (User Management) sẽ được triển khai ở giai đoạn tiếp theo theo phân công thành viên nhóm.'
+    });
+    setShowNoticeModal(true);
   };
 
   return (
@@ -109,7 +122,7 @@ const Header = ({ onSearch, cartCount = 0 }) => {
               </span>
               <span className="top-bar-item d-none d-md-inline-flex">
                 <FaMapMarkerAlt className="text-warning" />
-                <span>Hà Nội - TP. Hồ Chí Minh - Đà Nẵng</span>
+                <span>Cần Thơ</span>
               </span>
               <span className="top-bar-item d-none d-lg-inline-flex">
                 <FaClock className="text-warning" />
@@ -162,6 +175,11 @@ const Header = ({ onSearch, cartCount = 0 }) => {
             <Nav className="mx-auto my-2 my-lg-0">
 
               <Nav.Link
+
+                as={Link}
+                to="/"
+                className="nav-link-custom"
+
                 href="#home"
                 className={`nav-link-custom ${activeSection === 'home' ? 'active' : ''}`}
               >
@@ -169,43 +187,43 @@ const Header = ({ onSearch, cartCount = 0 }) => {
               </Nav.Link>
 
               <Nav.Link
-                href="#categories"
-                className={`nav-link-custom ${activeSection === 'categories' ? 'active' : ''}`}
+                href="/#categories"
+                className="nav-link-custom"
               >
                 Danh Mục
               </Nav.Link>
 
               <Nav.Link
-                href="#featured-pets"
-                className={`nav-link-custom ${activeSection === 'featured-pets' ? 'active' : ''}`}
+                href="/#featured-pets"
+                className="nav-link-custom"
               >
                 Thú Cưng
               </Nav.Link>
 
               <Nav.Link
-                href="#popular-breeds"
-                className={`nav-link-custom ${activeSection === 'popular-breeds' ? 'active' : ''}`}
+                href="/#popular-breeds"
+                className="nav-link-custom"
               >
                 Yêu Thích
               </Nav.Link>
 
               <Nav.Link
-                href="#accessories-section"
-                className={`nav-link-custom ${activeSection === 'accessories-section' ? 'active' : ''}`}
+                href="/#accessories-section"
+                className="nav-link-custom"
               >
                 Tiện Ích
               </Nav.Link>
 
               <Nav.Link
-                href="#shopping-process"
-                className={`nav-link-custom ${activeSection === 'shopping-process' ? 'active' : ''}`}
+                href="/#shopping-process"
+                className="nav-link-custom"
               >
                 Quy Trình
               </Nav.Link>
 
               <Nav.Link
-                href="#testimonials"
-                className={`nav-link-custom ${activeSection === 'testimonials' ? 'active' : ''}`}
+                href="/#testimonials"
+                className="nav-link-custom"
               >
                 Đánh Giá
               </Nav.Link>
@@ -218,26 +236,40 @@ const Header = ({ onSearch, cartCount = 0 }) => {
                   Quản Lý Đơn Hàng
                 </Nav.Link>
               )}
+
+              {/* Order History */}
+              <Nav.Link
+                as={Link}
+                to="/orders"
+                className="nav-link-custom"
+              >
+                Lịch sử đơn hàng
+              </Nav.Link>
+
+              {/* Order Management */}
+              <Nav.Link
+                as={Link}
+                to="/admin/orders"
+                className="nav-link-custom"
+              >
+                Quản lý đơn hàng
+              </Nav.Link>
+
             </Nav>
 
             {/* Search Box & Quick Actions */}
             <div className="d-flex align-items-center gap-3">
-              <Form className="search-form-box" onSubmit={handleSearchSubmit}>
-                <Form.Control
-                  type="text"
-                  placeholder="Tìm cún cưng, mèo, phụ kiện..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input-custom"
-                />
-                <button
-                  type="submit"
-                  className="search-btn-icon"
-                  title="Tìm kiếm"
-                >
-                  <FaSearch />
-                </button>
-              </Form>
+              <button
+                type="button"
+                className="search-trigger"
+                onClick={() => setShowSearch(true)}
+                aria-label="Mở hộp tìm kiếm"
+              >
+                <span className="search-trigger-text">
+                  Tìm cún cưng, mèo, phụ kiện...
+                </span>
+                <FaSearch className="search-trigger-icon" />
+              </button>
 
               {/* User Account: nút Đăng nhập hoặc menu tài khoản */}
               {user ? (
@@ -285,12 +317,44 @@ const Header = ({ onSearch, cartCount = 0 }) => {
                 type="button"
               >
                 <FaShoppingCart />
-                <span className="cart-badge-count">{cartCount}</span>
+                {cartCount > 0 && (
+                  <span className="cart-badge-count">{cartCount}</span>
+                )}
               </button>
             </div>
           </Navbar.Collapse>
         </Container>
       </Navbar>
+
+      {/* Hộp tìm kiếm nổi */}
+      <SearchOverlay show={showSearch} onClose={() => setShowSearch(false)} />
+
+      {/* Notice Modal for Non-Phase 1 Features */}
+      <Modal
+        show={showNoticeModal}
+        onHide={() => setShowNoticeModal(false)}
+        centered
+      >
+        <Modal.Header closeButton className="border-0 pb-0">
+          <Modal.Title className="fw-bold d-flex align-items-center gap-2 text-primary">
+            <FaInfoCircle className="text-warning" />
+            {noticeMessage.title}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="py-3 text-secondary">
+          <p className="mb-0">{noticeMessage.content}</p>
+        </Modal.Body>
+        <Modal.Footer className="border-0 pt-0">
+          <Button
+            variant="warning"
+            className="fw-bold text-white px-4"
+            style={{ borderRadius: '50px' }}
+            onClick={() => setShowNoticeModal(false)}
+          >
+            Đã hiểu
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

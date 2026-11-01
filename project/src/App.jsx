@@ -1,9 +1,10 @@
-
-import React, { useEffect, useMemo, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
+
 import HomePage from './pages/HomePage';
+import SearchPage from './pages/SearchPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderManagementPage from './pages/OrderManagementPage';
@@ -11,11 +12,26 @@ import LoginPage from './pages/LoginPage';
 import RequireAuth from './components/auth/RequireAuth';
 import { AuthProvider } from './context/AuthContext';
 
-const CART_STORAGE_KEY = 'pet-shop-cart';
+import OrderHistoryPage from './pages/OrderHistoryPage';
+import OrderDetailPage from './pages/OrderDetailPage';
+import OrderManagementPage from './pages/OrderManagementPage';
+import { CartProvider, useCart } from './context/CartContext';
 
 function AppContent() {
   const [searchQuery, setSearchQuery] = useState('');
+  const { cartCount, addToCart } = useCart();
 
+  const home = (
+    <HomePage
+      searchQuery={searchQuery}
+      onAddToCart={addToCart}
+    />
+import CategoryManagementPage from './pages/CategoryManagementPage';
+import ProductManagementPage from './pages/ProductManagementPage';
+
+const CART_STORAGE_KEY = 'pet-shop-cart';
+
+function AppContent() {
   const [cartItems, setCartItems] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]');
@@ -24,18 +40,34 @@ function AppContent() {
     }
   });
 
+  // Save cart to localStorage
+  // Lưu từ khóa tìm kiếm
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Xử lý khi người dùng tìm kiếm
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
+
   // Lưu giỏ hàng vào localStorage khi giỏ hàng thay đổi
   useEffect(() => {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+    localStorage.setItem(
+      CART_STORAGE_KEY,
+      JSON.stringify(cartItems)
+    );
   }, [cartItems]);
 
-  // Tính tổng số lượng sản phẩm trong giỏ hàng
+  // Calculate cart count
   const cartCount = useMemo(
-    () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    () => cartItems.reduce(
+      (sum, item) => sum + Number(item.quantity || 0),
+      0
+    ),
     [cartItems]
   );
 
-  // Thêm sản phẩm vào giỏ hàng
+
+  // Add product to cart
   const handleAddToCart = (product) => {
     setCartItems((current) => {
       const existing = current.find(
@@ -43,23 +75,32 @@ function AppContent() {
       );
 
       if (existing) {
-        // Thú cưng là sản phẩm độc nhất, không tăng số lượng vượt quá 1.
-        if (product.petType === 'dog' || product.petType === 'cat') {
+        // Pets cannot have quantity greater than 1
+        if (
+          product.petType === 'dog' ||
+          product.petType === 'cat'
+        ) {
           return current;
         }
 
         return current.map((item) =>
           String(item.id) === String(product.id)
-            ? { ...item, quantity: item.quantity + 1 }
+            ? {
+              ...item,
+              quantity: item.quantity + 1
+            }
             : item
         );
       }
 
-      return [...current, { ...product, quantity: 1 }];
+      return [
+        ...current,
+        { ...product, quantity: 1 }
+      ];
     });
   };
 
-  // Cập nhật số lượng sản phẩm trong giỏ hàng
+  // Update cart quantity
   const updateCartQuantity = (id, quantity) => {
     setCartItems((current) =>
       current
@@ -72,48 +113,51 @@ function AppContent() {
     );
   };
 
-  // Xóa một sản phẩm khỏi giỏ hàng
+  // Remove product from cart
   const removeFromCart = (id) => {
     setCartItems((current) =>
-      current.filter((item) => String(item.id) !== String(id))
+      current.filter(
+        (item) => String(item.id) !== String(id)
+      )
     );
   };
 
-  // Xóa toàn bộ giỏ hàng sau khi checkout
-  const clearCart = () => setCartItems([]);
+  // Clear cart after checkout
+  const clearCart = () => {
+    setCartItems([]);
+  };
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Header
-        onSearch={setSearchQuery}
-        cartCount={cartCount}
-      />
 
-      <div className="flex-grow-1">
+      {/* Common Header */}
+      <Header cartCount={cartCount} />
+
+      {/* Main Routes */}
+      <main className="flex-grow-1">
         <Routes>
-          {/* Trang chủ */}
+
+          {/* Home */}
           <Route
             path="/"
             element={
               <HomePage
-                searchQuery={searchQuery}
                 onAddToCart={handleAddToCart}
               />
             }
           />
 
-          {/* Trang sản phẩm */}
+          {/* Search */}
           <Route
-            path="/products"
+            path="/search"
             element={
-              <HomePage
-                searchQuery={searchQuery}
+              <SearchPage
                 onAddToCart={handleAddToCart}
               />
             }
           />
 
-          {/* Trang giỏ hàng */}
+          {/* Shopping Cart */}
           <Route
             path="/cart"
             element={
@@ -125,7 +169,7 @@ function AppContent() {
             }
           />
 
-          {/* Trang thanh toán */}
+          {/* Checkout */}
           <Route
             path="/checkout"
             element={
@@ -140,6 +184,19 @@ function AppContent() {
           <Route path="/login" element={<LoginPage />} />
 
           {/* Quản lý đơn hàng (chỉ admin / nhân viên) */}
+          {/* Customer Order History */}
+          <Route
+            path="/orders"
+            element={<OrderHistoryPage />}
+          />
+
+          {/* Customer Order Detail */}
+          <Route
+            path="/orders/:id"
+            element={<OrderDetailPage />}
+          />
+
+          {/* Admin Order Management */}
           <Route
             path="/admin/orders"
             element={
@@ -149,21 +206,102 @@ function AppContent() {
             }
           />
 
-          {/* Các đường dẫn không xác định */}
+          {/* Admin Order Detail */}
+          <Route
+            path="/admin/orders/:id"
+            element={<OrderDetailPage />}
+          />
+
+          {/* Fallback */}
           <Route
             path="*"
             element={
               <HomePage
-                searchQuery={searchQuery}
                 onAddToCart={handleAddToCart}
               />
             }
           />
+
         </Routes>
+      </main>
+
+      {/* Common Footer */}
+      <Footer />
+
+    </div>
+
+  return (
+    <div className="d-flex flex-column min-vh-100">
+      <Header onSearch={setSearchQuery} cartCount={cartCount} />
+
+      <div className="flex-grow-1">
+        <Routes>
+          <Route path="/" element={home} />
+          <Route path="/products" element={home} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/admin/orders" element={<OrderManagementPage />} />
+          <Route path="*" element={home} />
+        </Routes>
+    <BrowserRouter>
+      <div className="d-flex flex-column min-vh-100">
+        {/* Common Header */}
+        <Header onSearch={handleSearch} cartCount={cartCount} />
+
+        {/* Main Routes */}
+        <div className="flex-grow-1">
+
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <HomePage
+                  searchQuery={searchQuery}
+                  onAddToCart={handleAddToCart}
+                />
+              }
+            />
+
+            <Route
+              path="/admin/categories"
+              element={<CategoryManagementPage />}
+            />
+
+            <Route
+              path="/admin/categories/:categoryId/products"
+              element={<ProductManagementPage />}
+            />
+
+            <Route
+              path="/admin/orders"
+              element={<OrderManagementPage />}
+            />
+
+            <Route
+              path="/admin/orders/:id"
+              element={<OrderDetailPage />}
+            />
+
+            {/* Fallback route must be last */}
+            <Route
+              path="*"
+              element={
+                <HomePage
+                  searchQuery={searchQuery}
+                  onAddToCart={handleAddToCart}
+                />
+              }
+            />
+          </Routes>
+
+        </div>
+
+        {/* Common Footer */}
+        <Footer />
       </div>
 
-      <Footer />
-    </div>
+    </BrowserRouter>
+
   );
 }
 
@@ -173,7 +311,11 @@ function App() {
       <AuthProvider>
         <AppContent />
       </AuthProvider>
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
     </BrowserRouter>
+    <AppContent />
   );
 }
 

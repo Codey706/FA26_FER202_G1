@@ -1,6 +1,6 @@
-
 import { useEffect, useMemo, useState } from 'react';
 import orderService from '../services/orderService';
+import { Link } from 'react-router-dom';
 
 const statusLabels = {
     pending: 'Chờ xác nhận',
@@ -179,14 +179,20 @@ export default function OrderManagementPage() {
                                 <th>Tổng tiền</th>
                                 <th>Trạng thái</th>
                                 <th>Cập nhật trạng thái</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             {filteredOrders.map((order) => (
                                 <tr key={order.id}>
-                                    <td className="fw-semibold">{order.id}</td>
+                                    {/* Mã đơn */}
+                                    <td className="text-nowrap fw-semibold">
+                                        {order.id}
+                                    </td>
 
+                                    {/* Khách hàng */}
+                                    <td className="fw-semibold">{order.id}</td>
                                     <td>
                                         <div>{order.customerName || 'Chưa có tên'}</div>
                                         <small className="text-muted">
@@ -194,13 +200,15 @@ export default function OrderManagementPage() {
                                         </small>
                                     </td>
 
+                                    {/* Ngày đặt */}
                                     <td>{formatDate(order.orderDate)}</td>
 
+                                    {/* Tổng tiền */}
                                     <td className="text-nowrap">
                                         {formatCurrency(order.totalAmount)}
                                     </td>
 
-
+                                    {/* Trạng thái */}
                                     <td>
                                         <span
                                             className={`badge ${{
@@ -212,13 +220,11 @@ export default function OrderManagementPage() {
                                                 }[order.orderStatus] || 'status-default'
                                                 }`}
                                         >
-                                            {statusLabels[order.orderStatus] ||
-                                                order.orderStatus ||
-                                                'Chưa xác định'}
+                                            {statusLabels[order.orderStatus] || order.orderStatus}
                                         </span>
                                     </td>
 
-
+                                    {/* Cập nhật trạng thái */}
                                     <td>
                                         <select
                                             className="form-select form-select-sm"
@@ -245,6 +251,16 @@ export default function OrderManagementPage() {
                                         {updatingId === order.id && (
                                             <small className="text-muted">Đang lưu...</small>
                                         )}
+                                    </td>
+
+                                    {/* Thao tác */}
+                                    <td>
+                                        <Link
+                                            to={`/admin/orders/${order.id}`}
+                                            className="btn btn-sm btn-outline-primary"
+                                        >
+                                            Xem chi tiết
+                                        </Link>
                                     </td>
                                 </tr>
                             ))}

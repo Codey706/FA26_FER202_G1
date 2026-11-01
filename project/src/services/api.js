@@ -6,9 +6,19 @@
 // Target API base URL
 let BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+/** Lỗi do server trả về (có status) hoặc lỗi kết nối (status = 0). */
+export class ApiError extends Error {
+  constructor(message, status = 0) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 /**
- * Custom API request wrapper using Fetch API
- * Auto-falls back between localhost and 127.0.0.1 to avoid Windows IPv6 DNS issues.
+ * Custom API request wrapper using Fetch API.
+ * - Lỗi HTTP (4xx/5xx) được ném nguyên vẹn, KHÔNG retry (tránh gửi trùng POST đặt hàng).
+ * - Chỉ khi lỗi mạng và URL là localhost mới thử lại với 127.0.0.1 (vấn đề IPv6 trên Windows).
  * @param {string} endpoint - API endpoint (e.g. '/products')
  * @param {object} options - Fetch options (method, headers, body, params)
  * @returns {Promise<any>} - Parsed JSON response
@@ -33,54 +43,57 @@ export const request = async (endpoint, options = {}) => {
     return url;
   };
 
-  const defaultHeaders = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-    ...headers
-  };
-
   const config = {
     method: options.method || 'GET',
-    headers: defaultHeaders,
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...headers
+    },
     ...customConfig
   };
 
-  if (body) {
+  if (body !== undefined && body !== null) {
     config.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
 
-  // Attempt initial fetch
-  let targetUrl = buildUrl(BASE_URL);
-  try {
-    const response = await fetch(targetUrl, config);
+  const send = async (baseUrl) => {
+    const response = await fetch(buildUrl(baseUrl), config);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorMessage =
-        errorData.message || `Lỗi HTTP ${response.status}: ${response.statusText}`;
-      throw new Error(errorMessage);
+      throw new ApiError(
+        errorData.message || `Lỗi HTTP ${response.status}: ${response.statusText}`,
+        response.status
+      );
     }
 
-    return await response.json();
+    // DELETE / 204 có thể không có body
+    const text = await response.text();
+    return text ? JSON.parse(text) : null;
+  };
+
+  try {
+    return await send(BASE_URL);
   } catch (error) {
-    // If localhost failed due to Windows IPv6 vs IPv4 resolution, fallback to 127.0.0.1
+    // Server đã trả lời -> đây là lỗi thật, không che giấu và không retry.
+    if (error instanceof ApiError) throw error;
+
     if (BASE_URL.includes('localhost')) {
       try {
         const fallbackBase = BASE_URL.replace('localhost', '127.0.0.1');
-        const fallbackUrl = buildUrl(fallbackBase);
-        const fallbackResp = await fetch(fallbackUrl, config);
-        if (fallbackResp.ok) {
-          BASE_URL = fallbackBase; // Update working baseUrl
-          return await fallbackResp.json();
-        }
+        const result = await send(fallbackBase);
+        BASE_URL = fallbackBase; // nhớ base URL đang hoạt động
+        return result;
       } catch (fallbackErr) {
-        // Fallback also failed, proceed to throw clear error
+        if (fallbackErr instanceof ApiError) throw fallbackErr;
       }
     }
 
-    console.error(`[API Error] ${config.method} ${targetUrl}:`, error.message);
-    throw new Error(
-      `Không thể kết nối đến JSON Server tại ${BASE_URL}. Vui lòng đảm bảo bạn đã chạy lệnh 'npm run server' (cổng 3001).`
+    console.error(`[API Error] ${config.method} ${buildUrl(BASE_URL)}:`, error.message);
+    throw new ApiError(
+      `Không thể kết nối đến JSON Server tại ${BASE_URL}. Vui lòng đảm bảo bạn đã chạy lệnh 'npm run server' (cổng 3001).`,
+      0
     );
   }
 };

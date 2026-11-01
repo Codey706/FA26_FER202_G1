@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Badge, Modal, Button } from 'react-bootstrap';
+import React, { useState, useRef, useEffect } from 'react';
+import { Modal, Button } from 'react-bootstrap';
 import {
   FaShoppingCart,
   FaStar,
@@ -15,16 +15,22 @@ const DEFAULT_ACC_FALLBACK =
 const ProductCard = ({ product, onAddToCart }) => {
   const [showDetail, setShowDetail] = useState(false);
   const [added, setAdded] = useState(false);
-  const [imgSrc, setImgSrc] = useState(product.image || DEFAULT_ACC_FALLBACK);
+  const [imgSrc, setImgSrc] = useState(product?.image || DEFAULT_ACC_FALLBACK);
+  const addedTimerRef = useRef(null);
+
+  useEffect(() => () => clearTimeout(addedTimerRef.current), []);
 
   if (!product) return null;
 
   const handleAdd = () => {
+    const result = onAddToCart ? onAddToCart(product) : { ok: true };
+
+    // Chỉ hiện "Đã thêm" khi thực sự thêm được (không hết hàng / vượt tồn kho).
+    if (result?.ok === false) return;
+
     setAdded(true);
-    if (onAddToCart) {
-      onAddToCart(product);
-    }
-    setTimeout(() => setAdded(false), 2000);
+    clearTimeout(addedTimerRef.current);
+    addedTimerRef.current = setTimeout(() => setAdded(false), 2000);
   };
 
   return (
