@@ -107,21 +107,13 @@ const Header = ({ cartCount = 0, onSearch }) => {
         setShowSearch(false);
 
         if (window.location.pathname !== '/search') {
-            navigate('/search');
+            navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
         }
     };
 
     const handleLogout = () => {
         logout();
         navigate('/');
-    };
-
-    const handleUserClick = () => {
-        if (user) {
-            navigate('/profile');
-        } else {
-            navigate('/login');
-        }
     };
 
     return (

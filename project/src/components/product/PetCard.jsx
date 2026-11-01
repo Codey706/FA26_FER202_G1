@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
-import { Badge, Modal, Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import { Modal, Button } from 'react-bootstrap';
 import {
   FaHeart,
   FaStar,
@@ -8,7 +10,6 @@ import {
   FaPaw,
   FaPhoneAlt,
   FaCheckCircle,
-  FaInfoCircle,
   FaShoppingCart
 } from 'react-icons/fa';
 import { formatCurrency } from '../../utils/formatters';
@@ -19,7 +20,9 @@ const DEFAULT_FALLBACK_IMG =
 const PetCard = ({ pet, onAddToCart }) => {
   const [showModal, setShowModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [imgSrc, setImgSrc] = useState(pet.image || DEFAULT_FALLBACK_IMG);
+  const [imgSrc, setImgSrc] = useState(
+    pet?.image || DEFAULT_FALLBACK_IMG
+  );
 
   if (!pet) return null;
 
@@ -28,10 +31,11 @@ const PetCard = ({ pet, onAddToCart }) => {
   return (
     <>
       <div className="pet-card">
-        {/* Thumbnail Box */}
         <div className="pet-card-thumb">
           {pet.discount > 0 && (
-            <span className="badge-tag-discount">-{pet.discount}%</span>
+            <span className="badge-tag-discount">
+              -{pet.discount}%
+            </span>
           )}
 
           {pet.gender && (
@@ -51,7 +55,6 @@ const PetCard = ({ pet, onAddToCart }) => {
             onError={() => setImgSrc(DEFAULT_FALLBACK_IMG)}
           />
 
-          {/* Like Heart Button */}
           <button
             type="button"
             className="btn btn-sm position-absolute"
@@ -77,26 +80,27 @@ const PetCard = ({ pet, onAddToCart }) => {
           </button>
         </div>
 
-        {/* Card Body */}
         <div className="pet-card-body">
-          {/* Rating & Review */}
           <div className="d-flex align-items-center justify-content-between mb-2">
             <div className="d-flex align-items-center gap-1 text-warning small">
               <FaStar />
-              <strong className="text-dark ms-1">{pet.rating || 5.0}</strong>
-              <span className="text-muted">({pet.reviewCount || 10})</span>
+              <strong className="text-dark ms-1">
+                {pet.rating || 5.0}
+              </strong>
+              <span className="text-muted">
+                ({pet.reviewCount || 10})
+              </span>
             </div>
+
             <span className="badge bg-light text-secondary border small">
               {pet.petType === 'dog' ? 'Chó Cảnh' : 'Mèo Cảnh'}
             </span>
           </div>
 
-          {/* Pet Name */}
           <h5 className="pet-card-title" title={pet.name}>
             {pet.name}
           </h5>
 
-          {/* Meta Tags */}
           <div className="pet-meta-row">
             {pet.age && (
               <span className="pet-meta-tag">
@@ -104,11 +108,16 @@ const PetCard = ({ pet, onAddToCart }) => {
                 {pet.age}
               </span>
             )}
+
             {pet.color && (
-              <span className="pet-meta-tag text-truncate" style={{ maxWidth: 140 }}>
+              <span
+                className="pet-meta-tag text-truncate"
+                style={{ maxWidth: 140 }}
+              >
                 {pet.color}
               </span>
             )}
+
             {pet.healthCheck && (
               <span className="pet-meta-tag text-success">
                 <FaShieldAlt /> Sức khỏe tốt
@@ -116,19 +125,29 @@ const PetCard = ({ pet, onAddToCart }) => {
             )}
           </div>
 
-          {/* Price Section */}
           <div className="pet-price-box">
             <div>
-              <div className="current-price">{formatCurrency(pet.price)}</div>
-              {pet.originalPrice && pet.originalPrice > pet.price && (
-                <div className="original-price">
-                  {formatCurrency(pet.originalPrice)}
-                </div>
-              )}
+              <div className="current-price">
+                {formatCurrency(pet.price)}
+              </div>
+
+              {pet.originalPrice &&
+                pet.originalPrice > pet.price && (
+                  <div className="original-price">
+                    {formatCurrency(pet.originalPrice)}
+                  </div>
+                )}
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Nút chuyển đến trang chi tiết thú cưng */}
+          <Link
+            to={`/products/${pet.id}`}
+            className="btn btn-outline-secondary btn-sm rounded-pill mb-2 w-100"
+          >
+            Xem chi tiết
+          </Link>
+
           <div className="pet-card-actions d-flex flex-column gap-2">
             <button
               type="button"
@@ -138,6 +157,7 @@ const PetCard = ({ pet, onAddToCart }) => {
               <FaShoppingCart className="small" />
               Thêm Vào Giỏ
             </button>
+
             <button
               type="button"
               className="btn btn-card-action btn-contact-pet"
@@ -150,14 +170,19 @@ const PetCard = ({ pet, onAddToCart }) => {
         </div>
       </div>
 
-      {/* Detail / Adoption Inquiry Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        size="lg"
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title className="fw-bold d-flex align-items-center gap-2">
             <FaPaw className="text-warning" />
             <span>Thông Tin Chi Tiết Thú Cưng</span>
           </Modal.Title>
         </Modal.Header>
+
         <Modal.Body className="p-4">
           <div className="row g-4 align-items-center">
             <div className="col-md-5 text-center">
@@ -165,20 +190,30 @@ const PetCard = ({ pet, onAddToCart }) => {
                 src={imgSrc}
                 alt={pet.name}
                 className="img-fluid rounded-4 shadow-sm"
-                style={{ maxHeight: 280, width: '100%', objectFit: 'cover' }}
+                style={{
+                  maxHeight: 280,
+                  width: '100%',
+                  objectFit: 'cover'
+                }}
               />
+
               <div className="mt-3">
                 <span className="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
                   Tình trạng: Sẵn sàng về nhà mới
                 </span>
               </div>
             </div>
+
             <div className="col-md-7">
-              <h4 className="fw-bold text-dark mb-2">{pet.name}</h4>
+              <h4 className="fw-bold text-dark mb-2">
+                {pet.name}
+              </h4>
+
               <div className="d-flex align-items-center gap-2 mb-3">
                 <span className="badge bg-danger fs-6 px-3 py-2 rounded-pill">
                   {formatCurrency(pet.price)}
                 </span>
+
                 {pet.originalPrice && (
                   <span className="text-muted text-decoration-line-through small">
                     {formatCurrency(pet.originalPrice)}
@@ -190,17 +225,24 @@ const PetCard = ({ pet, onAddToCart }) => {
                 <div className="row g-2">
                   <div className="col-6">
                     <strong>Giống:</strong>{' '}
-                    {pet.petType === 'dog' ? 'Chó thuần chủng' : 'Mèo thuần chủng'}
+                    {pet.petType === 'dog'
+                      ? 'Chó thuần chủng'
+                      : 'Mèo thuần chủng'}
                   </div>
+
                   <div className="col-6">
-                    <strong>Giới tính:</strong> {pet.gender || 'Đực/Cái'}
+                    <strong>Giới tính:</strong>{' '}
+                    {pet.gender || 'Đực/Cái'}
                   </div>
+
                   <div className="col-6">
                     <strong>Độ tuổi:</strong> {pet.age}
                   </div>
+
                   <div className="col-6">
                     <strong>Màu sắc:</strong> {pet.color}
                   </div>
+
                   <div className="col-12">
                     <strong>Tiêm phòng:</strong>{' '}
                     <span className="text-success fw-bold">
@@ -208,13 +250,16 @@ const PetCard = ({ pet, onAddToCart }) => {
                       {pet.vaccinated || 'Đã tiêm phòng đầy đủ'}
                     </span>
                   </div>
+
                   <div className="col-12">
                     <strong>Nguồn gốc:</strong> {pet.origin}
                   </div>
                 </div>
               </div>
 
-              <p className="text-muted small mb-3">{pet.description}</p>
+              <p className="text-muted small mb-3">
+                {pet.description || 'Chưa có mô tả thú cưng.'}
+              </p>
 
               <div className="alert alert-warning py-2 px-3 small d-flex align-items-center gap-2 mb-0">
                 <FaCheckCircle className="text-success flex-shrink-0" />
@@ -225,6 +270,7 @@ const PetCard = ({ pet, onAddToCart }) => {
             </div>
           </div>
         </Modal.Body>
+
         <Modal.Footer className="border-0 pt-0">
           <Button
             variant="outline-secondary"
@@ -233,6 +279,7 @@ const PetCard = ({ pet, onAddToCart }) => {
           >
             Đóng
           </Button>
+
           <a
             href="tel:0987654321"
             className="btn btn-warning text-white fw-bold rounded-pill px-4 d-inline-flex align-items-center gap-2"

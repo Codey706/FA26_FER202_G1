@@ -1189,9 +1189,10 @@
       "dewormed": true,
       "healthCheck": true,
       "origin": "Bố mẹ gia phả WCF",
-      "color": "Golden NY12 Ánh Vàng",
-      "description": "Tông màu Golden sáng chói ngời, mắt xanh lá ngọc lục bảo đẹp mê hồn. Thể trạng săn chắc mập mạp, tính tình hiền như cục bột.",
-      "image": "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=600&q=80",
+      "color": "Đen - nâu vàng",
+      "description": "Chó Becgie Đức (German Shepherd) với bộ lông đen pha nâu vàng đặc trưng. Thông minh, trung thành, có khả năng học hỏi tốt và cần được vận động thường xuyên.",
+      "image": "/images/pets/dogs/dog-13.jpg",
+      "imageAlt": "Chó Becgie Đức với bộ lông đen pha nâu vàng",
       "rating": 5,
       "reviewCount": 26,
       "isFeatured": false,
@@ -2181,7 +2182,52 @@
     },
     {
       "id": "ord-1793110178277-x2x4s",
-      "orderStatus": "cancelled"
+"orderStatus": "cancelled",
+      "userId": null,
+      "customerName": "ad",
+      "phone": "0901234567",
+      "email": "abc@gmail.com",
+      "shippingAddress": "s",
+      "paymentMethod": "Chuyển khoản ngân hàng",
+      "notes": "s",
+      "items": [
+        {
+          "productId": "pet-02",
+          "name": "Poodle Tiny Nâu Đỏ Xoăn Tít",
+          "price": 8500000,
+          "quantity": 1,
+          "image": "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?auto=format&fit=crop&w=600&q=80"
+        }
+      ],
+      "totalAmount": 8500000,
+      "orderDate": "2026-10-27T14:09:38.277Z"
+    },
+    {
+      "id": "ord-106",
+      "userId": "u3",
+      "customerName": "Lê Hoàng Nam",
+      "phone": "0905123456",
+      "email": "namle@gmail.com",
+      "shippingAddress": "78 Nguyễn Trãi, Thanh Xuân, Hà Nội",
+      "items": [
+        {
+          "productId": "acc-09",
+          "name": "Vòng cổ chuông họa tiết dấu chân (5 màu)",
+          "price": 65000,
+          "quantity": 1
+        },
+        {
+          "productId": "acc-11",
+          "name": "Bánh nhai Pedigree Dentastix Original cho chó lớn",
+          "price": 95000,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": 255000,
+      "paymentMethod": "Ví điện tử MoMo",
+      "orderStatus": "delivered",
+      "orderDate": "2024-04-20T10:20:00Z",
+      "notes": "Đơn phụ kiện đã giao đủ; khách đã xác nhận nhận hàng."
     }
   ]
 }
