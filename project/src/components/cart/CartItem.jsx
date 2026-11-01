@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Button } from 'react-bootstrap';
-import { FaTrash } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { FaTrash, FaPaw, FaBoxOpen } from 'react-icons/fa';
 import { formatCurrency } from '../../utils/formatters';
 import { getMaxQuantity, isPet } from '../../utils/cartUtils';
 
@@ -34,52 +34,53 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
   const lineTotal = item.price * item.quantity;
 
   return (
-    <div className="d-flex flex-column flex-sm-row align-items-sm-center gap-3 py-3 border-bottom">
-      <img
-        src={item.image || FALLBACK_IMG}
-        alt={item.name}
-        className="rounded-3"
-        style={{ width: 112, height: 96, objectFit: 'cover' }}
-        onError={(event) => {
-          event.currentTarget.onerror = null;
-          event.currentTarget.src = FALLBACK_IMG;
-        }}
-      />
+    <div className="cart-item">
+      <Link to={`/products/${item.id}`}>
+        <img
+          src={item.image || FALLBACK_IMG}
+          alt={item.name}
+          className="cart-item-img"
+          onError={(event) => {
+            event.currentTarget.onerror = null;
+            event.currentTarget.src = FALLBACK_IMG;
+          }}
+        />
+      </Link>
 
-      <div className="flex-grow-1">
-        <h6 className="fw-bold mb-1">{item.name}</h6>
-        <div className="text-warning fw-bold">{formatCurrency(item.price)}</div>
-        <small className="text-muted d-block">
+      <div className="cart-item-info">
+        <Link to={`/products/${item.id}`} className="cart-item-name">
+          {item.name}
+        </Link>
+        <div className="cart-item-price">{formatCurrency(item.price)}</div>
+        <span className={`cart-item-tag ${pet ? 'is-pet' : ''}`}>
+          {pet ? <FaPaw /> : <FaBoxOpen />}
           {pet ? 'Thú cưng (mỗi bé chỉ có 1)' : 'Phụ kiện / thức ăn'}
-        </small>
+        </span>
         {unavailable ? (
-          <small className="text-danger fw-semibold">
-            Sản phẩm đã hết hàng, vui lòng xóa khỏi giỏ.
-          </small>
+          <span className="cart-item-warn">Sản phẩm đã hết hàng, vui lòng xóa khỏi giỏ.</span>
         ) : (
           !pet &&
           item.quantity >= max && (
-            <small className="text-danger">Đã đạt số lượng tối đa ({max}).</small>
+            <span className="cart-item-warn">Đã đạt số lượng tối đa ({max}).</span>
           )
         )}
       </div>
 
-      <div className="d-flex align-items-center gap-2">
-        <Button
-          size="sm"
-          variant="outline-secondary"
+      <div className="qty-stepper">
+        <button
+          type="button"
+          className="qty-btn"
           disabled={pet || unavailable || item.quantity <= 1}
           onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
           aria-label="Giảm số lượng"
         >
           −
-        </Button>
+        </button>
 
         <input
           type="text"
           inputMode="numeric"
-          className="form-control form-control-sm text-center fw-bold"
-          style={{ width: 56 }}
+          className="qty-input"
           value={draft}
           disabled={pet || unavailable}
           onChange={(event) => setDraft(event.target.value.replace(/\D/g, ''))}
@@ -90,30 +91,28 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
           aria-label={`Số lượng ${item.name}`}
         />
 
-        <Button
-          size="sm"
-          variant="outline-secondary"
+        <button
+          type="button"
+          className="qty-btn"
           disabled={pet || unavailable || item.quantity >= max}
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
           aria-label="Tăng số lượng"
         >
           +
-        </Button>
+        </button>
       </div>
 
-      <div className="text-sm-end fw-bold" style={{ minWidth: 120 }}>
-        {formatCurrency(lineTotal)}
-      </div>
+      <div className="cart-item-total">{formatCurrency(lineTotal)}</div>
 
-      <Button
-        variant="outline-danger"
-        size="sm"
+      <button
+        type="button"
+        className="cart-remove-btn"
         onClick={() => onRemove(item.id)}
         title="Xóa sản phẩm"
         aria-label={`Xóa ${item.name} khỏi giỏ hàng`}
       >
-        <FaTrash />
-      </Button>
+        <FaTrash size={14} />
+      </button>
     </div>
   );
 };

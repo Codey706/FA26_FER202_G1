@@ -278,6 +278,31 @@ export default function OrderDetailPage() {
                                 </div>
                             )}
 
+                            {order.shippingFee !== undefined && (
+                                <div className="px-4 pt-3 border-top">
+                                    <div className="d-flex justify-content-between text-secondary mb-1">
+                                        <span>Tạm tính</span>
+                                        <span>{formatCurrency(order.subtotal ?? (Number(order.totalAmount) - Number(order.shippingFee)))}</span>
+                                    </div>
+                                    <div className="d-flex justify-content-between text-secondary mb-1">
+                                        <span>Phí vận chuyển</span>
+                                        <span>{Number(order.shippingFee) > 0 ? formatCurrency(order.shippingFee) : 'Miễn phí'}</span>
+                                    </div>
+                                    {Number(order.depositAmount) > 0 && (
+                                        <>
+                                            <div className="d-flex justify-content-between text-success mb-1">
+                                                <span>Đặt cọc giữ bé</span>
+                                                <span>{formatCurrency(order.depositAmount)}</span>
+                                            </div>
+                                            <div className="d-flex justify-content-between text-secondary mb-1">
+                                                <span>Thanh toán khi nhận bé</span>
+                                                <span>{formatCurrency(order.remainingAmount)}</span>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
                             <div className="p-4 bg-light bg-opacity-50 border-top d-flex justify-content-between align-items-center">
                                 <span className="fw-semibold text-secondary">Tổng cộng đơn hàng:</span>
                                 <span className="fs-4 fw-bold text-danger">

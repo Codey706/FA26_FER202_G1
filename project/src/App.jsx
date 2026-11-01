@@ -95,10 +95,14 @@ function AppContent() {
             element={<CartPage />}
           />
 
-          {/* Checkout */}
+          {/* Checkout (bắt buộc đăng nhập) */}
           <Route
             path="/checkout"
-            element={<CheckoutPage />}
+            element={
+              <RequireAuth>
+                <CheckoutPage />
+              </RequireAuth>
+            }
           />
 
           {/* Login */}

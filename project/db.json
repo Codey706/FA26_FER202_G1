@@ -603,7 +603,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 1
+      "inStock": 0
     },
     {
       "id": "pet-02",
@@ -629,7 +629,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 1
+      "inStock": 0
     },
     {
       "id": "pet-18",
@@ -835,7 +835,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 1
+      "inStock": 0
     },
     {
       "id": "pet-22",
@@ -1304,7 +1304,7 @@
       "reviewCount": 0,
       "isFeatured": true,
       "status": "available",
-      "inStock": 20
+      "inStock": 18
     },
     {
       "id": "acc-02",
@@ -1412,7 +1412,7 @@
       "reviewCount": 0,
       "isFeatured": true,
       "status": "available",
-      "inStock": 20
+      "inStock": 19
     },
     {
       "id": "acc-06",
@@ -1707,7 +1707,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 20
+      "inStock": 19
     },
     {
       "id": "acc-16",
@@ -1969,35 +1969,6 @@
   ],
   "carts": [
     {
-      "id": "cart-1",
-      "userId": "u3",
-      "items": [
-        {
-          "productId": "acc-01",
-          "name": "Bánh thưởng Milk-Bone Original cho chó",
-          "price": 140000,
-          "quantity": 2,
-          "image": "/images/food/item-01.jpg"
-        },
-        {
-          "productId": "acc-05",
-          "name": "Pate Pedigree Puppy vị gà và cơm cho chó con",
-          "price": 185000,
-          "quantity": 1,
-          "image": "/images/food/item-05.jpg"
-        },
-        {
-          "productId": "acc-15",
-          "name": "Ghế nệm viền cao họa tiết caro (đỏ và xanh)",
-          "price": 180000,
-          "quantity": 1,
-          "image": "/images/beds/bed-01.jpg"
-        }
-      ],
-      "totalPrice": 645000,
-      "updatedAt": "2024-03-25T10:30:00Z"
-    },
-    {
       "id": "cart-2",
       "userId": "u4",
       "items": [
@@ -2013,38 +1984,21 @@
       "updatedAt": "2024-04-01T15:20:00Z"
     },
     {
-      "id": "cart-guest-mverd88bdez8",
-      "userId": null,
+      "id": "cart-u3-mvy337h8gdbn",
+      "userId": "u3",
       "items": [
         {
-          "productId": "acc-02",
-          "name": "Pate Mèo Ciao Churu Vị Cá Ngừ Tuyệt Hảo",
-          "price": 65000,
-          "quantity": 2,
-          "image": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=600&q=80",
-          "petType": "accessory",
-          "inStock": 120
-        }
-      ],
-      "totalPrice": 130000,
-      "updatedAt": "2026-10-19T04:32:40.649Z"
-    },
-    {
-      "id": "cart-guest-mvqrjw2iyys7",
-      "userId": null,
-      "items": [
-        {
-          "productId": "pet-01",
-          "name": "Bé Corgi Pembroke Vàng Trắng",
-          "price": 14500000,
+          "productId": "pet-05",
+          "name": "Chó Pug Vàng Kem",
+          "price": 6500000,
           "quantity": 1,
-          "image": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=600&q=80",
+          "image": "/images/pets/dogs/dog-05.jpg",
           "petType": "dog",
           "inStock": 1
         }
       ],
-      "totalPrice": 14500000,
-      "updatedAt": "2026-10-27T14:11:16.470Z"
+      "totalPrice": 6500000,
+      "updatedAt": "2026-11-01T17:08:50.532Z"
     }
   ],
   "orders": [
@@ -2182,7 +2136,7 @@
     },
     {
       "id": "ord-1793110178277-x2x4s",
-"orderStatus": "cancelled",
+      "orderStatus": "cancelled",
       "userId": null,
       "customerName": "ad",
       "phone": "0901234567",
@@ -2228,6 +2182,101 @@
       "orderStatus": "delivered",
       "orderDate": "2024-04-20T10:20:00Z",
       "notes": "Đơn phụ kiện đã giao đủ; khách đã xác nhận nhận hàng."
+    },
+    {
+      "id": "ord-1793550622245-6axi7",
+      "userId": null,
+      "customerName": "Như Ý Huỳnh",
+      "phone": "0901234567",
+      "email": "nhuyce200087@gmail.com",
+      "shippingAddress": "ádssàewijurioqwju3orjq",
+      "paymentMethod": "Tiền mặt khi nhận hàng (COD)",
+      "notes": "",
+      "items": [
+        {
+          "productId": "pet-01",
+          "name": "Chó Bắc Kinh Trắng",
+          "price": 6000000,
+          "quantity": 1,
+          "image": "/images/pets/dogs/dog-01.jpg"
+        }
+      ],
+      "totalAmount": 6000000,
+      "orderStatus": "pending",
+      "orderDate": "2026-11-01T16:30:22.245Z"
+    },
+    {
+      "id": "ord-1793550882764-hozbf",
+      "userId": "u1",
+      "customerName": "Nguyễn Văn An",
+      "phone": "0987654321",
+      "email": "admin@matpet.vn",
+      "shippingAddress": "123 Cầu Giấy, Quận Cầu Giấy, Hà Nội",
+      "paymentMethod": "Tiền mặt khi nhận hàng (COD)",
+      "notes": "",
+      "items": [
+        {
+          "productId": "pet-02",
+          "name": "Chó Bắc Kinh Vàng Trắng",
+          "price": 6500000,
+          "quantity": 1,
+          "image": "/images/pets/dogs/dog-02.jpg"
+        }
+      ],
+      "totalAmount": 6500000,
+      "orderStatus": "pending",
+      "orderDate": "2026-11-01T16:34:42.764Z"
+    },
+    {
+      "id": "ord-1793552837749-5s2fo",
+      "userId": "u3",
+      "customerName": "Nguyễn Võ Nhật Duy",
+      "phone": "0349401599",
+      "email": "duynvnce201168@gmail.com",
+      "shippingAddress": "Thạnh Hòa, TP Cần Thơ",
+      "paymentMethod": "Tiền mặt khi nhận hàng (COD)",
+      "notes": "",
+      "items": [
+        {
+          "productId": "acc-01",
+          "name": "Bánh thưởng Milk-Bone Original cho chó",
+          "price": 140000,
+          "quantity": 2,
+          "image": "/images/food/item-01.jpg",
+          "petType": "accessory"
+        },
+        {
+          "productId": "acc-05",
+          "name": "Pate Pedigree Puppy vị gà và cơm cho chó con",
+          "price": 185000,
+          "quantity": 1,
+          "image": "/images/food/item-05.jpg",
+          "petType": "accessory"
+        },
+        {
+          "productId": "acc-15",
+          "name": "Ghế nệm viền cao họa tiết caro (đỏ và xanh)",
+          "price": 180000,
+          "quantity": 1,
+          "image": "/images/beds/bed-01.jpg",
+          "petType": "accessory"
+        },
+        {
+          "productId": "pet-06",
+          "name": "Chó Alaskan Malamute Nâu Đỏ",
+          "price": 12000000,
+          "quantity": 1,
+          "image": "/images/pets/dogs/dog-06.jpg",
+          "petType": "dog"
+        }
+      ],
+      "subtotal": 12645000,
+      "shippingFee": 0,
+      "depositAmount": 3600000,
+      "remainingAmount": 9045000,
+      "totalAmount": 12645000,
+      "orderStatus": "pending",
+      "orderDate": "2026-11-01T17:07:17.749Z"
     }
   ]
 }
