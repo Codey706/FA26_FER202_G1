@@ -44,24 +44,8 @@ const Footer = () => {
               </div>
               <div className="d-flex align-items-center gap-2 text-white">
                 <FaTruck className="text-info" />
-                <span>Vận chuyển an toàn hỏa tốc trên 63 tỉnh thành</span>
+                <span>Vận chuyển an toàn hỏa tốc trên tất cả các tỉnh thành</span>
               </div>
-            </div>
-
-            {/* Social Icons */}
-            <div className="social-links-box">
-              <a href="#facebook" className="social-icon-btn" title="Facebook">
-                <FaFacebookF />
-              </a>
-              <a href="#youtube" className="social-icon-btn" title="YouTube">
-                <FaYoutube />
-              </a>
-              <a href="#tiktok" className="social-icon-btn" title="TikTok">
-                <FaTiktok />
-              </a>
-              <a href="#instagram" className="social-icon-btn" title="Instagram">
-                <FaInstagram />
-              </a>
             </div>
           </Col>
 
@@ -121,19 +105,13 @@ const Footer = () => {
             <div className="footer-contact-item">
               <FaMapMarkerAlt className="footer-contact-icon" />
               <span>
-                <strong>Cơ sở Hà Nội:</strong> 123 Cầu Giấy, Quận Cầu Giấy, Hà Nội
-              </span>
-            </div>
-            <div className="footer-contact-item">
-              <FaMapMarkerAlt className="footer-contact-icon" />
-              <span>
-                <strong>Cơ sở TP.HCM:</strong> 45 Nguyễn Trãi, Phường Bến Thành, Quận 1
+                <strong>Cơ sở Cần Thơ:</strong> 123 Nguyễn Văn Cừ, Quận Ninh Kiều, Cần Thơ
               </span>
             </div>
             <div className="footer-contact-item">
               <FaPhoneAlt className="footer-contact-icon" />
               <span>
-                <strong>Hotline:</strong> 0987.654.321 / 0912.345.678
+                <strong>Hotline:</strong> 0987.654.321 / 0918.352.816
               </span>
             </div>
             <div className="footer-contact-item">
@@ -145,7 +123,7 @@ const Footer = () => {
             <div className="footer-contact-item">
               <FaClock className="footer-contact-icon" />
               <span>
-                <strong>Giờ làm việc:</strong> 08:00 - 21:30 (Thứ 2 - Chủ Nhật)
+                <strong>Giờ làm việc:</strong> 08:00 - 21:00 (Thứ 2 - Chủ Nhật)
               </span>
             </div>
           </Col>
@@ -154,7 +132,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="footer-bottom">
           <p className="mb-0">
-            © 2026 Pet Shop - Website Kinh Doanh Thú Cưng & Phụ Kiện. Phát triển với ReactJS & Vite.
+            © 2026 Pet Shop - Website Kinh Doanh Thú Cưng & Phụ Kiện.
           </p>
         </div>
       </Container>

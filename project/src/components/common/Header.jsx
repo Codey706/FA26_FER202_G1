@@ -107,11 +107,11 @@ const Header = ({ onSearch, cartCount = 0 }) => {
               </span>
               <span className="top-bar-item d-none d-md-inline-flex">
                 <FaMapMarkerAlt className="text-warning" />
-                <span>Hà Nội - TP. Hồ Chí Minh - Đà Nẵng</span>
+                <span>Cần Thơ</span>
               </span>
               <span className="top-bar-item d-none d-lg-inline-flex">
                 <FaClock className="text-warning" />
-                <span>Mở cửa: 08:00 - 21:30</span>
+                <span>Mở cửa: 08:00 - 21:00</span>
               </span>
             </div>
             <div className="d-flex align-items-center gap-3">
