@@ -39,7 +39,12 @@ body {
   line-height: 1.6;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Nunito', 'Be Vietnam Pro', sans-serif;
   font-weight: 700;
   color: var(--text-dark);
@@ -367,6 +372,7 @@ a:hover {
   from {
     transform: translateY(0);
   }
+
   to {
     transform: translateY(-8px);
   }
@@ -493,6 +499,7 @@ a:hover {
     font-size: 1rem;
   }
 }
+
 /* ================= Product & Pet Cards ================= */
 .pet-card,
 .product-card {
@@ -1216,6 +1223,7 @@ a:hover {
     transform: translateY(100px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -1228,23 +1236,29 @@ a:hover {
     padding: 40px 24px;
     text-align: center;
   }
+
   .hero-title {
     font-size: 2.2rem;
   }
+
   .hero-stats-row {
     justify-content: center;
   }
+
   .hero-img-box {
     margin-top: 30px;
   }
+
   .hero-floating-card {
     left: 10px;
     bottom: 10px;
   }
+
   .cta-banner-box {
     padding: 36px 24px;
     text-align: center;
   }
+
   .cta-title {
     font-size: 1.8rem;
   }
@@ -1254,9 +1268,11 @@ a:hover {
   .section-title {
     font-size: 1.7rem;
   }
+
   .hero-title {
     font-size: 1.8rem;
   }
+
   .top-bar {
     display: none;
   }
@@ -1466,13 +1482,25 @@ a:hover {
 }
 
 @keyframes search-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes search-pop-in {
-  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ================= Search: trang kết quả ================= */
@@ -1534,4 +1562,41 @@ a:hover {
   .search-overlay {
     padding-top: 10vh;
   }
+}
+
+/* Order History - Status colors */
+.badge.status-pending {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  border: 1px solid #ffe69c;
+}
+
+.badge.status-processing {
+  background-color: #cfe2ff !important;
+  color: #084298 !important;
+  border: 1px solid #9ec5fe;
+}
+
+.badge.status-shipping {
+  background-color: #cff4fc !important;
+  color: #055160 !important;
+  border: 1px solid #9eeaf9;
+}
+
+.badge.status-delivered {
+  background-color: #d1e7dd !important;
+  color: #0f5132 !important;
+  border: 1px solid #a3cfbb;
+}
+
+.badge.status-cancelled {
+  background-color: #f8d7da !important;
+  color: #842029 !important;
+  border: 1px solid #f1aeb5;
+}
+
+.badge.status-default {
+  background-color: #e2e3e5 !important;
+  color: #41464b !important;
+  border: 1px solid #d3d6d8;
 }
