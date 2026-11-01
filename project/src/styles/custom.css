@@ -1876,3 +1876,103 @@ a:hover {
   color: #41464b !important;
   border: 1px solid #d3d6d8;
 }
+
+/* ================= Header: desktop navigation on one line ================= */
+@media (min-width: 992px) {
+  .header-sticky > .container {
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+
+  .header-sticky .navbar-brand {
+    flex: 0 0 auto;
+    margin-right: 8px;
+  }
+
+  .header-sticky .navbar-collapse {
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+  }
+
+  .header-sticky .navbar-nav {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 0;
+    margin: 0 6px !important;
+  }
+
+  .header-sticky .nav-link-custom {
+    white-space: nowrap;
+    padding: 7px 7px !important;
+    font-size: 0.78rem;
+    letter-spacing: -0.15px;
+  }
+
+  .header-sticky .navbar-collapse > .d-flex {
+    flex: 0 0 auto;
+    gap: 8px !important;
+  }
+
+  .header-sticky .search-trigger {
+    max-width: 185px;
+    min-width: 145px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .header-sticky .search-trigger-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.78rem;
+  }
+
+  .header-sticky .user-icon-btn,
+  .header-sticky .cart-icon-btn {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .header-sticky .brand-logo {
+    font-size: 1.15rem;
+    gap: 7px;
+  }
+
+  .header-sticky .brand-icon-box {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+
+  .header-sticky .brand-logo small {
+    font-size: 0.52rem !important;
+  }
+
+  .header-sticky .nav-link-custom {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    font-size: 0.70rem;
+  }
+
+  .header-sticky .search-trigger {
+    min-width: 125px;
+    max-width: 145px;
+  }
+}
+
+/* Mobile/tablet keep the original Bootstrap collapsible menu. */
+@media (max-width: 991.98px) {
+  .header-sticky .navbar-nav {
+    align-items: stretch;
+  }
+
+  .header-sticky .nav-link-custom {
+    white-space: normal;
+  }
+}

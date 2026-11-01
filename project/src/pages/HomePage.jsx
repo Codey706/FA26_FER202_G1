@@ -97,6 +97,7 @@ const HomePage = ({ searchQuery = '', onAddToCart }) => {
       <PopularBreeds />
 
       <AccessoriesSection
+        searchQuery={searchQuery}
         onAddToCart={handleAddToCart}
         selectedCategory={selectedCategory}
         onClearCategory={() => setSelectedCategory(null)}
