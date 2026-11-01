@@ -6,6 +6,7 @@ import {
   Container,
   Nav,
   Form,
+  Dropdown
   Modal,
   Button
 } from 'react-bootstrap';
@@ -18,12 +19,23 @@ import {
   FaShoppingCart,
   FaUserAlt,
   FaShieldAlt,
-  FaInfoCircle
+  FaSignInAlt,
+  FaSignOutAlt,
+  FaClipboardList
 } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
+
+const ROLE_LABELS = {
+  admin: 'Quản trị viên',
+  staff: 'Nhân viên',
+  customer: 'Khách hàng'
+};
 import SearchOverlay from './SearchOverlay';
 
 const Header = ({ cartCount = 0 }) => {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const { user, isStaffOrAdmin, logout } = useAuth();
   const [showSearch, setShowSearch] = useState(false);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
   const [noticeMessage, setNoticeMessage] = useState({ title: '', content: '' });
@@ -71,6 +83,21 @@ const Header = ({ cartCount = 0 }) => {
     };
   }, []);
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (onSearch) {
+      onSearch(searchTerm);
+    }
+    // Scroll to products section if searching
+    const target = document.getElementById('featured-pets');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   const handleUserClick = () => {
     setNoticeMessage({
       title: 'Tài khoản người dùng',
@@ -196,6 +223,15 @@ const Header = ({ cartCount = 0 }) => {
               >
                 Đánh Giá
               </Nav.Link>
+              {isStaffOrAdmin && (
+                <Nav.Link
+                  as={Link}
+                  to="/admin/orders"
+                  className="nav-link-custom"
+                >
+                  Quản Lý Đơn Hàng
+                </Nav.Link>
+              )}
 
               {/* Order History */}
               <Nav.Link
@@ -231,15 +267,43 @@ const Header = ({ cartCount = 0 }) => {
                 <FaSearch className="search-trigger-icon" />
               </button>
 
-              {/* User Account Button */}
-              <button
-                className="user-icon-btn"
-                onClick={handleUserClick}
-                title="Tài khoản người dùng"
-                type="button"
-              >
-                <FaUserAlt />
-              </button>
+              {/* User Account: nút Đăng nhập hoặc menu tài khoản */}
+              {user ? (
+                <Dropdown align="end">
+                  <Dropdown.Toggle
+                    as="button"
+                    type="button"
+                    id="user-menu-toggle"
+                    className="user-icon-btn user-avatar-btn"
+                    title={user.fullName}
+                  >
+                    <FaUserAlt />
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu className="user-menu shadow">
+                    <div className="user-menu-header">
+                      <div className="fw-bold text-truncate">{user.fullName}</div>
+                      <small className="text-muted d-block text-truncate">{user.email}</small>
+                      <span className="user-role-badge">
+                        {ROLE_LABELS[user.role] || user.role}
+                      </span>
+                    </div>
+                    <Dropdown.Divider />
+                    {isStaffOrAdmin && (
+                      <Dropdown.Item as={Link} to="/admin/orders">
+                        <FaClipboardList className="me-2 text-warning" /> Quản lý đơn hàng
+                      </Dropdown.Item>
+                    )}
+                    <Dropdown.Item onClick={handleLogout} className="text-danger">
+                      <FaSignOutAlt className="me-2" /> Đăng xuất
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              ) : (
+                <Link to="/login" className="btn-primary-orange btn-login-header">
+                  <FaSignInAlt /> Đăng nhập
+                </Link>
+              )}
 
               {/* Shopping Cart Button with Badge */}
               <button
