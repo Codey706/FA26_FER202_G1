@@ -63,6 +63,15 @@ export const productService = {
     return await api.get(`/products/${id}`);
   },
 
+  /**
+   * Cập nhật tồn kho sau khi đặt hàng
+   * @param {string} id
+   * @param {number} inStock
+   */
+  updateStock: async (id, inStock) => {
+    return await api.patch(`/products/${id}`, { inStock });
+  },
+
   // Prepared for future CRUD module
   createProduct: async (productData) => {
     return await api.post('/products', productData);

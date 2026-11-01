@@ -1,6 +1,5 @@
-
-import React, { useEffect, useMemo, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import HomePage from './pages/HomePage';
@@ -9,6 +8,18 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import SearchPage from './pages/SearchPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
+import OrderManagementPage from './pages/OrderManagementPage';
+import { CartProvider, useCart } from './context/CartContext';
+
+function AppContent() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const { cartCount, addToCart } = useCart();
+
+  const home = (
+    <HomePage
+      searchQuery={searchQuery}
+      onAddToCart={addToCart}
+    />
 import CategoryManagementPage from './pages/CategoryManagementPage';
 import ProductManagementPage from './pages/ProductManagementPage';
 
@@ -42,54 +53,19 @@ function AppContent() {
     [cartItems]
   );
 
-  // Thêm sản phẩm vào giỏ hàng
-  const handleAddToCart = (product) => {
-    setCartItems((current) => {
-      const existing = current.find(
-        (item) => String(item.id) === String(product.id)
-      );
-
-      if (existing) {
-        // Thú cưng là sản phẩm độc nhất, không tăng số lượng vượt quá 1.
-        if (product.petType === 'dog' || product.petType === 'cat') {
-          return current;
-        }
-
-        return current.map((item) =>
-          String(item.id) === String(product.id)
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-
-      return [...current, { ...product, quantity: 1 }];
-    });
-  };
-
-  // Cập nhật số lượng sản phẩm trong giỏ hàng
-  const updateCartQuantity = (id, quantity) => {
-    setCartItems((current) =>
-      current
-        .map((item) =>
-          String(item.id) === String(id)
-            ? { ...item, quantity }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-  // Xóa một sản phẩm khỏi giỏ hàng
-  const removeFromCart = (id) => {
-    setCartItems((current) =>
-      current.filter((item) => String(item.id) !== String(id))
-    );
-  };
-
-  // Xóa toàn bộ giỏ hàng sau khi checkout
-  const clearCart = () => setCartItems([]);
-
   return (
+    <div className="d-flex flex-column min-vh-100">
+      <Header onSearch={setSearchQuery} cartCount={cartCount} />
+
+      <div className="flex-grow-1">
+        <Routes>
+          <Route path="/" element={home} />
+          <Route path="/products" element={home} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/admin/orders" element={<OrderManagementPage />} />
+          <Route path="*" element={home} />
+        </Routes>
     <BrowserRouter>
       <div className="d-flex flex-column min-vh-100">
         {/* Common Header */}
@@ -153,6 +129,11 @@ function AppContent() {
 
 function App() {
   return (
+    <BrowserRouter>
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
+    </BrowserRouter>
     <AppContent />
   );
 }

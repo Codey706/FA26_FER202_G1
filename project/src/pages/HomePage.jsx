@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import HeroBanner from '../components/home/HeroBanner';
 import CategorySection from '../components/home/CategorySection';
 import FeaturedPets from '../components/home/FeaturedPets';
@@ -8,19 +8,23 @@ import AccessoriesSection from '../components/home/AccessoriesSection';
 import ShoppingProcess from '../components/home/ShoppingProcess';
 import Testimonials from '../components/home/Testimonials';
 import CTASection from '../components/home/CTASection';
-import { FaCheckCircle } from 'react-icons/fa';
+import { FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 
 const HomePage = ({ searchQuery = '', onAddToCart }) => {
-  const [toastMessage, setToastMessage] = useState(null);
+  const [toast, setToast] = useState(null); // { text, ok }
   const [selectedCategory, setSelectedCategory] = useState(null);
   const toastTimerRef = useRef(null);
 
   const handleAddToCart = (product) => {
-    if (onAddToCart) {
-      onAddToCart(product);
-    }
+    // onAddToCart trả về { ok, message } để toast phản ánh đúng kết quả.
+    const result = onAddToCart
+      ? onAddToCart(product)
+      : { ok: true, message: `Đã thêm "${product.name}" vào giỏ hàng!` };
 
-    setToastMessage(`Đã thêm "${product.name}" vào giỏ hàng!`);
+    setToast({
+      text: result?.message || `Đã thêm "${product.name}" vào giỏ hàng!`,
+      ok: result?.ok !== false
+    });
 
     // Xóa timer cũ trước khi tạo timer mới
     if (toastTimerRef.current) {
@@ -28,7 +32,7 @@ const HomePage = ({ searchQuery = '', onAddToCart }) => {
     }
 
     toastTimerRef.current = setTimeout(() => {
-      setToastMessage(null);
+      setToast(null);
       toastTimerRef.current = null;
     }, 3000);
   };
@@ -104,14 +108,18 @@ const HomePage = ({ searchQuery = '', onAddToCart }) => {
 
       <CTASection />
 
-      {toastMessage && (
+      {toast && (
         <div
           className="toast-notice"
           role="status"
           aria-live="polite"
         >
-          <FaCheckCircle className="text-success fs-5" />
-          <span>{toastMessage}</span>
+          {toast.ok ? (
+            <FaCheckCircle className="text-success fs-5" />
+          ) : (
+            <FaExclamationCircle className="text-warning fs-5" />
+          )}
+          <span>{toast.text}</span>
         </div>
       )}
     </main>
