@@ -2005,6 +2005,26 @@
       ],
       "totalPrice": 440000,
       "updatedAt": "2024-04-01T15:20:00Z"
+<<<<<<< Updated upstream
+=======
+    },
+    {
+      "id": "cart-u3-mvy337h8gdbn",
+      "userId": "u3",
+      "items": [
+        {
+          "productId": "pet-05",
+          "name": "Chó Pug Vàng Kem",
+          "price": 6500000,
+          "quantity": 1,
+          "image": "/images/pets/dogs/dog-05.jpg",
+          "petType": "dog",
+          "inStock": 1
+        }
+      ],
+      "totalPrice": 6500000,
+      "updatedAt": "2026-11-03T01:58:14.125Z"
+>>>>>>> Stashed changes
     }
   ],
   "orders": [

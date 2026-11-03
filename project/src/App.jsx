@@ -12,7 +12,13 @@ import CheckoutPage from './pages/CheckoutPage';
 import CategoryManagementPage from './pages/CategoryManagementPage';
 import ProductManagementPage from './pages/ProductManagementPage';
 
+<<<<<<< Updated upstream
 const CART_STORAGE_KEY = 'pet-shop-cart';
+=======
+import RequireAuth from './components/auth/RequireAuth';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider, useCart } from './context/CartContext';
+>>>>>>> Stashed changes
 
 function AppContent() {
   const [cartItems, setCartItems] = useState(() => {
@@ -26,7 +32,14 @@ function AppContent() {
   // Lưu từ khóa tìm kiếm
   const [searchQuery, setSearchQuery] = useState('');
 
+<<<<<<< Updated upstream
   // Xử lý khi người dùng tìm kiếm
+=======
+  const { user } = useAuth();
+
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
+
+>>>>>>> Stashed changes
   const handleSearch = (query) => {
     setSearchQuery(query);
   };
@@ -95,8 +108,25 @@ function AppContent() {
         {/* Common Header */}
         <Header onSearch={handleSearch} cartCount={cartCount} />
 
+<<<<<<< Updated upstream
         {/* Main Routes */}
         <div className="flex-grow-1">
+=======
+      {/* Main Routes */}
+      <main className="flex-grow-1">
+        <Routes>
+          {/* Home */}
+          <Route
+            path="/"
+            element={
+              <HomePage
+                searchQuery={searchQuery}
+                onAddToCart={addToCart}
+                isAdmin={isAdmin}
+              />
+            }
+          />
+>>>>>>> Stashed changes
 
           <Routes>
             <Route

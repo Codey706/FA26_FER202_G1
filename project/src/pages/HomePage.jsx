@@ -10,8 +10,13 @@ import Testimonials from '../components/home/Testimonials';
 import CTASection from '../components/home/CTASection';
 import { FaCheckCircle } from 'react-icons/fa';
 
+<<<<<<< Updated upstream
 const HomePage = ({ searchQuery = '', onAddToCart }) => {
   const [toastMessage, setToastMessage] = useState(null);
+=======
+const HomePage = ({ searchQuery = '', onAddToCart, isAdmin = false  }) => {
+  const [toast, setToast] = useState(null); // { text, ok }
+>>>>>>> Stashed changes
   const [selectedCategory, setSelectedCategory] = useState(null);
   const toastTimerRef = useRef(null);
 
@@ -76,6 +81,7 @@ const HomePage = ({ searchQuery = '', onAddToCart }) => {
       <CategorySection
         selectedCategory={selectedCategory}
         onSelectCategory={handleSelectCategory}
+        isAdmin={isAdmin}
       />
 
       {/* 3. Featured Pets */}

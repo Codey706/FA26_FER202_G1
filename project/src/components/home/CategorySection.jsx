@@ -5,6 +5,7 @@ import { FaPaw, FaCheckCircle } from 'react-icons/fa';
 import categoryService from '../../services/categoryService';
 import productService from '../../services/productService';
 import Loading from '../common/Loading';
+import { useNavigate } from 'react-router-dom';
 
 const ACCESSORY_CATEGORY_IDS = [
   'cat-food',
@@ -23,7 +24,9 @@ const CATEGORY_IMAGES = {
 const CategorySection = ({
   onSelectCategory,
   selectedCategory = null,
+  isAdmin = false,
 }) => {
+  const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +101,7 @@ const CategorySection = ({
       style={{ backgroundColor: '#fffdfa' }}
     >
       <Container>
-        <div className="text-center mb-5">
+        <div className="position-relative text-center mb-5">
           <span className="section-badge">
             <FaPaw /> DANH MỤC
           </span>
@@ -110,6 +113,16 @@ const CategorySection = ({
           <p className="section-subtitle">
             Chọn danh mục để tìm sản phẩm phù hợp với thú cưng của bạn.
           </p>
+
+          {isAdmin && (
+            <button
+              type="button"
+              className="manage-categories-btn position-absolute top-50 end-0 translate-middle-y"
+              onClick={() => navigate('/admin/categories')}
+            >
+              Manage Categories <span>→</span>
+            </button>
+          )}
         </div>
 
 
