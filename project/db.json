@@ -784,7 +784,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 1
+      "inStock": 0
     },
     {
       "id": "pet-21",
@@ -1998,7 +1998,7 @@
         }
       ],
       "totalPrice": 6500000,
-      "updatedAt": "2026-11-01T17:08:50.532Z"
+      "updatedAt": "2026-11-03T02:25:35.494Z"
     }
   ],
   "orders": [
@@ -2277,6 +2277,33 @@
       "totalAmount": 12645000,
       "orderStatus": "pending",
       "orderDate": "2026-11-01T17:07:17.749Z"
+    },
+    {
+      "id": "ord-1793672873453-ahfbs",
+      "userId": "u3",
+      "customerName": "Nguyễn Võ Nhật Duy",
+      "phone": "0349401599",
+      "email": "duynvnce201168@gmail.com",
+      "shippingAddress": "Thạnh Hòa, TP Cần Thơ",
+      "paymentMethod": "Tiền mặt khi nhận hàng (COD)",
+      "notes": "",
+      "items": [
+        {
+          "productId": "pet-05",
+          "name": "Chó Pug Vàng Kem",
+          "price": 6500000,
+          "quantity": 1,
+          "image": "/images/pets/dogs/dog-05.jpg",
+          "petType": "dog"
+        }
+      ],
+      "subtotal": 6500000,
+      "shippingFee": 0,
+      "depositAmount": 1950000,
+      "remainingAmount": 4550000,
+      "totalAmount": 6500000,
+      "orderStatus": "pending",
+      "orderDate": "2026-11-03T02:27:53.453Z"
     }
   ]
 }
