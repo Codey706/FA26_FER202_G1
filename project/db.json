@@ -2032,6 +2032,23 @@
       "updatedAt": "2026-11-09T03:15:57.396Z"
     },
     {
+      "id": "cart-u3-mwa3pbhcj6ek",
+      "userId": "u3",
+      "items": [
+        {
+          "productId": "pet-25",
+          "name": "Mèo Ragdoll Colorpoint",
+          "price": 12000000,
+          "quantity": 1,
+          "image": "/images/pets/cats/cat-09.jpg",
+          "petType": "cat",
+          "inStock": 1
+        }
+      ],
+      "totalPrice": 12000000,
+      "updatedAt": "2026-11-10T02:58:46.752Z"
+    },
+    {
       "id": "cart-guest-mw9y48v8evp3",
       "userId": null,
       "items": [
