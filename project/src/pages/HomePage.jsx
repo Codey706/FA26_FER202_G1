@@ -6,7 +6,6 @@ import WhyChooseUs from '../components/home/WhyChooseUs';
 import PopularBreeds from '../components/home/PopularBreeds';
 import AccessoriesSection from '../components/home/AccessoriesSection';
 import ShoppingProcess from '../components/home/ShoppingProcess';
-import Testimonials from '../components/home/Testimonials';
 import CTASection from '../components/home/CTASection';
 import { FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 
@@ -104,8 +103,6 @@ const HomePage = ({ searchQuery = '', onAddToCart }) => {
       />
 
       <ShoppingProcess />
-
-      <Testimonials />
 
       <CTASection />
 
