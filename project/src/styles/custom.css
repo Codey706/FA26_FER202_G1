@@ -2479,3 +2479,64 @@ a:hover {
     width: 20px;
   }
 }
+
+/* ===== ADMIN ORDER MANAGEMENT - PET SHOP THEME ===== */
+
+.admin-order-page {
+  background-color: #fff9f2;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Tiêu đề */
+.admin-order-page h1 {
+  color: #914800;
+}
+
+/* Thẻ tổng số đơn hàng */
+.admin-order-page .badge.bg-warning {
+  background-color: #fff0d9 !important;
+  color: #914800 !important;
+  border-color: #ffd699 !important;
+}
+
+/* Khu vực tìm kiếm */
+.admin-order-page .form-control,
+.admin-order-page .form-select,
+.admin-order-page .input-group-text {
+  border-color: #f1dfca;
+}
+
+.admin-order-page .form-control:focus,
+.admin-order-page .form-select:focus {
+  border-color: #ff7a00;
+  box-shadow: 0 0 0 0.2rem rgba(255, 122, 0, 0.15);
+}
+
+/* Bảng đơn hàng */
+.admin-order-page .table {
+  background-color: #ffffff;
+}
+
+.admin-order-page .table thead th {
+  background-color: #fff3e6;
+  color: #914800;
+  border-bottom: 2px solid #ffdfbd;
+  white-space: nowrap;
+}
+
+.admin-order-page .table tbody tr:hover {
+  background-color: #fffaf4;
+}
+
+/* Nút chi tiết */
+.admin-order-page .btn-outline-primary {
+  color: #ff7a00;
+  border-color: #ff7a00;
+}
+
+.admin-order-page .btn-outline-primary:hover {
+  background-color: #ff7a00;
+  border-color: #ff7a00;
+  color: #ffffff;
+}
