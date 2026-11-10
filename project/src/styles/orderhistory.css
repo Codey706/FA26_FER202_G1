@@ -1,0 +1,232 @@
+/* =====================================================
+   ORDER HISTORY - PET SHOP DESIGN SYSTEM
+   Dùng chung token từ custom.css:
+   --primary-color: #ff7a00
+   --primary-gradient: cam -> đỏ cam
+   --bg-cream: #fff9f2
+   --border-color: #f1e4d3
+   ===================================================== */
+
+.order-history-page {
+    min-height: 70vh;
+    padding-bottom: 56px !important;
+    background: var(--bg-cream, #fff9f2);
+    color: var(--text-dark, #1e293b);
+}
+
+/* Trang yêu cầu đăng nhập */
+.order-history-guest {
+    display: flex;
+    align-items: center;
+}
+
+.order-login-card {
+    width: 100%;
+    max-width: 540px;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border-color, #f1e4d3);
+    border-radius: var(--radius-xl, 28px);
+    box-shadow: var(--shadow-lg, 0 16px 36px rgba(255, 122, 0, 0.12));
+}
+
+.order-login-card h3 {
+    color: var(--text-dark, #1e293b);
+}
+
+/* Banner tiêu đề */
+.order-history-heading {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 26px 30px;
+    border: 1px solid var(--border-color, #f1e4d3);
+    border-radius: var(--radius-lg, 20px);
+    background: linear-gradient(135deg, #fff3e6 0%, #fffbf5 55%, #ffe8d1 100%);
+}
+
+.order-history-heading::after {
+    position: absolute;
+    z-index: -1;
+    top: -65px;
+    right: -35px;
+    width: 165px;
+    height: 165px;
+    border-radius: 50%;
+    background: rgba(255, 122, 0, 0.08);
+    content: "";
+    pointer-events: none;
+}
+
+.order-history-heading h1 {
+    color: var(--text-dark, #1e293b);
+}
+
+.order-history-heading p {
+    color: var(--text-muted, #64748b);
+}
+
+/* Thông báo riêng cho Staff/Admin */
+.order-history-staff-alert {
+    border: 1px solid #ffd8b0;
+    background: #fff5e9;
+    color: #854600;
+}
+
+.order-history-staff-alert .text-primary {
+    color: var(--primary-color, #ff7a00) !important;
+}
+
+/* Khu vực tìm kiếm và lọc */
+.order-history-filters {
+    margin-right: 0;
+    margin-left: 0;
+    padding: 20px 16px;
+    border: 1px solid var(--border-color, #f1e4d3);
+    border-radius: var(--radius-lg, 20px);
+    background: var(--card-bg, #fff);
+    box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.04));
+}
+
+.order-history-filters .form-label {
+    color: var(--text-dark, #1e293b) !important;
+    font-weight: 700;
+}
+
+.order-history-filters .form-control,
+.order-history-filters .form-select,
+.order-history-filters .input-group-text {
+    min-height: 43px;
+    border-color: #f1dfca;
+    background-color: #fffaf5;
+}
+
+.order-history-filters .input-group-text {
+    border-right: 0;
+    color: var(--primary-color, #ff7a00);
+}
+
+.order-history-filters .input-group .form-control {
+    border-left: 0;
+}
+
+.order-history-filters .form-control:focus,
+.order-history-filters .form-select:focus {
+    border-color: var(--primary-color, #ff7a00);
+    box-shadow: 0 0 0 0.2rem rgba(255, 122, 0, 0.15);
+}
+
+/* Loading */
+.order-history-loading .spinner-border {
+    color: var(--primary-color, #ff7a00) !important;
+}
+
+/* Trạng thái chưa có đơn hàng */
+.order-empty-state {
+    border: 1px solid var(--border-color, #f1e4d3);
+    border-radius: var(--radius-lg, 20px);
+    background: var(--card-bg, #fff);
+    box-shadow: var(--shadow-md, 0 8px 24px rgba(255, 122, 0, 0.08));
+}
+
+.order-empty-state h2 {
+    color: var(--text-dark, #1e293b);
+}
+
+/* Bảng lịch sử đơn hàng */
+.order-history-table {
+    overflow-x: auto;
+    border: 1px solid var(--border-color, #f1e4d3);
+    border-radius: var(--radius-lg, 20px);
+    background: var(--card-bg, #fff);
+    box-shadow: var(--shadow-md, 0 8px 24px rgba(255, 122, 0, 0.08));
+}
+
+.order-history-table table {
+    margin-bottom: 0;
+}
+
+.order-history-table thead th {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color, #f1e4d3);
+    background: #fff3e6;
+    color: #914800;
+    font-size: 0.88rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.order-history-table tbody td {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    border-color: #f5eee7;
+    vertical-align: middle;
+}
+
+.order-history-table tbody tr {
+    transition: background-color 0.18s ease;
+}
+
+.order-history-table tbody tr:hover>* {
+    background-color: #fffaf5;
+}
+
+.order-history-table tbody td:first-child {
+    color: var(--primary-color, #ff7a00);
+}
+
+.order-history-table .text-danger {
+    color: #dc2626 !important;
+}
+
+/* Nút xem chi tiết */
+.order-history-table .btn-outline-warning {
+    border-color: #ffd3a8;
+    background: #fff8f0;
+    color: #d96500;
+}
+
+.order-history-table .btn-outline-warning:hover {
+    border-color: transparent;
+    background: var(--primary-gradient, linear-gradient(135deg, #ff8a00 0%, #ff5200 100%));
+    color: #fff;
+}
+
+/* Bộ lọc và bảng trên màn hình nhỏ */
+@media (max-width: 767.98px) {
+    .order-history-page {
+        padding-top: 20px !important;
+    }
+
+    .order-history-heading {
+        padding: 21px 18px;
+    }
+
+    .order-history-filters {
+        padding: 16px 12px;
+    }
+
+    .order-history-table {
+        border-radius: 12px;
+    }
+
+    .order-history-table table {
+        min-width: 750px;
+    }
+
+    .order-login-card {
+        padding: 2rem 1.25rem !important;
+    }
+
+    .order-history-staff-alert {
+        align-items: flex-start !important;
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .order-history-table tbody tr {
+        transition: none;
+    }
+}
