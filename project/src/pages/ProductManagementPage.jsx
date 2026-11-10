@@ -406,8 +406,6 @@ function ProductManagementPage() {
                     vaccinated: editingProduct?.vaccinated || '',
                     dewormed: editingProduct?.dewormed ?? false,
                     healthCheck: editingProduct?.healthCheck ?? false,
-                    rating: editingProduct?.rating ?? 0,
-                    reviewCount: editingProduct?.reviewCount ?? 0,
                     isFeatured: editingProduct?.isFeatured ?? false
                 };
             } else {
@@ -429,8 +427,6 @@ function ProductManagementPage() {
                     status: editingProduct?.status || 'available',
                     originalPrice: editingProduct?.originalPrice ?? Number(formData.price),
                     discount: editingProduct?.discount ?? 0,
-                    rating: editingProduct?.rating ?? 0,
-                    reviewCount: editingProduct?.reviewCount ?? 0,
                     isFeatured: editingProduct?.isFeatured ?? false
                 };
             }
@@ -807,7 +803,7 @@ function ProductManagementPage() {
                                 </Table>
                             </div>
                         )}
-                    {!loading && totalPages > 1 && (
+                        {!loading && totalPages > 1 && (
                             <div className="d-flex justify-content-center mt-3">
                                 <Pagination className="mb-0">
                                     <Pagination.Prev
