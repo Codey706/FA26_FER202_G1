@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Form, Alert, Spinner } from 'react-bootstrap';
 import { FaClipboardCheck, FaArrowLeft, FaCheckCircle, FaUser, FaCreditCard, FaMapMarkerAlt, FaEdit } from 'react-icons/fa';
 import OrderSummary from '../components/cart/OrderSummary';
@@ -8,7 +8,13 @@ import orderService from '../services/orderService';
 import productService from '../services/productService';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { calcOrderSummary, getMaxQuantity } from '../utils/cartUtils';
+import {
+  calcOrderSummary,
+  getMaxQuantity,
+  isPet,
+  normalizeCart,
+  syncItemsWithProducts
+} from '../utils/cartUtils';
 import { formatCurrency } from '../utils/formatters';
 import { PROVINCE_GROUPS, composeAddress, isValidProvince, splitAddress } from '../utils/vnAddress';
 
@@ -125,8 +131,29 @@ const buildInitialForm = (user) => {
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
-  const { items, clearCart, refreshFromServer, syncing } = useCart();
+  const { items: cartItems, clearCart, removeFromCart, refreshFromServer, syncing: cartSyncing } = useCart();
+
+  // "Mua ngay": trang này được mở kèm đúng 1 sản phẩm trong location.state.buyNow
+  // -> chỉ thanh toán sản phẩm đó, giỏ hàng giữ nguyên.
+  // Vào từ giỏ hàng (không có buyNow) -> thanh toán toàn bộ giỏ như cũ.
+  const isBuyNow = Boolean(location.state?.buyNow);
+  const [buyNowItems, setBuyNowItems] = useState(() =>
+    location.state?.buyNow ? normalizeCart([location.state.buyNow]) : []
+  );
+  const items = isBuyNow ? buyNowItems : cartItems;
+  const syncing = isBuyNow ? false : cartSyncing;
+
+  // Làm mới giá / tồn kho của các sản phẩm sắp thanh toán.
+  const refreshItems = async () => {
+    if (!isBuyNow) return refreshFromServer();
+    if (buyNowItems.length === 0) return { items: [], changes: [] };
+    const products = await productService.getProducts();
+    const result = syncItemsWithProducts(buyNowItems, products);
+    setBuyNowItems(result.items);
+    return result;
+  };
 
   const [form, setForm] = useState(() => buildInitialForm(user));
   // 'form' = nhập thông tin, 'review' = xem lại và xác nhận trước khi tạo đơn
@@ -233,7 +260,7 @@ const CheckoutPage = () => {
       setError('');
 
       // 1. Luôn đồng bộ dữ liệu mới nhất từ server trước khi trừ tồn kho.
-      const { items: freshItems, changes: cartChanges } = await refreshFromServer();
+      const { items: freshItems, changes: cartChanges } = await refreshItems();
       if (!freshItems || freshItems.length === 0) {
         setError('Giỏ hàng đang trống hoặc sản phẩm trong giỏ không còn tồn tại.');
         return;
@@ -327,7 +354,14 @@ const CheckoutPage = () => {
 
       // 5. Chỉ xóa giỏ và hiện thành công sau khi cập nhật tồn kho + tạo đơn xong.
       setSuccessOrder(created || order);
-      clearCart();
+      if (isBuyNow) {
+        // Mua ngay: giữ nguyên giỏ hàng; chỉ bỏ bé thú cưng vừa mua (đã hết hàng) nếu có trong giỏ.
+        freshItems.filter(isPet).forEach((item) => removeFromCart(item.id));
+        // Xóa state "mua ngay" khỏi lịch sử để tải lại trang không đặt lại đơn cũ.
+        navigate(location.pathname, { replace: true, state: null });
+      } else {
+        clearCart();
+      }
     } catch (err) {
       setError(err.message || 'Không thể tạo đơn hàng. Hãy kiểm tra JSON Server ở cổng 3001.');
     } finally {
@@ -424,8 +458,12 @@ const CheckoutPage = () => {
         ) : items.length === 0 ? (
           <div className="shop-card shop-empty">
             <div className="shop-icon-box"><FaClipboardCheck /></div>
-            <h4 className="fw-bold">Giỏ hàng đang trống</h4>
-            <p className="text-muted">Hãy chọn sản phẩm trước khi thanh toán nhé.</p>
+            <h4 className="fw-bold">{isBuyNow ? 'Không có sản phẩm để thanh toán' : 'Giỏ hàng đang trống'}</h4>
+            <p className="text-muted">
+              {isBuyNow
+                ? 'Sản phẩm này có thể đã hết hàng hoặc không còn được bán.'
+                : 'Hãy chọn sản phẩm trước khi thanh toán nhé.'}
+            </p>
             <Link to="/" className="btn-shop-primary">Quay lại chọn sản phẩm</Link>
           </div>
         ) : isReview ? (
@@ -618,9 +656,19 @@ const CheckoutPage = () => {
                   <button type="submit" className="btn-shop-primary w-100 py-3">
                     Tiếp tục: xem lại đơn hàng
                   </button>
-                  <Link to="/cart" className="d-flex justify-content-center align-items-center gap-2 mt-3 fw-bold">
-                    <FaArrowLeft /> Quay lại giỏ hàng
-                  </Link>
+                  {isBuyNow ? (
+                    <button
+                      type="button"
+                      className="link-back d-flex justify-content-center align-items-center gap-2 mt-3 fw-bold w-100"
+                      onClick={() => navigate(-1)}
+                    >
+                      <FaArrowLeft /> Quay lại mua sắm
+                    </button>
+                  ) : (
+                    <Link to="/cart" className="d-flex justify-content-center align-items-center gap-2 mt-3 fw-bold">
+                      <FaArrowLeft /> Quay lại giỏ hàng
+                    </Link>
+                  )}
                 </OrderSummary>
               </Col>
             </Row>

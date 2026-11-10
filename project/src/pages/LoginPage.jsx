@@ -35,8 +35,18 @@ const LoginPage = () => {
 
   // Đã đăng nhập (kể cả vừa đăng nhập xong) -> quay lại trang đang muốn vào hoặc trang mặc định
   if (user) {
-    const from = location.state?.from?.pathname;
-    return <Navigate to={from || getDefaultRoute(user)} replace />;
+    const from = location.state?.from;
+    if (from?.pathname) {
+      // Giữ nguyên search + state (vd: sản phẩm "Mua ngay" gửi sang /checkout).
+      return (
+        <Navigate
+          to={{ pathname: from.pathname, search: from.search || '' }}
+          state={from.state}
+          replace
+        />
+      );
+    }
+    return <Navigate to={getDefaultRoute(user)} replace />;
   }
 
   const handleChange = (event) => {

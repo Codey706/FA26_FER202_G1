@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  FaStar,
   FaShieldAlt,
   FaPaw,
   FaShoppingCart,
   FaBolt
 } from 'react-icons/fa';
 import { formatCurrency } from '../../utils/formatters';
-import { useCart } from '../../context/CartContext';
+import { addItem, toCartItem } from '../../utils/cartUtils';
 
 const DEFAULT_FALLBACK_IMG =
   'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80';
@@ -18,31 +17,23 @@ const PetCard = ({ pet, onAddToCart }) => {
     pet?.image || DEFAULT_FALLBACK_IMG
   );
   const navigate = useNavigate();
-  const { items } = useCart();
 
   if (!pet) return null;
 
   const outOfStock = Number(pet.inStock) <= 0;
   const isMale = pet.gender?.toLowerCase() === 'đực';
 
-  // Mua ngay: thêm vào giỏ rồi chuyển thẳng sang trang thanh toán.
+  // Mua ngay: chỉ thanh toán riêng bé này, KHÔNG đụng tới giỏ hàng.
   // (/checkout đã bọc RequireAuth nên chưa đăng nhập sẽ được đưa tới /login.)
   const handleBuyNow = () => {
     if (outOfStock) return;
 
-    const alreadyInCart = items.some(
-      (item) => String(item.id) === String(pet.id)
-    );
-
-    if (!alreadyInCart && onAddToCart) {
-      const result = onAddToCart(pet);
-      if (result?.ok === false) {
-        alert(result.message || 'Không thể thêm sản phẩm vào giỏ hàng.');
-        return;
-      }
+    const { result } = addItem([], pet); // chỉ để kiểm tra hợp lệ / còn hàng
+    if (!result.ok) {
+      alert(result.message || 'Không thể mua sản phẩm này.');
+      return;
     }
-
-    navigate('/checkout');
+    navigate('/checkout', { state: { buyNow: toCartItem(pet, 1) } });
   };
 
   return (
@@ -57,9 +48,8 @@ const PetCard = ({ pet, onAddToCart }) => {
 
           {pet.gender && (
             <span
-              className={`badge-tag-gender ${
-                isMale ? 'badge-gender-male' : 'badge-gender-female'
-              }`}
+              className={`badge-tag-gender ${isMale ? 'badge-gender-male' : 'badge-gender-female'
+                }`}
             >
               {pet.gender}
             </span>
@@ -75,16 +65,6 @@ const PetCard = ({ pet, onAddToCart }) => {
 
         <div className="pet-card-body">
           <div className="d-flex align-items-center justify-content-between mb-2">
-            <div className="d-flex align-items-center gap-1 text-warning small">
-              <FaStar />
-              <strong className="text-dark ms-1">
-                {pet.rating || 5.0}
-              </strong>
-              <span className="text-muted">
-                ({pet.reviewCount || 10})
-              </span>
-            </div>
-
             <span className="badge bg-light text-secondary border small">
               {pet.petType === 'dog' ? 'Chó Cảnh' : 'Mèo Cảnh'}
             </span>

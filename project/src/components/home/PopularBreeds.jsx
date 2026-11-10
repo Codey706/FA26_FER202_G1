@@ -12,6 +12,7 @@ import breedService from '../../services/breedService';
 import productService from '../../services/productService';
 import { formatCurrency } from '../../utils/formatters';
 import { useCart } from '../../context/CartContext';
+import { addItem, toCartItem } from '../../utils/cartUtils';
 import Loading from '../common/Loading';
 
 const PopularBreeds = () => {
@@ -23,7 +24,7 @@ const PopularBreeds = () => {
   const [retryTrigger, setRetryTrigger] = useState(0);
 
   const navigate = useNavigate();
-  const { items, addToCart } = useCart();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     let isMounted = true;
@@ -73,22 +74,15 @@ const PopularBreeds = () => {
     }
   };
 
-  // Mua ngay: thêm vào giỏ rồi chuyển sang trang thanh toán.
+  // Mua ngay: chỉ thanh toán riêng bé này, KHÔNG đụng tới giỏ hàng.
   // (/checkout đã bọc RequireAuth nên chưa đăng nhập sẽ được đưa tới /login.)
   const handleBuyNow = (pet) => {
-    const alreadyInCart = items.some(
-      (item) => String(item.id) === String(pet.id)
-    );
-
-    if (!alreadyInCart) {
-      const result = addToCart(pet);
-      if (result?.ok === false) {
-        alert(result.message || 'Không thể thêm sản phẩm vào giỏ hàng.');
-        return;
-      }
+    const { result } = addItem([], pet); // chỉ để kiểm tra hợp lệ / còn hàng
+    if (!result.ok) {
+      alert(result.message || 'Không thể mua sản phẩm này.');
+      return;
     }
-
-    navigate('/checkout');
+    navigate('/checkout', { state: { buyNow: toCartItem(pet, 1) } });
   };
 
   return (

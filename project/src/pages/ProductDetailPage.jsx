@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Container,
@@ -14,20 +14,20 @@ import {
   FaArrowLeft,
   FaShoppingCart,
   FaPaw,
-  FaStar,
   FaCheckCircle,
   FaTimesCircle,
   FaMinus,
   FaPlus,
-  FaCheck
+  FaCheck,
+  FaBolt
 } from "react-icons/fa";
 
 import productService from "../services/productService";
 import categoryService from "../services/categoryService";
-import reviewService from "../services/reviewService";
 import PetCard from "../components/product/PetCard";
 import ProductCard from "../components/product/ProductCard";
 import { formatCurrency } from "../utils/formatters";
+import { addItem, toCartItem } from "../utils/cartUtils";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&w=800&q=80";
@@ -50,7 +50,6 @@ function ProductDetailPage({ onAddToCart }) {
 
   const [product, setProduct] = useState(null);
   const [category, setCategory] = useState(null);
-  const [reviews, setReviews] = useState([]);
   const [related, setRelated] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -61,7 +60,7 @@ function ProductDetailPage({ onAddToCart }) {
   const [relatedToast, setRelatedToast] = useState("");
   const toastTimerRef = useRef(null);
 
-  // Tải sản phẩm, danh mục, đánh giá và sản phẩm liên quan.
+  // Tải sản phẩm, danh mục và sản phẩm liên quan.
   useEffect(() => {
     let active = true;
 
@@ -69,7 +68,6 @@ function ProductDetailPage({ onAddToCart }) {
     setError("");
     setProduct(null);
     setCategory(null);
-    setReviews([]);
     setRelated([]);
     setQuantity(1);
     setAdded(false);
@@ -83,9 +81,8 @@ function ProductDetailPage({ onAddToCart }) {
         setProduct(data);
 
         // Phần phụ: lỗi ở đây không làm hỏng trang chi tiết.
-        const [categories, productReviews, allProducts] = await Promise.all([
+        const [categories, allProducts] = await Promise.all([
           categoryService.getCategories().catch(() => []),
-          reviewService.getReviews({ productId: id }).catch(() => []),
           productService.getProducts({ categoryId: data.categoryId }).catch(() => [])
         ]);
 
@@ -94,7 +91,6 @@ function ProductDetailPage({ onAddToCart }) {
         setCategory(
           categories.find((c) => String(c.id) === String(data.categoryId)) || null
         );
-        setReviews(Array.isArray(productReviews) ? productReviews : []);
         setRelated(
           (Array.isArray(allProducts) ? allProducts : [])
             .filter((p) => String(p.id) !== String(data.id))
@@ -125,12 +121,6 @@ function ProductDetailPage({ onAddToCart }) {
   // Thú cưng chỉ có 1 bé/sản phẩm; phụ kiện tối đa bằng tồn kho.
   const maxQuantity = isPet ? 1 : Math.max(stock, 0);
 
-  const avgRating = useMemo(() => {
-    if (reviews.length === 0) return null;
-    const sum = reviews.reduce((acc, r) => acc + Number(r.rating || 0), 0);
-    return sum / reviews.length;
-  }, [reviews]);
-
   const changeQuantity = (next) => {
     setQuantity(Math.min(Math.max(1, next), Math.max(maxQuantity, 1)));
   };
@@ -159,9 +149,25 @@ function ProductDetailPage({ onAddToCart }) {
       addedCount < quantity
         ? `Đã thêm ${addedCount}/${quantity} sản phẩm. ${lastResult?.message || ""}`
         : isPet
-        ? lastResult?.message || "Đã thêm sản phẩm vào giỏ hàng."
-        : `Đã thêm ${addedCount} sản phẩm vào giỏ hàng.`
+          ? lastResult?.message || "Đã thêm sản phẩm vào giỏ hàng."
+          : `Đã thêm ${addedCount} sản phẩm vào giỏ hàng.`
     );
+  };
+
+  // Mua ngay: chỉ thanh toán riêng sản phẩm này (đúng số lượng đã chọn), KHÔNG đụng tới giỏ hàng.
+  // (/checkout đã bọc RequireAuth nên chưa đăng nhập sẽ được đưa tới /login.)
+  const handleBuyNow = () => {
+    if (!product || outOfStock) return;
+
+    const { result } = addItem([], product); // chỉ để kiểm tra hợp lệ / còn hàng
+    if (!result.ok) {
+      setAdded(false);
+      setCartMessage(result.message || "Không thể mua sản phẩm này.");
+      return;
+    }
+    navigate("/checkout", {
+      state: { buyNow: toCartItem(product, isPet ? 1 : quantity) }
+    });
   };
 
   // Thêm sản phẩm liên quan vào giỏ.
@@ -169,9 +175,9 @@ function ProductDetailPage({ onAddToCart }) {
     const result = onAddToCart?.(item);
     setRelatedToast(
       result?.message ||
-        (result?.ok === false
-          ? "Không thể thêm sản phẩm vào giỏ hàng."
-          : `Đã thêm "${item.name}" vào giỏ hàng!`)
+      (result?.ok === false
+        ? "Không thể thêm sản phẩm vào giỏ hàng."
+        : `Đã thêm "${item.name}" vào giỏ hàng!`)
     );
     clearTimeout(toastTimerRef.current);
     toastTimerRef.current = setTimeout(() => setRelatedToast(""), 3000);
@@ -188,8 +194,8 @@ function ProductDetailPage({ onAddToCart }) {
     product?.petType === "dog"
       ? "Thú cưng - Chó"
       : product?.petType === "cat"
-      ? "Thú cưng - Mèo"
-      : product?.typeLabel || "Phụ kiện";
+        ? "Thú cưng - Mèo"
+        : product?.typeLabel || "Phụ kiện";
 
   const hasDiscount =
     product &&
@@ -280,22 +286,6 @@ function ProductDetailPage({ onAddToCart }) {
                 </Badge>
 
                 <h1 className="fw-bold">{product.name}</h1>
-
-                <div className="d-flex align-items-center gap-2 text-warning mb-2">
-                  <FaStar />
-                  <strong className="text-dark">
-                    {avgRating !== null
-                      ? avgRating.toFixed(1)
-                      : product.rating || "Chưa có"}
-                  </strong>
-                  <span className="text-muted small">
-                    (
-                    {reviews.length > 0
-                      ? `${reviews.length} đánh giá`
-                      : "chưa có đánh giá"}
-                    )
-                  </span>
-                </div>
 
                 <div className="my-3">
                   <span className="fs-3 fw-bold text-danger">
@@ -409,19 +399,32 @@ function ProductDetailPage({ onAddToCart }) {
                   </div>
                 )}
 
-                <Button
-                  variant={outOfStock ? "secondary" : "warning"}
-                  className="text-white fw-bold rounded-pill px-4"
-                  onClick={handleAddToCart}
-                  disabled={outOfStock}
-                >
-                  {added && !outOfStock ? (
-                    <FaCheck className="me-2" />
-                  ) : (
-                    <FaShoppingCart className="me-2" />
+                <div className="d-flex flex-wrap gap-2">
+                  <Button
+                    variant={outOfStock ? "secondary" : "warning"}
+                    className="text-white fw-bold rounded-pill px-4"
+                    onClick={handleAddToCart}
+                    disabled={outOfStock}
+                  >
+                    {added && !outOfStock ? (
+                      <FaCheck className="me-2" />
+                    ) : (
+                      <FaShoppingCart className="me-2" />
+                    )}
+                    {outOfStock ? "Hết hàng" : "Thêm vào giỏ hàng"}
+                  </Button>
+
+                  {!outOfStock && (
+                    <Button
+                      variant="danger"
+                      className="fw-bold rounded-pill px-4"
+                      onClick={handleBuyNow}
+                    >
+                      <FaBolt className="me-2" />
+                      Mua ngay
+                    </Button>
                   )}
-                  {outOfStock ? "Hết hàng" : "Thêm vào giỏ hàng"}
-                </Button>
+                </div>
 
                 {cartMessage && (
                   <Alert variant={added ? "success" : "warning"} className="mt-3">
@@ -431,47 +434,6 @@ function ProductDetailPage({ onAddToCart }) {
                 )}
               </Col>
             </Row>
-
-            {/* Đánh giá */}
-            <section className="mt-5">
-              <h3 className="fw-bold mb-3">Đánh giá từ khách hàng</h3>
-
-              {reviews.length === 0 ? (
-                <Alert variant="light" className="border">
-                  Sản phẩm này chưa có đánh giá nào.
-                </Alert>
-              ) : (
-                <Row className="g-3">
-                  {reviews.map((review) => (
-                    <Col md={6} key={review.id}>
-                      <div className="border rounded-4 p-3 h-100 bg-white">
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                          <strong>{review.userName || "Khách hàng"}</strong>
-                          <span className="text-warning">
-                            {Array.from({ length: 5 }, (_, i) => (
-                              <FaStar
-                                key={i}
-                                style={{ opacity: i < Number(review.rating) ? 1 : 0.25 }}
-                              />
-                            ))}
-                          </span>
-                        </div>
-                        <p className="mb-2 text-secondary">{review.comment}</p>
-                        <small className="text-muted">
-                          {review.date}
-                          {review.verified && (
-                            <span className="ms-2 text-success">
-                              <FaCheckCircle className="me-1" />
-                              Đã mua hàng
-                            </span>
-                          )}
-                        </small>
-                      </div>
-                    </Col>
-                  ))}
-                </Row>
-              )}
-            </section>
 
             {/* Sản phẩm liên quan */}
             {related.length > 0 && (
