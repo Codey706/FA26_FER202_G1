@@ -603,7 +603,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 0
+      "inStock": 5
     },
     {
       "id": "pet-02",
@@ -629,7 +629,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 0
+      "inStock": 21
     },
     {
       "id": "pet-18",
@@ -785,7 +785,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 0
+      "inStock": 6
     },
     {
       "id": "pet-21",
@@ -1989,32 +1989,6 @@
       "updatedAt": "2024-04-01T15:20:00Z"
     },
     {
-      "id": "cart-u3-mvy337h8gdbn",
-      "userId": "u3",
-      "items": [
-        {
-          "productId": "pet-03",
-          "name": "Chó Dachshund Đen Nâu",
-          "price": 5500000,
-          "quantity": 1,
-          "image": "/images/pets/dogs/dog-03.jpg",
-          "petType": "dog",
-          "inStock": 1
-        },
-        {
-          "productId": "pet-04",
-          "name": "Chó Poodle Nâu Đỏ",
-          "price": 8500000,
-          "quantity": 1,
-          "image": "/images/pets/dogs/dog-04.jpg",
-          "petType": "dog",
-          "inStock": 1
-        }
-      ],
-      "totalPrice": 14000000,
-      "updatedAt": "2026-11-10T03:15:06.653Z"
-    },
-    {
       "id": "cart-guest-mw0vvhi2jviz",
       "userId": null,
       "items": [
@@ -2030,6 +2004,43 @@
       ],
       "totalPrice": 9000000,
       "updatedAt": "2026-11-09T03:15:57.396Z"
+    },
+    {
+      "id": "cart-u3-mwa3pbhcj6ek",
+      "userId": "u3",
+      "items": [
+        {
+          "productId": "pet-25",
+          "name": "Mèo Ragdoll Colorpoint",
+          "price": 12000000,
+          "quantity": 1,
+          "image": "/images/pets/cats/cat-09.jpg",
+          "petType": "cat",
+          "inStock": 1
+        }
+      ],
+      "totalPrice": 12000000,
+      "updatedAt": "2026-11-10T02:58:46.752Z"
+
+      "totalPrice": 9000000,
+      "updatedAt": "2026-11-09T03:15:57.396Z"
+    },
+    {
+      "id": "cart-guest-mw9y48v8evp3",
+      "userId": null,
+      "items": [
+        {
+          "productId": "pet-03",
+          "name": "Chó Dachshund Đen Nâu",
+          "price": 5500000,
+          "quantity": 1,
+          "image": "/images/pets/dogs/dog-03.jpg",
+          "petType": "dog",
+          "inStock": 1
+        }
+      ],
+      "totalPrice": 5500000,
+      "updatedAt": "2026-11-10T00:49:10.723Z"
     }
   ],
   "orders": [

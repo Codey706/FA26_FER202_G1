@@ -64,6 +64,14 @@ export const productService = {
   },
 
   /**
+   * Lấy danh sách loại sản phẩm (dùng cho form quản lý phụ kiện)
+   * @param {object} params
+   */
+  getProductTypes: async (params = {}) => {
+    return await api.get('/productTypes', params);
+  },
+
+  /**
    * Cập nhật tồn kho sau khi đặt hàng
    * @param {string} id
    * @param {number} inStock
@@ -72,7 +80,7 @@ export const productService = {
     return await api.patch(`/products/${id}`, { inStock });
   },
 
-  // Prepared for future CRUD module
+  // CRUD sản phẩm (dùng ở ProductManagementPage)
   createProduct: async (productData) => {
     return await api.post('/products', productData);
   },
