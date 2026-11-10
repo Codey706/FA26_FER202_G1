@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Form, Alert, Spinner } from 'react-bootstrap';
-import { FaClipboardCheck, FaArrowLeft, FaCheckCircle, FaUser, FaCreditCard } from 'react-icons/fa';
+import { FaClipboardCheck, FaArrowLeft, FaCheckCircle, FaUser, FaCreditCard, FaMapMarkerAlt, FaEdit } from 'react-icons/fa';
 import OrderSummary from '../components/cart/OrderSummary';
 import ShopPageHeader from '../components/cart/ShopPageHeader';
 import orderService from '../services/orderService';
@@ -10,6 +10,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { calcOrderSummary, getMaxQuantity } from '../utils/cartUtils';
 import { formatCurrency } from '../utils/formatters';
+import { PROVINCE_GROUPS, composeAddress, isValidProvince, splitAddress } from '../utils/vnAddress';
 
 const PAYMENT_METHODS = [
   'Tiền mặt khi nhận hàng (COD)',
@@ -45,7 +46,8 @@ const PAYMENT_GUIDE = {
 };
 
 const MAX_NAME_LENGTH = 100;
-const MAX_ADDRESS_LENGTH = 300;
+const MIN_ADDRESS_DETAIL_LENGTH = 5;
+const MAX_ADDRESS_DETAIL_LENGTH = 200;
 const MAX_NOTES_LENGTH = 500;
 
 const isValidName = (name) =>
@@ -81,10 +83,13 @@ const validateField = (name, value) => {
       if (!trimmed) return 'Vui lòng nhập email.';
       if (!isValidEmail(trimmed)) return 'Địa chỉ email không đúng định dạng.';
       return '';
-    case 'shippingAddress':
-      if (!trimmed) return 'Vui lòng nhập địa chỉ nhận hàng.';
-      if (trimmed.length < 5 || trimmed.length > MAX_ADDRESS_LENGTH) {
-        return `Địa chỉ phải có từ 5 đến ${MAX_ADDRESS_LENGTH} ký tự.`;
+    case 'province':
+      if (!trimmed) return 'Vui lòng chọn tỉnh/thành phố.';
+      return isValidProvince(trimmed) ? '' : 'Tỉnh/thành phố không hợp lệ, vui lòng chọn lại trong danh sách.';
+    case 'addressDetail':
+      if (!trimmed) return 'Vui lòng nhập địa chỉ cụ thể (số nhà, tên đường, phường/xã).';
+      if (trimmed.length < MIN_ADDRESS_DETAIL_LENGTH || trimmed.length > MAX_ADDRESS_DETAIL_LENGTH) {
+        return `Địa chỉ cụ thể phải có từ ${MIN_ADDRESS_DETAIL_LENGTH} đến ${MAX_ADDRESS_DETAIL_LENGTH} ký tự.`;
       }
       return '';
     case 'paymentMethod':
@@ -98,30 +103,50 @@ const validateField = (name, value) => {
   }
 };
 
+const getFormErrors = (form) =>
+  Object.fromEntries(
+    Object.entries(form)
+      .map(([name, value]) => [name, validateField(name, value)])
+      .filter(([, message]) => message)
+  );
+
+const buildInitialForm = (user) => {
+  const saved = splitAddress(user?.address);
+  return {
+    customerName: user?.fullName || '',
+    phone: user?.phone || '',
+    email: user?.email || '',
+    province: saved.province,
+    addressDetail: saved.detail,
+    paymentMethod: PAYMENT_METHODS[0],
+    notes: ''
+  };
+};
+
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { items, clearCart, refreshFromServer, syncing } = useCart();
 
-  const [form, setForm] = useState({
-    customerName: user?.fullName || '',
-    phone: user?.phone || '',
-    email: user?.email || '',
-    shippingAddress: user?.address || '',
-    paymentMethod: PAYMENT_METHODS[0],
-    notes: ''
-  });
+  const [form, setForm] = useState(() => buildInitialForm(user));
+  // 'form' = nhập thông tin, 'review' = xem lại và xác nhận trước khi tạo đơn
+  const [step, setStep] = useState('form');
 
   // Tự động cập nhật form nếu user đăng nhập hoặc thay đổi
   useEffect(() => {
     if (user) {
-      setForm((prev) => ({
-        ...prev,
-        customerName: prev.customerName || user.fullName || '',
-        phone: prev.phone || user.phone || '',
-        email: prev.email || user.email || '',
-        shippingAddress: prev.shippingAddress || user.address || ''
-      }));
+      setForm((prev) => {
+        // Chỉ điền sẵn địa chỉ khi người dùng chưa nhập gì, tránh ghép nhầm tỉnh với địa chỉ vừa gõ.
+        const saved = !prev.province && !prev.addressDetail ? splitAddress(user.address) : null;
+        return {
+          ...prev,
+          customerName: prev.customerName || user.fullName || '',
+          phone: prev.phone || user.phone || '',
+          email: prev.email || user.email || '',
+          province: saved ? saved.province : prev.province,
+          addressDetail: saved ? saved.detail : prev.addressDetail
+        };
+      });
     }
   }, [user]);
 
@@ -144,8 +169,36 @@ const CheckoutPage = () => {
     });
   };
 
-  const handleSubmit = async (event) => {
+  // Bước 1: kiểm tra form, đạt thì chuyển sang màn hình xem lại (chưa tạo đơn).
+  const handleReview = (event) => {
     event.preventDefault();
+
+    if (items.length === 0) {
+      setError('Giỏ hàng đang trống. Vui lòng chọn sản phẩm trước khi thanh toán.');
+      return;
+    }
+
+    const validationErrors = getFormErrors(form);
+    setFieldErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      setError('Vui lòng kiểm tra lại các thông tin được đánh dấu đỏ.');
+      return;
+    }
+
+    setError('');
+    setStep('review');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleEdit = () => {
+    if (submittingRef.current) return;
+    setError('');
+    setStep('form');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Bước 2: người dùng đã xem lại và bấm "Xác nhận đặt hàng" -> tạo đơn thật.
+  const handlePlaceOrder = async () => {
     if (submittingRef.current) return;
 
     if (items.length === 0) {
@@ -153,24 +206,26 @@ const CheckoutPage = () => {
       return;
     }
 
+    // Kiểm tra lại lần nữa cho chắc; nếu có lỗi thì đưa người dùng về form để sửa.
+    const validationErrors = getFormErrors(form);
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors);
+      setError('Thông tin đặt hàng chưa hợp lệ, vui lòng kiểm tra lại.');
+      setStep('form');
+      return;
+    }
+
     const customer = {
       customerName: form.customerName.trim(),
       phone: form.phone.trim(),
       email: form.email.trim(),
-      shippingAddress: form.shippingAddress.trim(),
+      province: form.province,
+      addressDetail: form.addressDetail.trim(),
+      // Giữ trường gộp để trang chi tiết/quản lý đơn hàng hiển thị như cũ.
+      shippingAddress: composeAddress(form.addressDetail, form.province),
       paymentMethod: form.paymentMethod,
       notes: form.notes.trim()
     };
-
-    const validationErrors = Object.fromEntries(
-      Object.entries(form)
-        .map(([name, value]) => [name, validateField(name, value)])
-        .filter(([, message]) => message)
-    );
-    setFieldErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) {
-      return;
-    }
 
     try {
       submittingRef.current = true;
@@ -282,6 +337,7 @@ const CheckoutPage = () => {
   };
 
   const guide = PAYMENT_GUIDE[form.paymentMethod];
+  const isReview = step === 'review';
 
   /* ---------- Đặt hàng thành công ---------- */
   if (successOrder) {
@@ -294,7 +350,7 @@ const CheckoutPage = () => {
           title="Đặt hàng"
           highlight="thành công"
           subtitle="Cảm ơn bạn đã tin tưởng PET SHOP!"
-          step={3}
+          step={4}
         />
         <Container>
           <div className="shop-card shop-empty mx-auto" style={{ maxWidth: 680 }}>
@@ -349,10 +405,14 @@ const CheckoutPage = () => {
       <ShopPageHeader
         icon={<FaClipboardCheck />}
         badge="Thanh toán"
-        title="Thông tin"
-        highlight="đặt hàng"
-        subtitle="Điền thông tin nhận hàng và chọn phương thức thanh toán."
-        step={2}
+        title={isReview ? 'Xem lại' : 'Thông tin'}
+        highlight={isReview ? 'đơn hàng' : 'đặt hàng'}
+        subtitle={
+          isReview
+            ? 'Kiểm tra kỹ thông tin trước khi xác nhận. Đơn hàng chỉ được tạo sau khi bạn bấm “Xác nhận đặt hàng”.'
+            : 'Điền thông tin nhận hàng và chọn phương thức thanh toán.'
+        }
+        step={isReview ? 3 : 2}
       />
 
       <Container>
@@ -368,8 +428,93 @@ const CheckoutPage = () => {
             <p className="text-muted">Hãy chọn sản phẩm trước khi thanh toán nhé.</p>
             <Link to="/" className="btn-shop-primary">Quay lại chọn sản phẩm</Link>
           </div>
+        ) : isReview ? (
+          <Row className="g-4">
+            <Col lg={7}>
+              <div className="shop-card">
+                <div className="d-flex justify-content-between align-items-center gap-2 mb-3">
+                  <h5 className="shop-card-title mb-0">
+                    <span className="shop-title-icon"><FaMapMarkerAlt /></span>
+                    Thông tin nhận hàng
+                  </h5>
+                  <button type="button" className="btn-shop-outline" onClick={handleEdit} disabled={loading}>
+                    <FaEdit /> Chỉnh sửa
+                  </button>
+                </div>
+                {error && <Alert variant="danger" className="rounded-4">{error}</Alert>}
+
+                <div className="summary-row align-items-start">
+                  <span>Người nhận</span>
+                  <strong className="text-end ms-3">{form.customerName.trim()}</strong>
+                </div>
+                <div className="summary-row align-items-start">
+                  <span>Số điện thoại</span>
+                  <strong className="text-end ms-3">{form.phone.trim()}</strong>
+                </div>
+                <div className="summary-row align-items-start">
+                  <span>Email</span>
+                  <strong className="text-end ms-3 text-break">{form.email.trim()}</strong>
+                </div>
+                <div className="summary-row align-items-start">
+                  <span>Tỉnh / Thành phố</span>
+                  <strong className="text-end ms-3">{form.province}</strong>
+                </div>
+                <div className="summary-row align-items-start">
+                  <span>Địa chỉ cụ thể</span>
+                  <strong className="text-end ms-3 text-break">{form.addressDetail.trim()}</strong>
+                </div>
+                <div className="summary-row align-items-start">
+                  <span>Ghi chú</span>
+                  <strong className="text-end ms-3 text-break">{form.notes.trim() || 'Không có'}</strong>
+                </div>
+              </div>
+
+              <div className="shop-card mt-4">
+                <h5 className="shop-card-title">
+                  <span className="shop-title-icon"><FaCreditCard /></span>
+                  Phương thức thanh toán
+                </h5>
+                <p className="fw-semibold mb-2">{form.paymentMethod}</p>
+                {guide && (
+                  <div className="pay-info">
+                    <strong>{guide.title}</strong>
+                    <ul>
+                      {guide.lines.map((line) => <li key={line}>{line}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div className="shop-card mt-4">
+                <h5 className="shop-card-title">Sản phẩm trong đơn ({items.length})</h5>
+                {items.map((item) => (
+                  <div key={item.id} className="checkout-line">
+                    {item.image && <img src={item.image} alt={item.name} />}
+                    <div className="flex-grow-1">
+                      <div className="fw-semibold">{item.name}</div>
+                      <small className="text-muted">
+                        {formatCurrency(item.price)} × {item.quantity}
+                      </small>
+                    </div>
+                    <strong className="text-nowrap">{formatCurrency(item.price * item.quantity)}</strong>
+                  </div>
+                ))}
+              </div>
+            </Col>
+
+            <Col lg={5}>
+              <OrderSummary items={items}>
+                <button type="button" onClick={handlePlaceOrder} disabled={loading} className="btn-shop-primary w-100 py-3">
+                  {loading ? 'Đang tạo đơn hàng...' : 'Xác nhận đặt hàng'}
+                </button>
+                <button type="button" onClick={handleEdit} disabled={loading} className="btn-shop-outline w-100 mt-2">
+                  <FaArrowLeft /> Quay lại chỉnh sửa thông tin
+                </button>
+              </OrderSummary>
+            </Col>
+          </Row>
         ) : (
-          <Form onSubmit={handleSubmit} noValidate className="shop-form">
+          <Form onSubmit={handleReview} noValidate className="shop-form">
             <Row className="g-4">
               <Col lg={7}>
                 <div className="shop-card">
@@ -402,11 +547,29 @@ const CheckoutPage = () => {
                     </Col>
                   </Row>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Địa chỉ nhận hàng *</Form.Label>
-                    <Form.Control as="textarea" rows={2} name="shippingAddress" value={form.shippingAddress} onChange={handleChange} required maxLength={MAX_ADDRESS_LENGTH} isInvalid={Boolean(fieldErrors.shippingAddress)} placeholder="Số nhà, đường, phường/xã, tỉnh/thành" />
-                    <Form.Control.Feedback type="invalid">{fieldErrors.shippingAddress}</Form.Control.Feedback>
-                  </Form.Group>
+                  <Row>
+                    <Col md={5}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Tỉnh / Thành phố *</Form.Label>
+                        <Form.Select name="province" value={form.province} onChange={handleChange} required isInvalid={Boolean(fieldErrors.province)}>
+                          <option value="">Chọn tỉnh/thành phố</option>
+                          {PROVINCE_GROUPS.map((group) => (
+                            <optgroup key={group.label} label={group.label}>
+                              {group.options.map((name) => <option key={name} value={name}>{name}</option>)}
+                            </optgroup>
+                          ))}
+                        </Form.Select>
+                        <Form.Control.Feedback type="invalid">{fieldErrors.province}</Form.Control.Feedback>
+                      </Form.Group>
+                    </Col>
+                    <Col md={7}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Địa chỉ cụ thể *</Form.Label>
+                        <Form.Control name="addressDetail" value={form.addressDetail} onChange={handleChange} required maxLength={MAX_ADDRESS_DETAIL_LENGTH} isInvalid={Boolean(fieldErrors.addressDetail)} placeholder="Số nhà, tên đường, phường/xã" autoComplete="street-address" />
+                        <Form.Control.Feedback type="invalid">{fieldErrors.addressDetail}</Form.Control.Feedback>
+                      </Form.Group>
+                    </Col>
+                  </Row>
 
                   <Form.Group className="mb-3">
                     <Form.Label>Ghi chú</Form.Label>
@@ -452,8 +615,8 @@ const CheckoutPage = () => {
                       </div>
                     ))}
                   </div>
-                  <button type="submit" disabled={loading} className="btn-shop-primary w-100 py-3">
-                    {loading ? 'Đang tạo đơn hàng...' : 'Xác nhận đặt hàng'}
+                  <button type="submit" className="btn-shop-primary w-100 py-3">
+                    Tiếp tục: xem lại đơn hàng
                   </button>
                   <Link to="/cart" className="d-flex justify-content-center align-items-center gap-2 mt-3 fw-bold">
                     <FaArrowLeft /> Quay lại giỏ hàng
