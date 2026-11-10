@@ -603,7 +603,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 5
+      "inStock": 0
     },
     {
       "id": "pet-02",
@@ -629,7 +629,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 21
+      "inStock": 0
     },
     {
       "id": "pet-18",
@@ -785,7 +785,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 6
+      "inStock": 0
     },
     {
       "id": "pet-21",
@@ -1989,6 +1989,32 @@
       "updatedAt": "2024-04-01T15:20:00Z"
     },
     {
+      "id": "cart-u3-mvy337h8gdbn",
+      "userId": "u3",
+      "items": [
+        {
+          "productId": "pet-19",
+          "name": "Mèo Ba Tư Vàng Cam",
+          "price": 8000000,
+          "quantity": 1,
+          "image": "/images/pets/cats/cat-03.jpg",
+          "petType": "cat",
+          "inStock": 1
+        },
+        {
+          "productId": "pet-04",
+          "name": "Chó Poodle Nâu Đỏ",
+          "price": 8500000,
+          "quantity": 1,
+          "image": "/images/pets/dogs/dog-04.jpg",
+          "petType": "dog",
+          "inStock": 1
+        }
+      ],
+      "totalPrice": 16500000,
+      "updatedAt": "2026-11-10T04:13:58.209Z"
+    },
+    {
       "id": "cart-guest-mw0vvhi2jviz",
       "userId": null,
       "items": [
@@ -2022,7 +2048,7 @@
       "totalPrice": 12000000,
       "updatedAt": "2026-11-10T02:58:46.752Z"
     },
-        {
+    {
       "id": "cart-guest-mw9y48v8evp3",
       "userId": null,
       "items": [

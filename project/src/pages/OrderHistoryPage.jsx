@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Alert, Button, Spinner, Badge } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import { Alert, Button, Spinner } from 'react-bootstrap';
 import { FaShoppingBag, FaSearch, FaLock, FaSignInAlt, FaArrowRight, FaShieldAlt } from 'react-icons/fa';
 import orderService from '../services/orderService';
 import { useAuth } from '../context/AuthContext';
+import '../styles/orderhistory.css';
 
 const statusLabels = {
     pending: { label: 'Chờ xác nhận', badgeClass: 'bg-warning text-dark' },
@@ -22,8 +23,6 @@ const formatCurrency = (amount) =>
 
 export default function OrderHistoryPage() {
     const { user, isStaffOrAdmin } = useAuth();
-    const navigate = useNavigate();
-
     const [orders, setOrders] = useState([]);
     const [keyword, setKeyword] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -48,7 +47,7 @@ export default function OrderHistoryPage() {
 
                 if (active) {
                     const list = Array.isArray(allOrders) ? allOrders : [];
-                    
+
                     // LỌC NGHIÊM NGẶT: Chỉ hiển thị đơn hàng thuộc về chính tài khoản này!
                     // Tránh việc khách hàng này xem được đơn hàng và thông tin cá nhân của khách hàng khác.
                     const userEmail = String(user.email || '').trim().toLowerCase();
@@ -160,206 +159,199 @@ export default function OrderHistoryPage() {
     }
 
     return (
-        <main className="container py-4">
-            {/* Banner dành riêng cho Admin/Staff khi vào trang này */}
-            {isStaffOrAdmin && (
-                <Alert variant="info" className="d-flex align-items-center justify-content-between rounded-4 shadow-sm mb-4">
-                    <div className="d-flex align-items-center gap-2">
-                        <FaShieldAlt className="text-primary fs-5" />
-                        <div>
-                            <strong>Bạn đang đăng nhập với vai trò {user.role === 'admin' ? 'Quản trị viên (Admin)' : 'Nhân viên (Staff)'}.</strong>
-                            <div className="small text-muted">
-                                Đây là trang hiển thị đơn hàng cá nhân của bạn. Để xem và xử lý toàn bộ đơn hàng của khách hàng, hãy chuyển đến trang Quản lý đơn hàng.
+        <main className="order-history-page py-4">
+            <div className="container">
+                {/* Banner dành riêng cho Admin/Staff khi vào trang này */}
+                {isStaffOrAdmin && (
+                    <Alert variant="warning" className="order-history-staff-alert d-flex align-items-center justify-content-between rounded-4 shadow-sm mb-4">
+                        <div className="d-flex align-items-center gap-2">
+                            <FaShieldAlt className="text-primary fs-5" />
+                            <div>
+                                <strong>Bạn đang đăng nhập với vai trò {user.role === 'admin' ? 'Quản trị viên (Admin)' : 'Nhân viên (Staff)'}.</strong>
+                                <div className="small text-muted">
+                                    Đây là trang hiển thị đơn hàng cá nhân của bạn. Để xem và xử lý toàn bộ đơn hàng của khách hàng, hãy chuyển đến trang Quản lý đơn hàng.
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <Button
-                        as={Link}
-                        to="/admin/orders"
-                        variant="primary"
-                        size="sm"
-                        className="rounded-pill px-3 fw-bold flex-shrink-0"
-                    >
-                        Trang quản lý đơn hàng
-                    </Button>
-                </Alert>
-            )}
+                        <Button
+                            as={Link}
+                            to="/admin/orders"
+                            variant="primary"
+                            size="sm"
+                            className="rounded-pill px-3 fw-bold flex-shrink-0"
+                        >
+                            Trang quản lý đơn hàng
+                        </Button>
+                    </Alert>
+                )}
 
-            <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-                <div>
+                <div className="order-history-heading d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
                     <h1 className="h3 fw-bold mb-1">Lịch sử đơn hàng của tôi</h1>
                     <p className="text-muted mb-0">
                         Chào <strong>{user.fullName || user.username}</strong>, theo dõi tình trạng và xem chi tiết các đơn hàng bạn đã đặt.
                     </p>
                 </div>
 
-                <Button
-                    as={Link}
-                    to="/profile"
-                    variant="outline-warning"
-                    className="rounded-pill fw-bold px-3 btn-sm"
-                >
-                    Hồ sơ cá nhân
-                </Button>
-            </div>
+                <div className="order-history-table table-responsive bg-white rounded-4 shadow-sm border px-4 py-3 mb-4">
+                    <div className="col-md-8 px-4 py-3">
+                        <label htmlFor="order-search" className="form-label fw-semibold text-secondary">
+                            Tìm kiếm đơn hàng
+                        </label>
+                        <div className="input-group">
+                            <span className="input-group-text bg-white">
+                                <FaSearch className="text-muted" />
+                            </span>
+                            <input
+                                id="order-search"
+                                className="form-control"
+                                type="search"
+                                placeholder="Nhập mã đơn hàng..."
+                                value={keyword}
+                                onChange={(e) => setKeyword(e.target.value)}
+                            />
+                        </div>
+                    </div>
 
-            <div className="row g-3 mb-4">
-                <div className="col-md-8">
-                    <label htmlFor="order-search" className="form-label fw-semibold text-secondary">
-                        Tìm kiếm đơn hàng
-                    </label>
-                    <div className="input-group">
-                        <span className="input-group-text bg-white">
-                            <FaSearch className="text-muted" />
+                    <div className="col-md-4 px-4 py-3">
+                        <label htmlFor="order-status" className="form-label fw-semibold text-secondary">
+                            Lọc theo trạng thái
+                        </label>
+                        <select
+                            id="order-status"
+                            className="form-select"
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value="all">Tất cả trạng thái</option>
+                            {Object.entries(statusLabels).map(([value, item]) => (
+                                <option key={value} value={value}>
+                                    {item.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {loading && (
+                    <div className="text-center py-5" role="status">
+                        <Spinner animation="border" variant="warning" />
+                        <p className="mt-2 text-muted">Đang tải đơn hàng của bạn...</p>
+                    </div>
+                )}
+
+                {!loading && error && (
+                    <Alert variant="danger" className="rounded-4">
+                        {error}
+                        <button
+                            className="btn btn-sm btn-outline-danger ms-3 rounded-pill"
+                            onClick={() => window.location.reload()}
+                        >
+                            Thử lại
+                        </button>
+                    </Alert>
+                )}
+
+                {!loading && !error && filteredOrders.length === 0 && (
+                    <div className="text-center bg-white rounded-4 shadow-sm p-5 border">
+                        <div
+                            className="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle"
+                            style={{
+                                width: 70,
+                                height: 70,
+                                background: '#f8fafc',
+                                color: '#94a3b8'
+                            }}
+                        >
+                            <FaShoppingBag size={32} />
+                        </div>
+                        <h2 className="h5 fw-bold">Chưa có đơn hàng nào</h2>
+                        <p className="text-muted mb-4" style={{ maxWidth: 420, margin: '0 auto' }}>
+                            {keyword || statusFilter !== 'all'
+                                ? 'Không tìm thấy đơn hàng nào phù hợp với bộ lọc tìm kiếm.'
+                                : 'Bạn chưa đặt đơn hàng nào tại PET SHOP. Hãy khám phá ngay các bé thú cưng và phụ kiện cao cấp nhé!'}
+                        </p>
+                        <Button as={Link} to="/" className="btn-primary-orange px-4 py-2 rounded-pill fw-bold">
+                            Khám phá sản phẩm ngay
+                        </Button>
+                    </div>
+                )}
+
+                {!loading && !error && filteredOrders.length > 0 && (
+                    <div className="table-responsive bg-white rounded-4 shadow-sm border px-3 py-3">
+                        <table className="table table-hover align-middle mb-0">
+                            <thead className="table-light">
+                                <tr>
+                                    <th className="ps-4">Mã đơn</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th className="text-end pe-4">Hành động</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {filteredOrders.map((order) => {
+                                    const statusConfig = statusLabels[order.orderStatus] || {
+                                        label: order.orderStatus || 'Chưa xác định',
+                                        badgeClass: 'bg-secondary text-white'
+                                    };
+
+                                    const itemCount = Array.isArray(order.items)
+                                        ? order.items.reduce((s, it) => s + Number(it.quantity || 1), 0)
+                                        : 1;
+
+                                    return (
+                                        <tr key={order.id}>
+                                            <td className="ps-4 fw-bold text-dark">
+                                                #{order.id}
+                                            </td>
+                                            <td className="text-muted">
+                                                {order.orderDate
+                                                    ? new Date(order.orderDate).toLocaleDateString('vi-VN')
+                                                    : '—'}
+                                            </td>
+                                            <td className="text-truncate" style={{ maxWidth: 250 }}>
+                                                <span className="mb-2 p-2 badge bg-light text-dark border me-3 align-middle fw-semibold">
+                                                    {itemCount} món
+                                                </span>
+                                                <small className="mt-3 mb-0 p-2text-muted text-truncate d-inline-block" style={{ maxWidth: 220 }}>
+                                                    {order.items?.[0]?.name || 'Chi tiết đơn'}
+                                                    {order.items?.length > 1 ? ` (+${order.items.length - 1})` : ''}
+                                                </small>
+                                            </td>
+                                            <td className="fw-bold text-danger text-nowrap">
+                                                {formatCurrency(order.totalAmount)}
+                                            </td>
+                                            <td>
+                                                <span className={`badge rounded-pill px-3 py-2 fw-bold ${statusConfig.badgeClass}`}>
+                                                    {statusConfig.label}
+                                                </span>
+                                            </td>
+                                            <td className="text-end pe-4">
+                                                <Link
+                                                    to={`/orders/${encodeURIComponent(order.id)}`}
+                                                    className="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold"
+                                                >
+                                                    Chi tiết <FaArrowRight size={11} className="ms-1" />
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                {!loading && !error && filteredOrders.length > 0 && (
+                    <div className="d-flex justify-content-between align-items-center mt-3 text-muted small">
+                        <span>
+                            Hiển thị <strong>{filteredOrders.length}</strong> đơn hàng của bạn.
                         </span>
-                        <input
-                            id="order-search"
-                            className="form-control"
-                            type="search"
-                            placeholder="Nhập mã đơn hàng..."
-                            value={keyword}
-                            onChange={(e) => setKeyword(e.target.value)}
-                        />
                     </div>
-                </div>
-
-                <div className="col-md-4">
-                    <label htmlFor="order-status" className="form-label fw-semibold text-secondary">
-                        Lọc theo trạng thái
-                    </label>
-                    <select
-                        id="order-status"
-                        className="form-select"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                        <option value="all">Tất cả trạng thái</option>
-                        {Object.entries(statusLabels).map(([value, item]) => (
-                            <option key={value} value={value}>
-                                {item.label}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                )}
             </div>
-
-            {loading && (
-                <div className="text-center py-5" role="status">
-                    <Spinner animation="border" variant="warning" />
-                    <p className="mt-2 text-muted">Đang tải đơn hàng của bạn...</p>
-                </div>
-            )}
-
-            {!loading && error && (
-                <Alert variant="danger" className="rounded-4">
-                    {error}
-                    <button
-                        className="btn btn-sm btn-outline-danger ms-3 rounded-pill"
-                        onClick={() => window.location.reload()}
-                    >
-                        Thử lại
-                    </button>
-                </Alert>
-            )}
-
-            {!loading && !error && filteredOrders.length === 0 && (
-                <div className="text-center bg-white rounded-4 shadow-sm p-5 border">
-                    <div
-                        className="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle"
-                        style={{
-                            width: 70,
-                            height: 70,
-                            background: '#f8fafc',
-                            color: '#94a3b8'
-                        }}
-                    >
-                        <FaShoppingBag size={32} />
-                    </div>
-                    <h2 className="h5 fw-bold">Chưa có đơn hàng nào</h2>
-                    <p className="text-muted mb-4" style={{ maxWidth: 420, margin: '0 auto' }}>
-                        {keyword || statusFilter !== 'all'
-                            ? 'Không tìm thấy đơn hàng nào phù hợp với bộ lọc tìm kiếm.'
-                            : 'Bạn chưa đặt đơn hàng nào tại PET SHOP. Hãy khám phá ngay các bé thú cưng và phụ kiện cao cấp nhé!'}
-                    </p>
-                    <Button as={Link} to="/" className="btn-primary-orange px-4 py-2 rounded-pill fw-bold">
-                        Khám phá sản phẩm ngay
-                    </Button>
-                </div>
-            )}
-
-            {!loading && !error && filteredOrders.length > 0 && (
-                <div className="table-responsive bg-white rounded-4 shadow-sm border">
-                    <table className="table table-hover align-middle mb-0">
-                        <thead className="table-light">
-                            <tr>
-                                <th className="ps-4">Mã đơn</th>
-                                <th>Ngày đặt</th>
-                                <th>Sản phẩm</th>
-                                <th>Tổng tiền</th>
-                                <th>Trạng thái</th>
-                                <th className="text-end pe-4">Hành động</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {filteredOrders.map((order) => {
-                                const statusConfig = statusLabels[order.orderStatus] || {
-                                    label: order.orderStatus || 'Chưa xác định',
-                                    badgeClass: 'bg-secondary text-white'
-                                };
-
-                                const itemCount = Array.isArray(order.items)
-                                    ? order.items.reduce((s, it) => s + Number(it.quantity || 1), 0)
-                                    : 1;
-
-                                return (
-                                    <tr key={order.id}>
-                                        <td className="ps-4 fw-bold text-dark">
-                                            #{order.id}
-                                        </td>
-                                        <td className="text-muted">
-                                            {order.orderDate
-                                                ? new Date(order.orderDate).toLocaleDateString('vi-VN')
-                                                : '—'}
-                                        </td>
-                                        <td>
-                                            <span className="badge bg-light text-dark border me-2">
-                                                {itemCount} món
-                                            </span>
-                                            <small className="text-muted text-truncate d-inline-block" style={{ maxWidth: 220 }}>
-                                                {order.items?.[0]?.name || 'Chi tiết đơn'}
-                                                {order.items?.length > 1 ? ` (+${order.items.length - 1})` : ''}
-                                            </small>
-                                        </td>
-                                        <td className="fw-bold text-danger text-nowrap">
-                                            {formatCurrency(order.totalAmount)}
-                                        </td>
-                                        <td>
-                                            <span className={`badge rounded-pill px-3 py-2 fw-bold ${statusConfig.badgeClass}`}>
-                                                {statusConfig.label}
-                                            </span>
-                                        </td>
-                                        <td className="text-end pe-4">
-                                            <Link
-                                                to={`/orders/${encodeURIComponent(order.id)}`}
-                                                className="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold"
-                                            >
-                                                Chi tiết <FaArrowRight size={11} className="ms-1" />
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-
-            {!loading && !error && filteredOrders.length > 0 && (
-                <div className="d-flex justify-content-between align-items-center mt-3 text-muted small">
-                    <span>Hiển thị <strong>{filteredOrders.length}</strong> đơn hàng của bạn.</span>
-                </div>
-            )}
         </main>
     );
 }
