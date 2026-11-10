@@ -13,6 +13,7 @@ import {
 import productService from '../../services/productService';
 import PetCard from '../product/PetCard';
 import Loading from '../common/Loading';
+import { scoreProduct } from '../../utils/search';
 
 const FeaturedPets = ({
   searchQuery = '',
@@ -114,13 +115,8 @@ const FeaturedPets = ({
 
     // Filter by search query
     if (searchQuery.trim() !== '') {
-      const query = searchQuery.toLowerCase().trim();
-
-      const matchesSearch =
-        pet.name?.toLowerCase().includes(query) ||
-        pet.color?.toLowerCase().includes(query) ||
-        pet.origin?.toLowerCase().includes(query) ||
-        pet.description?.toLowerCase().includes(query);
+      // Dùng chung bộ tìm kiếm không dấu với trang kết quả tìm kiếm.
+      const matchesSearch = scoreProduct(pet, searchQuery) > 0;
 
       if (!matchesSearch) {
         return false;
