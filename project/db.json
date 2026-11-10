@@ -681,7 +681,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 0
+      "inStock": 1
     },
     {
       "id": "pet-19",
@@ -733,7 +733,7 @@
       "reviewCount": 0,
       "isFeatured": true,
       "status": "available",
-      "inStock": 0
+      "inStock": 1
     },
     {
       "id": "pet-20",
@@ -1993,26 +1993,17 @@
       "userId": "u3",
       "items": [
         {
-          "productId": "pet-03",
-          "name": "Chó Dachshund Đen Nâu",
-          "price": 5500000,
+          "productId": "pet-19",
+          "name": "Mèo Ba Tư Vàng Cam",
+          "price": 8000000,
           "quantity": 1,
-          "image": "/images/pets/dogs/dog-03.jpg",
-          "petType": "dog",
-          "inStock": 1
-        },
-        {
-          "productId": "pet-04",
-          "name": "Chó Poodle Nâu Đỏ",
-          "price": 8500000,
-          "quantity": 1,
-          "image": "/images/pets/dogs/dog-04.jpg",
-          "petType": "dog",
+          "image": "/images/pets/cats/cat-03.jpg",
+          "petType": "cat",
           "inStock": 1
         }
       ],
-      "totalPrice": 14000000,
-      "updatedAt": "2026-11-10T03:15:06.653Z"
+      "totalPrice": 8000000,
+      "updatedAt": "2026-11-09T04:14:25.999Z"
     },
     {
       "id": "cart-guest-mw0vvhi2jviz",
@@ -2030,6 +2021,23 @@
       ],
       "totalPrice": 9000000,
       "updatedAt": "2026-11-09T03:15:57.396Z"
+    },
+    {
+      "id": "cart-guest-mw9y48v8evp3",
+      "userId": null,
+      "items": [
+        {
+          "productId": "pet-03",
+          "name": "Chó Dachshund Đen Nâu",
+          "price": 5500000,
+          "quantity": 1,
+          "image": "/images/pets/dogs/dog-03.jpg",
+          "petType": "dog",
+          "inStock": 1
+        }
+      ],
+      "totalPrice": 5500000,
+      "updatedAt": "2026-11-10T00:49:10.723Z"
     }
   ],
   "orders": [
@@ -2362,43 +2370,6 @@
       "totalAmount": 8000000,
       "orderStatus": "pending",
       "orderDate": "2026-11-09T03:43:20.628Z"
-    },
-    {
-      "id": "ord-1794280536715-5vrmm",
-      "userId": "u3",
-      "customerName": "Nguyễn Võ Nhật Duy",
-      "phone": "0349401599",
-      "email": "duynvnce201168@gmail.com",
-      "province": "Cần Thơ",
-      "addressDetail": "Thạnh Hòa",
-      "shippingAddress": "Thạnh Hòa, Cần Thơ",
-      "paymentMethod": "Tiền mặt khi nhận hàng (COD)",
-      "notes": "",
-      "items": [
-        {
-          "productId": "pet-03",
-          "name": "Chó Dachshund Đen Nâu",
-          "price": 5500000,
-          "quantity": 1,
-          "image": "/images/pets/dogs/dog-03.jpg",
-          "petType": "dog"
-        },
-        {
-          "productId": "pet-04",
-          "name": "Chó Poodle Nâu Đỏ",
-          "price": 8500000,
-          "quantity": 1,
-          "image": "/images/pets/dogs/dog-04.jpg",
-          "petType": "dog"
-        }
-      ],
-      "subtotal": 14000000,
-      "shippingFee": 0,
-      "depositAmount": 4200000,
-      "remainingAmount": 9800000,
-      "totalAmount": 14000000,
-      "orderStatus": "pending",
-      "orderDate": "2026-11-10T03:15:36.715Z"
     }
   ]
 }
