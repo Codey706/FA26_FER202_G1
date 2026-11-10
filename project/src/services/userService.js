@@ -22,7 +22,7 @@ export const userService = {
   },
 
   /**
-   * Cập nhật thông tin hồ sơ người dùng
+   * Cập nhật thông tin hồ sơ người dùng (người dùng tự cập nhật)
    * @param {string|number} id
    * @param {object} profileData - { fullName, email, phone, address, avatar }
    */
@@ -86,7 +86,7 @@ export const userService = {
    */
   getUserOrders: async (user) => {
     if (!user) return [];
-    
+
     const allOrders = await api.get('/orders');
     if (!Array.isArray(allOrders)) return [];
 
@@ -97,7 +97,7 @@ export const userService = {
     return allOrders.filter((order) => {
       // Khớp theo userId
       if (order.userId && String(order.userId) === userId) return true;
-      
+
       // Hoặc khớp theo email
       if (userEmail && String(order.email || '').toLowerCase().trim() === userEmail) {
         return true;
@@ -110,6 +110,131 @@ export const userService = {
 
       return false;
     });
+  },
+
+  // ==========================================
+  // DÀNH RIÊNG CHO QUẢN TRỊ VIÊN (ADMIN)
+  // ==========================================
+
+  /**
+   * Lấy toàn bộ danh sách người dùng cho trang Admin
+   */
+  getAllUsers: async () => {
+    const users = await api.get('/users');
+    if (!Array.isArray(users)) return [];
+    return users.map(stripPassword);
+  },
+
+  /**
+   * Tạo người dùng mới từ phía Quản trị viên
+   * @param {object} userData
+   */
+  createUser: async (userData) => {
+    const { username, fullName, email, phone, password, role = 'customer', status = 'active', address = '', avatar } = userData;
+
+    const cleanUsername = String(username || '').trim();
+    const cleanFullName = String(fullName || '').trim();
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const cleanPhone = String(phone || '').trim();
+
+    if (!cleanUsername || !cleanFullName || !cleanEmail || !password) {
+      throw new Error('Vui lòng điền các thông tin bắt buộc: Tên đăng nhập, Họ tên, Email, Mật khẩu.');
+    }
+
+    if (String(password).length < 6) {
+      throw new Error('Mật khẩu khởi tạo phải từ 6 ký tự trở lên.');
+    }
+
+    // Kiểm tra trùng username hoặc email
+    const allUsers = await api.get('/users');
+    if (Array.isArray(allUsers)) {
+      if (allUsers.some((u) => String(u.username || '').toLowerCase() === cleanUsername.toLowerCase())) {
+        throw new Error('Tên đăng nhập này đã được sử dụng.');
+      }
+      if (allUsers.some((u) => String(u.email || '').toLowerCase() === cleanEmail)) {
+        throw new Error('Email này đã được sử dụng bởi một tài khoản khác.');
+      }
+    }
+
+    const newUser = {
+      id: `u${Date.now()}`,
+      username: cleanUsername,
+      fullName: cleanFullName,
+      email: cleanEmail,
+      password: String(password),
+      phone: cleanPhone,
+      address: String(address || '').trim(),
+      role: role || 'customer',
+      status: status || 'active',
+      avatar: avatar || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=200&q=80',
+      createdAt: new Date().toISOString()
+    };
+
+    const created = await api.post('/users', newUser);
+    return stripPassword(created);
+  },
+
+  /**
+   * Cập nhật thông tin người dùng từ phía Admin (được phép sửa role, status, email...)
+   * @param {string|number} id
+   * @param {object} updateData
+   */
+  updateUserAdmin: async (id, updateData) => {
+    const allUsers = await api.get('/users');
+    if (Array.isArray(allUsers)) {
+      if (updateData.email) {
+        const cleanEmail = String(updateData.email).trim().toLowerCase();
+        if (allUsers.some((u) => String(u.id) !== String(id) && String(u.email || '').toLowerCase() === cleanEmail)) {
+          throw new Error('Email này đã được sử dụng bởi một tài khoản khác.');
+        }
+      }
+      if (updateData.username) {
+        const cleanUsername = String(updateData.username).trim().toLowerCase();
+        if (allUsers.some((u) => String(u.id) !== String(id) && String(u.username || '').toLowerCase() === cleanUsername)) {
+          throw new Error('Tên đăng nhập này đã tồn tại.');
+        }
+      }
+    }
+
+    const payload = { ...updateData };
+    delete payload.password; // Không cập nhật mật khẩu qua hàm này
+
+    const updated = await api.patch(`/users/${id}`, payload);
+    return stripPassword(updated);
+  },
+
+  /**
+   * Khóa / Kích hoạt nhanh trạng thái tài khoản
+   * @param {string|number} id
+   * @param {string} currentStatus - 'active' hoặc 'inactive'
+   */
+  toggleUserStatus: async (id, currentStatus) => {
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    const updated = await api.patch(`/users/${id}`, { status: newStatus });
+    return stripPassword(updated);
+  },
+
+  /**
+   * Admin đặt lại mật khẩu cho một người dùng bất kỳ
+   * @param {string|number} id
+   * @param {string} newPassword
+   */
+  adminResetPassword: async (id, newPassword) => {
+    if (!newPassword || String(newPassword).length < 6) {
+      throw new Error('Mật khẩu mới phải có tối thiểu 6 ký tự.');
+    }
+
+    await api.patch(`/users/${id}`, { password: String(newPassword) });
+    return true;
+  },
+
+  /**
+   * Xóa tài khoản người dùng
+   * @param {string|number} id
+   */
+  deleteUser: async (id) => {
+    await api.delete(`/users/${id}`);
+    return true;
   }
 };
 

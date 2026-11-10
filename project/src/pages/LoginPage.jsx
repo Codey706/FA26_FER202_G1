@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Container, Row, Col, Form, Button, Alert, InputGroup } from 'react-bootstrap';
 import {
   FaPaw,
@@ -10,7 +10,9 @@ import {
   FaSignInAlt,
   FaShieldAlt,
   FaTruck,
-  FaHeart
+  FaHeart,
+  FaKey,
+  FaUserPlus
 } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
@@ -59,6 +61,12 @@ const LoginPage = () => {
     }
   };
 
+  // Nạp nhanh tài khoản mẫu phục vụ kiểm thử
+  const handleQuickLogin = (identifier, password) => {
+    setForm({ identifier, password, remember: true });
+    setError('');
+  };
+
   return (
     <main className="auth-page">
       <Container>
@@ -82,6 +90,13 @@ const LoginPage = () => {
                     </li>
                   ))}
                 </ul>
+
+                <div className="mt-4 pt-3 border-top border-white border-opacity-25 text-white-50 small">
+                  Chưa có tài khoản?{' '}
+                  <Link to="/register" className="text-white fw-bold text-decoration-underline ms-1">
+                    Đăng ký miễn phí
+                  </Link>
+                </div>
               </div>
             </Col>
 
@@ -94,19 +109,19 @@ const LoginPage = () => {
                 <h1 className="section-title mt-2 mb-1">
                   Đăng nhập <span>tài khoản</span>
                 </h1>
-                <p className="text-muted mb-4">
+                <p className="text-muted mb-4 small">
                   Nhập tên đăng nhập hoặc email cùng mật khẩu của bạn.
                 </p>
 
                 {error && (
-                  <Alert variant="danger" className="rounded-3 py-2" role="alert">
+                  <Alert variant="danger" className="rounded-3 py-2 small" role="alert">
                     {error}
                   </Alert>
                 )}
 
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-3" controlId="login-identifier">
-                    <Form.Label className="fw-semibold">Tên đăng nhập hoặc Email</Form.Label>
+                    <Form.Label className="fw-semibold small">Tên đăng nhập hoặc Email</Form.Label>
                     <InputGroup className="auth-input-group">
                       <InputGroup.Text>
                         <FaUserAlt />
@@ -124,7 +139,15 @@ const LoginPage = () => {
                   </Form.Group>
 
                   <Form.Group className="mb-3" controlId="login-password">
-                    <Form.Label className="fw-semibold">Mật khẩu</Form.Label>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <Form.Label className="fw-semibold small mb-1">Mật khẩu</Form.Label>
+                      <Link
+                        to="/forgot-password"
+                        className="small text-warning text-decoration-none fw-semibold"
+                      >
+                        Quên mật khẩu?
+                      </Link>
+                    </div>
                     <InputGroup className="auth-input-group">
                       <InputGroup.Text>
                         <FaLock />
@@ -151,15 +174,17 @@ const LoginPage = () => {
                     </InputGroup>
                   </Form.Group>
 
-                  <Form.Check
-                    type="checkbox"
-                    id="login-remember"
-                    name="remember"
-                    label="Ghi nhớ đăng nhập"
-                    checked={form.remember}
-                    onChange={handleChange}
-                    className="mb-4 auth-remember"
-                  />
+                  <div className="d-flex align-items-center justify-content-between mb-4">
+                    <Form.Check
+                      type="checkbox"
+                      id="login-remember"
+                      name="remember"
+                      label="Ghi nhớ đăng nhập"
+                      checked={form.remember}
+                      onChange={handleChange}
+                      className="auth-remember small mb-0"
+                    />
+                  </div>
 
                   <Button
                     type="submit"
@@ -168,15 +193,52 @@ const LoginPage = () => {
                   >
                     {loading ? (
                       <>
-                        <span className="spinner-border spinner-border-sm" aria-hidden="true" />
+                        <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
                         Đang đăng nhập...
                       </>
                     ) : (
                       <>
-                        <FaSignInAlt /> Đăng nhập
+                        <FaSignInAlt className="me-2" /> Đăng nhập
                       </>
                     )}
                   </Button>
+
+                  <div className="text-center mt-3 small text-muted">
+                    Chưa có tài khoản?{' '}
+                    <Link to="/register" className="text-warning fw-bold">
+                      Đăng ký ngay
+                    </Link>
+                  </div>
+
+                  {/* Nút đăng nhập nhanh cho demo / chấm bài */}
+                  <div className="auth-demo mt-4">
+                    <div className="auth-demo-title">
+                      <FaKey /> Điền nhanh tài khoản thử nghiệm:
+                    </div>
+                    <div className="d-flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="auth-demo-chip"
+                        onClick={() => handleQuickLogin('admin_matpet', 'admin123')}
+                      >
+                        👑 Admin
+                      </button>
+                      <button
+                        type="button"
+                        className="auth-demo-chip"
+                        onClick={() => handleQuickLogin('staff_huong', 'staff123')}
+                      >
+                        👔 Staff
+                      </button>
+                      <button
+                        type="button"
+                        className="auth-demo-chip"
+                        onClick={() => handleQuickLogin('customer_nam', '123456')}
+                      >
+                        🛒 Khách hàng
+                      </button>
+                    </div>
+                  </div>
                 </Form>
               </div>
             </Col>

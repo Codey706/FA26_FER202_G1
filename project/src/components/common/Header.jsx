@@ -25,7 +25,10 @@ import {
     FaInfoCircle,
     FaShoppingBag,
     FaUserCircle,
-    FaThList
+    FaThList,
+    FaUsers,
+    FaUserPlus,
+    FaLock
 } from 'react-icons/fa';
 
 import { useAuth } from '../../context/AuthContext';
@@ -217,6 +220,13 @@ const Header = ({ cartCount = 0, onSearch }) => {
                                 <>
                                     <Nav.Link
                                         as={Link}
+                                        to="/admin/users"
+                                        className="nav-link-custom fw-bold text-danger"
+                                    >
+                                        Quản lý người dùng
+                                    </Nav.Link>
+                                    <Nav.Link
+                                        as={Link}
                                         to="/admin/categories"
                                         className="nav-link-custom fw-bold text-danger"
                                     >
@@ -354,9 +364,24 @@ const Header = ({ cartCount = 0, onSearch }) => {
                                             Hồ sơ cá nhân
                                         </Dropdown.Item>
 
+                                        <Dropdown.Item
+                                            as={Link}
+                                            to="/change-password"
+                                        >
+                                            <FaLock className="me-2 text-warning" />
+                                            Đổi mật khẩu
+                                        </Dropdown.Item>
+
                                         {/* Phân quyền menu riêng biệt theo vai trò */}
                                         {isAdmin && (
                                             <>
+                                                <Dropdown.Item
+                                                    as={Link}
+                                                    to="/admin/users"
+                                                >
+                                                    <FaUsers className="me-2 text-danger" />
+                                                    Quản lý người dùng
+                                                </Dropdown.Item>
                                                 <Dropdown.Item
                                                     as={Link}
                                                     to="/admin/categories"
@@ -416,12 +441,21 @@ const Header = ({ cartCount = 0, onSearch }) => {
                                     </Dropdown.Menu>
                                 </Dropdown>
                             ) : (
-                                <Link
+                                <div className="d-flex align-items-center gap-2">
+                                    <Link
                                     to="/login"
                                     className="btn-primary-orange btn-login-header"
                                 >
                                     <FaSignInAlt /> Đăng nhập
                                 </Link>
+                                    <Link
+                                        to="/register"
+                                        className="btn btn-outline-warning rounded-pill d-none d-md-inline-flex align-items-center gap-1 fw-bold px-3 py-2"
+                                        style={{ borderColor: '#ff7a00', color: '#ff7a00', fontSize: '0.88rem' }}
+                                    >
+                                        <FaUserPlus /> Đăng ký
+                                    </Link>
+                                </div>
                             )}
 
                             {/* Shopping Cart */}
