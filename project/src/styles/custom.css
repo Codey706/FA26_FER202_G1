@@ -2018,7 +2018,7 @@ a:hover {
   margin: 0;
 }
 
-/* Thanh các bước: Giỏ hàng -> Thanh toán -> Hoàn tất */
+/* Thanh các bước: Giỏ hàng -> Thông tin -> Xác nhận -> Hoàn tất */
 .shop-steps {
   display: flex;
   align-items: center;
