@@ -2021,6 +2021,23 @@
       ],
       "totalPrice": 9000000,
       "updatedAt": "2026-11-09T03:15:57.396Z"
+    },
+    {
+      "id": "cart-guest-mw9y48v8evp3",
+      "userId": null,
+      "items": [
+        {
+          "productId": "pet-03",
+          "name": "Chó Dachshund Đen Nâu",
+          "price": 5500000,
+          "quantity": 1,
+          "image": "/images/pets/dogs/dog-03.jpg",
+          "petType": "dog",
+          "inStock": 1
+        }
+      ],
+      "totalPrice": 5500000,
+      "updatedAt": "2026-11-10T00:49:10.723Z"
     }
   ],
   "orders": [
