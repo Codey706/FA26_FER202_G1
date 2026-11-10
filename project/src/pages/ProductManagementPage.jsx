@@ -13,7 +13,8 @@ import {
     Badge,
     Alert,
     Spinner,
-    InputGroup
+    InputGroup,
+    Pagination
 } from 'react-bootstrap';
 import {
     FaArrowLeft,
@@ -77,6 +78,14 @@ function ProductManagementPage() {
     // Từ khóa tìm kiếm.
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Loại sản phẩm (dành cho phụ kiện), bộ lọc tồn kho, sắp xếp, phân trang, thông báo.
+    const [productTypes, setProductTypes] = useState([]);
+    const [stockFilter, setStockFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('default');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [notice, setNotice] = useState(null);
+    const PAGE_SIZE = 8;
+
     // Xác định nhóm danh mục và loại thú cưng.
     const petType = category?.petType ||
         (categoryId === 'cat-dogs'
@@ -90,16 +99,26 @@ function ProductManagementPage() {
 
     const isPet = categoryType === 'pet';
 
-    // Lấy dữ liệu danh mục, sản phẩm và giống.
+    // Đồng bộ số lượng sản phẩm (itemCount) của danh mục với dữ liệu thực tế.
+    const syncCategoryCount = (cat, count) => {
+        if (!cat || Number(cat.itemCount) === count) return;
+
+        categoryService
+            .updateCategory(cat.id, { ...cat, itemCount: count })
+            .catch(() => { });
+    };
+
+    // Lấy dữ liệu danh mục, sản phẩm, giống và loại sản phẩm.
     const loadData = async () => {
         try {
             setLoading(true);
             setError('');
 
-            const [categoryData, productData, breedData] = await Promise.all([
+            const [categoryData, productData, breedData, typeData] = await Promise.all([
                 categoryService.getCategories(),
                 productService.getProducts(),
-                breedService.getBreeds()
+                breedService.getBreeds(),
+                productService.getProductTypes()
             ]);
 
             const selectedCategory = categoryData.find(
@@ -114,6 +133,8 @@ function ProductManagementPage() {
 
             setProducts(filteredProducts);
             setBreeds(breedData);
+            setProductTypes(typeData);
+            syncCategoryCount(selectedCategory, filteredProducts.length);
         } catch (err) {
             console.error(err);
             setError('Không thể tải danh sách sản phẩm. Vui lòng thử lại.');
@@ -126,24 +147,78 @@ function ProductManagementPage() {
         loadData();
     }, [categoryId]);
 
-    // Lọc sản phẩm theo từ khóa tìm kiếm.
-    const filteredProducts = products.filter(product => {
-        const keyword = searchTerm.trim().toLowerCase();
+    // Lọc sản phẩm theo từ khóa, tồn kho và sắp xếp.
+    const filteredProducts = products
+        .filter(product => {
+            const keyword = searchTerm.trim().toLowerCase();
+            const stock = Number(product.inStock) || 0;
 
-        if (!keyword) return true;
+            if (stockFilter === 'in' && stock <= 0) return false;
+            if (stockFilter === 'out' && stock > 0) return false;
+            if (stockFilter === 'low' && !(stock > 0 && stock <= 5)) return false;
 
-        return [
-            product.id,
-            product.name,
-            product.breedName,
-            product.origin,
-            product.brand,
-            product.type,
-            product.typeLabel
-        ].some(value =>
-            String(value || '').toLowerCase().includes(keyword)
+            if (!keyword) return true;
+
+            return [
+                product.id,
+                product.name,
+                product.breedName,
+                product.origin,
+                product.brand,
+                product.type,
+                product.typeLabel
+            ].some(value =>
+                String(value || '').toLowerCase().includes(keyword)
+            );
+        })
+        .sort((a, b) => {
+            switch (sortBy) {
+                case 'price-asc':
+                    return Number(a.price) - Number(b.price);
+                case 'price-desc':
+                    return Number(b.price) - Number(a.price);
+                case 'stock-asc':
+                    return Number(a.inStock) - Number(b.inStock);
+                case 'stock-desc':
+                    return Number(b.inStock) - Number(a.inStock);
+                case 'name':
+                    return String(a.name).localeCompare(String(b.name), 'vi');
+                default:
+                    return 0;
+            }
+        });
+
+    // Phân trang danh sách.
+    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+    const safePage = Math.min(currentPage, totalPages);
+    const pagedProducts = filteredProducts.slice(
+        (safePage - 1) * PAGE_SIZE,
+        safePage * PAGE_SIZE
+    );
+
+    // Về trang đầu khi đổi bộ lọc.
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, stockFilter, sortBy, categoryId]);
+
+    // Danh sách loại sản phẩm của danh mục hiện tại (nếu không có thì dùng tất cả).
+    const availableTypes = (() => {
+        const byCategory = productTypes.filter(
+            item => String(item.categoryId) === String(categoryId)
         );
-    });
+        return byCategory.length > 0 ? byCategory : productTypes;
+    })();
+
+    // Chọn loại sản phẩm: lưu cả mã loại và tên hiển thị.
+    const handleTypeChange = (e) => {
+        const selected = productTypes.find(item => item.id === e.target.value);
+
+        setFormData(prev => ({
+            ...prev,
+            type: e.target.value,
+            typeLabel: selected?.label || ''
+        }));
+    };
 
     // Lấy tên giống theo breedId.
     const getBreed = (breedId) => {
@@ -231,15 +306,10 @@ function ProductManagementPage() {
             String(item.name || '').trim().toLowerCase() === breedName.toLowerCase()
         );
 
+        // Giống đã tồn tại: dùng lại, KHÔNG ghi đè tính cách của giống
+        // bằng mô tả của từng sản phẩm.
         if (existingBreed) {
-            const updatedBreed = {
-                ...existingBreed,
-                personality: personality
-            };
-
-            await breedService.updateBreed(existingBreed.id, updatedBreed);
-
-            return updatedBreed;
+            return existingBreed;
         }
 
         const newBreed = {
@@ -283,6 +353,26 @@ function ProductManagementPage() {
         ) {
             setFormError('Vui lòng nhập giá bán hợp lệ.');
             return;
+        }
+
+        if (
+            !Number.isInteger(Number(formData.inStock)) ||
+            Number(formData.inStock) < 0
+        ) {
+            setFormError('Số lượng tồn kho phải là số nguyên không âm.');
+            return;
+        }
+
+        if (!isPet) {
+            if (!formData.type) {
+                setFormError('Vui lòng chọn loại sản phẩm.');
+                return;
+            }
+
+            if (!formData.forPets || formData.forPets.length === 0) {
+                setFormError('Vui lòng chọn ít nhất một đối tượng sử dụng (Chó/Mèo).');
+                return;
+            }
         }
 
         try {
@@ -358,11 +448,16 @@ function ProductManagementPage() {
                 await productService.createProduct(productData);
             }
 
+            setNotice({
+                variant: 'success',
+                text: editingProduct ? 'Đã cập nhật sản phẩm.' : 'Đã thêm sản phẩm mới.'
+            });
+
             handleClose();
             await loadData();
         } catch (err) {
             console.error(err);
-            alert('Không thể lưu sản phẩm. Vui lòng thử lại.');
+            setFormError('Không thể lưu sản phẩm. Vui lòng thử lại.');
         } finally {
             setSaving(false);
         }
@@ -371,7 +466,10 @@ function ProductManagementPage() {
     // Mở hộp thoại xác nhận xóa.
     const handleDelete = (product) => {
         if (!isAdmin) {
-            alert('Chỉ Quản trị viên (Admin) mới có quyền xóa sản phẩm khỏi hệ thống.');
+            setNotice({
+                variant: 'warning',
+                text: 'Chỉ Quản trị viên (Admin) mới có quyền xóa sản phẩm khỏi hệ thống.'
+            });
             return;
         }
         setDeletingProduct(product);
@@ -382,13 +480,22 @@ function ProductManagementPage() {
     const confirmDelete = async () => {
         if (!deletingProduct) return;
         if (!isAdmin) {
-            alert('Thao tác bị từ chối: Chỉ Quản trị viên mới được xóa sản phẩm.');
+            setNotice({
+                variant: 'warning',
+                text: 'Thao tác bị từ chối: Chỉ Quản trị viên mới được xóa sản phẩm.'
+            });
             setShowDeleteModal(false);
             return;
         }
 
         try {
             await productService.deleteProduct(deletingProduct.id);
+
+            syncCategoryCount(category, products.length - 1);
+            setNotice({
+                variant: 'success',
+                text: `Đã xóa sản phẩm "${deletingProduct.name}".`
+            });
 
             setProducts(prev =>
                 prev.filter(item =>
@@ -401,6 +508,10 @@ function ProductManagementPage() {
 
         } catch (err) {
             console.error('Lỗi xóa sản phẩm:', err);
+            setNotice({
+                variant: 'danger',
+                text: 'Không thể xóa sản phẩm. Vui lòng thử lại.'
+            });
 
             // Tải lại để đồng bộ dữ liệu nếu server đã xóa.
             await loadData();
@@ -476,6 +587,16 @@ function ProductManagementPage() {
                     </Alert>
                 )}
 
+                {notice && (
+                    <Alert
+                        variant={notice.variant}
+                        dismissible
+                        onClose={() => setNotice(null)}
+                    >
+                        {notice.text}
+                    </Alert>
+                )}
+
                 {/* Danh sách sản phẩm */}
                 <Card className="product-management-card">
                     <Card.Body>
@@ -484,7 +605,7 @@ function ProductManagementPage() {
                                 <div className="product-list-title">
                                     <h4>
                                         Danh sách sản phẩm
-                                        (Tổng {products.length} sản phẩm)
+                                        (Tổng {products.length} sản phẩm{filteredProducts.length !== products.length ? `, đang hiển thị ${filteredProducts.length}` : ''})
                                     </h4>
                                 </div>
 
@@ -511,7 +632,7 @@ function ProductManagementPage() {
 
                                 <Form.Control
                                     type="text"
-                                    placeholder="Tìm theo tên sản phẩm..."
+                                    placeholder="Tìm theo tên, giống, thương hiệu, loại..."
                                     value={searchTerm}
                                     onChange={e => setSearchTerm(e.target.value)}
                                 />
@@ -527,7 +648,36 @@ function ProductManagementPage() {
                             </InputGroup>
                         </div>
 
+                        <div className="d-flex flex-wrap gap-2 mb-3">
+                            <Form.Select
+                                style={{ maxWidth: 200 }}
+                                value={stockFilter}
+                                onChange={e => setStockFilter(e.target.value)}
+                                aria-label="Lọc theo tồn kho"
+                            >
+                                <option value="all">Tất cả tồn kho</option>
+                                <option value="in">Còn hàng</option>
+                                <option value="low">Sắp hết (≤ 5)</option>
+                                <option value="out">Hết hàng</option>
+                            </Form.Select>
+
+                            <Form.Select
+                                style={{ maxWidth: 220 }}
+                                value={sortBy}
+                                onChange={e => setSortBy(e.target.value)}
+                                aria-label="Sắp xếp"
+                            >
+                                <option value="default">Sắp xếp mặc định</option>
+                                <option value="name">Tên A → Z</option>
+                                <option value="price-asc">Giá tăng dần</option>
+                                <option value="price-desc">Giá giảm dần</option>
+                                <option value="stock-asc">Tồn kho tăng dần</option>
+                                <option value="stock-desc">Tồn kho giảm dần</option>
+                            </Form.Select>
+                        </div>
+
                         {loading ? (
+
                             <div className="product-loading">
                                 <Spinner animation="border" />
                                 <p>Đang tải danh sách sản phẩm...</p>
@@ -557,7 +707,7 @@ function ProductManagementPage() {
                                         <tr>
                                             <th></th>
                                             <th>Tên sản phẩm</th>
-                                            <th>Mô tả</th>
+                                            <th>Phân loại</th>
                                             <th>Giá bán</th>
                                             <th>Tồn kho</th>
                                             <th className="text-center">Thao tác</th>
@@ -565,7 +715,7 @@ function ProductManagementPage() {
                                     </thead>
 
                                     <tbody>
-                                        {filteredProducts.map(product => (
+                                        {pagedProducts.map(product => (
                                             <tr key={product.id}>
                                                 {/* Ảnh sản phẩm */}
                                                 <td>
@@ -589,7 +739,21 @@ function ProductManagementPage() {
 
                                                 {/* Mô tả */}
                                                 <td className="product-personality">
-                                                    {product.description || '—'}
+                                                    {isPet ? (
+                                                        <>
+                                                            <div>{product.breedName || '—'}</div>
+                                                            <small className="text-muted">
+                                                                {[product.gender, product.age].filter(Boolean).join(' · ') || '—'}
+                                                            </small>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <div>{product.typeLabel || '—'}</div>
+                                                            <small className="text-muted">
+                                                                {[product.brand, renderForPets(product.forPets) !== '—' ? `Cho ${renderForPets(product.forPets)}` : null].filter(Boolean).join(' · ') || '—'}
+                                                            </small>
+                                                        </>
+                                                    )}
                                                 </td>
 
                                                 {/* Giá bán */}
@@ -600,7 +764,8 @@ function ProductManagementPage() {
                                                 {/* Tồn kho */}
                                                 <td>
                                                     <Badge bg={Number(product.inStock) > 0 ? 'success' : 'danger'}>
-                                                        {product.inStock ?? 0}
+                                                        {Number(product.inStock) > 0 ? product.inStock : 'Hết hàng'}
+
                                                     </Badge>
                                                 </td>
 
@@ -640,6 +805,29 @@ function ProductManagementPage() {
                                         ))}
                                     </tbody>
                                 </Table>
+                            </div>
+                        )}
+                    {!loading && totalPages > 1 && (
+                            <div className="d-flex justify-content-center mt-3">
+                                <Pagination className="mb-0">
+                                    <Pagination.Prev
+                                        disabled={safePage === 1}
+                                        onClick={() => setCurrentPage(safePage - 1)}
+                                    />
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                        <Pagination.Item
+                                            key={page}
+                                            active={page === safePage}
+                                            onClick={() => setCurrentPage(page)}
+                                        >
+                                            {page}
+                                        </Pagination.Item>
+                                    ))}
+                                    <Pagination.Next
+                                        disabled={safePage === totalPages}
+                                        onClick={() => setCurrentPage(safePage + 1)}
+                                    />
+                                </Pagination>
                             </div>
                         )}
                     </Card.Body>
@@ -785,6 +973,70 @@ function ProductManagementPage() {
                                 </>
                             ) : (
                                 <>
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>Loại sản phẩm *</Form.Label>
+                                            <Form.Select
+                                                name="type"
+                                                value={formData.type}
+                                                onChange={handleTypeChange}
+                                                required
+                                            >
+                                                <option value="">-- Chọn loại --</option>
+                                                {availableTypes.map(item => (
+                                                    <option key={item.id} value={item.id}>
+                                                        {item.label}
+                                                    </option>
+                                                ))}
+                                            </Form.Select>
+                                        </Form.Group>
+                                    </Col>
+
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>Thương hiệu</Form.Label>
+                                            <Form.Control
+                                                name="brand"
+                                                value={formData.brand || ''}
+                                                onChange={handleChange}
+                                                placeholder="Ví dụ: Royal Canin"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>Khối lượng / Kích thước</Form.Label>
+                                            <Form.Control
+                                                name="weight"
+                                                value={formData.weight || ''}
+                                                onChange={handleChange}
+                                                placeholder="Ví dụ: 1.13 kg"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+
+                                    <Col md={6}>
+                                        <Form.Group className="mb-3">
+                                            <Form.Label>Phù hợp cho *</Form.Label>
+                                            <div className="d-flex gap-4 pt-2">
+                                                <Form.Check
+                                                    type="checkbox"
+                                                    id="for-dog"
+                                                    label="Chó"
+                                                    checked={formData.forPets.includes('dog')}
+                                                    onChange={e => handleForPetsChange('dog', e.target.checked)}
+                                                />
+                                                <Form.Check
+                                                    type="checkbox"
+                                                    id="for-cat"
+                                                    label="Mèo"
+                                                    checked={formData.forPets.includes('cat')}
+                                                    onChange={e => handleForPetsChange('cat', e.target.checked)}
+                                                />
+                                            </div>
+                                        </Form.Group>
+                                    </Col>
                                 </>
                             )}
 
@@ -826,6 +1078,16 @@ function ProductManagementPage() {
                                         onChange={handleChange}
                                         placeholder="/images/..."
                                     />
+                                    {formData.image && (
+                                        <img
+                                            src={formData.image}
+                                            alt="Xem trước"
+                                            className="mt-2 rounded"
+                                            style={{ maxHeight: 120, maxWidth: '100%', objectFit: 'cover' }}
+                                            onError={e => { e.currentTarget.style.display = 'none'; }}
+                                            onLoad={e => { e.currentTarget.style.display = 'block'; }}
+                                        />
+                                    )}
                                 </Form.Group>
                             </Col>
 

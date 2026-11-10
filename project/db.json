@@ -603,7 +603,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 0
+      "inStock": 5
     },
     {
       "id": "pet-02",
@@ -629,7 +629,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 0
+      "inStock": 21
     },
     {
       "id": "pet-18",
@@ -785,7 +785,7 @@
       "reviewCount": 0,
       "isFeatured": false,
       "status": "available",
-      "inStock": 0
+      "inStock": 6
     },
     {
       "id": "pet-21",
@@ -1989,23 +1989,6 @@
       "updatedAt": "2024-04-01T15:20:00Z"
     },
     {
-      "id": "cart-u3-mvy337h8gdbn",
-      "userId": "u3",
-      "items": [
-        {
-          "productId": "pet-19",
-          "name": "Mèo Ba Tư Vàng Cam",
-          "price": 8000000,
-          "quantity": 1,
-          "image": "/images/pets/cats/cat-03.jpg",
-          "petType": "cat",
-          "inStock": 1
-        }
-      ],
-      "totalPrice": 8000000,
-      "updatedAt": "2026-11-09T04:14:25.999Z"
-    },
-    {
       "id": "cart-guest-mw0vvhi2jviz",
       "userId": null,
       "items": [
@@ -2019,6 +2002,27 @@
           "inStock": 1
         }
       ],
+      "totalPrice": 9000000,
+      "updatedAt": "2026-11-09T03:15:57.396Z"
+    },
+    {
+      "id": "cart-u3-mwa3pbhcj6ek",
+      "userId": "u3",
+      "items": [
+        {
+          "productId": "pet-25",
+          "name": "Mèo Ragdoll Colorpoint",
+          "price": 12000000,
+          "quantity": 1,
+          "image": "/images/pets/cats/cat-09.jpg",
+          "petType": "cat",
+          "inStock": 1
+        }
+      ],
+ feature/productManagement
+      "totalPrice": 12000000,
+      "updatedAt": "2026-11-10T02:58:46.752Z"
+
       "totalPrice": 9000000,
       "updatedAt": "2026-11-09T03:15:57.396Z"
     },
@@ -2038,6 +2042,7 @@
       ],
       "totalPrice": 5500000,
       "updatedAt": "2026-11-10T00:49:10.723Z"
+ main
     }
   ],
   "orders": [

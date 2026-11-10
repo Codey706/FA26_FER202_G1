@@ -1,15 +1,16 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import {
   FaShoppingCart,
   FaStar,
   FaCheck,
   FaEye,
-  FaTag
+  FaTag,
+  FaBolt
 } from 'react-icons/fa';
 import { formatCurrency } from '../../utils/formatters';
+import { useCart } from '../../context/CartContext';
 
 const DEFAULT_ACC_FALLBACK =
   'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&w=600&q=80';
@@ -23,6 +24,8 @@ const ProductCard = ({ product, onAddToCart }) => {
   );
 
   const addedTimerRef = useRef(null);
+  const navigate = useNavigate();
+  const { items, addToCart } = useCart();
 
   // Cleanup timeout khi component bị unmount
   useEffect(() => {
@@ -48,6 +51,24 @@ const ProductCard = ({ product, onAddToCart }) => {
     }, 2000);
 
     return result || { ok: true };
+  };
+
+  // Mua ngay: thêm vào giỏ rồi chuyển thẳng sang trang thanh toán.
+  // (/checkout đã bọc RequireAuth nên chưa đăng nhập sẽ được đưa tới /login.)
+  const handleBuyNow = () => {
+    const alreadyInCart = items.some(
+      (item) => String(item.id) === String(product.id)
+    );
+
+    if (!alreadyInCart) {
+      const result = addToCart(product);
+      if (result?.ok === false) {
+        alert(result.message || 'Không thể thêm sản phẩm vào giỏ hàng.');
+        return;
+      }
+    }
+
+    navigate('/checkout');
   };
 
   return (
@@ -144,7 +165,7 @@ const ProductCard = ({ product, onAddToCart }) => {
             Xem chi tiết
           </Link>
 
-          <div className="pet-card-actions">
+          <div className="pet-card-actions d-flex flex-column gap-2">
             <button
               type="button"
               className={`btn btn-card-action ${
@@ -161,6 +182,16 @@ const ProductCard = ({ product, onAddToCart }) => {
                   <FaShoppingCart /> Thêm Vào Giỏ
                 </>
               )}
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-warning text-white fw-bold rounded-pill d-flex align-items-center justify-content-center gap-2"
+              onClick={handleBuyNow}
+              title="Mua ngay và chuyển tới trang thanh toán"
+            >
+              <FaBolt className="small" />
+              Mua Ngay
             </button>
           </div>
         </div>
