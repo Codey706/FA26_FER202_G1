@@ -36,6 +36,18 @@ export function AuthProvider({ children }) {
     return loggedInUser;
   }, []);
 
+  const register = useCallback(async (formData, autoLogin = false) => {
+    const registeredUser = await authService.register(formData);
+
+    if (autoLogin) {
+      clearStoredUser();
+      sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(registeredUser));
+      setUser(registeredUser);
+    }
+
+    return registeredUser;
+  }, []);
+
   const logout = useCallback(() => {
     clearStoredUser();
     setUser(null);
@@ -63,12 +75,15 @@ export function AuthProvider({ children }) {
     () => ({
       user,
       isAuthenticated: Boolean(user),
+      isAdmin: user?.role === 'admin',
+      isStaff: user?.role === 'staff',
       isStaffOrAdmin: user?.role === 'admin' || user?.role === 'staff',
       login,
+      register,
       logout,
       updateUser
     }),
-    [user, login, logout, updateUser]
+    [user, login, register, logout, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

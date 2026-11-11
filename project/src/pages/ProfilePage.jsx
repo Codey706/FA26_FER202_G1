@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Container,
   Row,
@@ -86,7 +86,17 @@ const ProfilePage = () => {
   const navigate = useNavigate();
 
   // Active Tab: 'info' | 'password' | 'orders' | 'security'
-  const [activeTab, setActiveTab] = useState('info');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => {
+    const tabParam = searchParams.get('tab');
+    return tabParam && ['info', 'password', 'orders', 'security'].includes(tabParam) ? tabParam : 'info';
+  });
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['info', 'password', 'orders', 'security'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   // Form State cho Thông tin cá nhân
   const [profileForm, setProfileForm] = useState({

@@ -9,6 +9,9 @@ import SearchPage from './pages/SearchPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 import ProfilePage from './pages/ProfilePage';
 
 import OrderHistoryPage from './pages/OrderHistoryPage';
@@ -18,6 +21,7 @@ import OrderManagementPage from './pages/OrderManagementPage';
 import CategoryManagementPage from './pages/CategoryManagementPage';
 import ProductManagementPage from './pages/ProductManagementPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import UserManagementPage from './pages/UserManagementPage';
 
 import RequireAuth from './components/auth/RequireAuth';
 import { AuthProvider } from './context/AuthContext';
@@ -111,6 +115,28 @@ function AppContent() {
             element={<LoginPage />}
           />
 
+          {/* Register (Đăng ký thành viên) */}
+          <Route
+            path="/register"
+            element={<RegisterPage />}
+          />
+
+          {/* Forgot Password (Quên mật khẩu) */}
+          <Route
+            path="/forgot-password"
+            element={<ForgotPasswordPage />}
+          />
+
+          {/* Change Password (Đổi mật khẩu) */}
+          <Route
+            path="/change-password"
+            element={
+              <RequireAuth>
+                <ChangePasswordPage />
+              </RequireAuth>
+            }
+          />
+
           {/* User Profile */}
           <Route
             path="/profile"
@@ -177,6 +203,16 @@ function AppContent() {
             element={
               <RequireAuth roles={['admin', 'staff']}>
                 <OrderDetailPage />
+              </RequireAuth>
+            }
+          />
+
+          {/* Admin User Management (Quản trị người dùng) */}
+          <Route
+            path="/admin/users"
+            element={
+              <RequireAuth roles={['admin']}>
+                <UserManagementPage />
               </RequireAuth>
             }
           />

@@ -1821,6 +1821,15 @@
           "quantity": 1,
           "image": "/images/pets/cats/cat-04.jpg",
           "petType": "cat",
+          "inStock": 0
+        },
+        {
+          "productId": "pet-03",
+          "name": "Chó Dachshund Đen Nâu",
+          "price": 5500000,
+          "quantity": 1,
+          "image": "/images/pets/dogs/dog-03.jpg",
+          "petType": "dog",
           "inStock": 1
         },
         {
