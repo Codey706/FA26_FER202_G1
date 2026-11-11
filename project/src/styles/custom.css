@@ -56,6 +56,21 @@ a {
   transition: var(--transition);
 }
 
+/* Nút dạng liên kết (không xanh, không gạch chân) giống thẻ <a> của site */
+.link-back {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.link-back:hover {
+  color: var(--primary-color);
+}
+
 a:hover {
   color: var(--primary-color);
 }
@@ -921,81 +936,6 @@ a:hover {
   font-size: 0.875rem;
   color: var(--text-muted);
   line-height: 1.6;
-}
-
-/* ================= Customer Reviews / Testimonials ================= */
-.review-card {
-  background: #ffffff;
-  border: 1px solid #faead9;
-  border-radius: var(--radius-lg);
-  padding: 28px 24px;
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.review-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-hover);
-  border-color: #fed7aa;
-}
-
-.review-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.review-avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--primary-color);
-}
-
-.review-user-name {
-  font-weight: 700;
-  font-size: 1rem;
-  color: #1e293b;
-  margin-bottom: 2px;
-}
-
-.review-verified {
-  font-size: 0.75rem;
-  color: #10b981;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 600;
-}
-
-.review-stars {
-  color: #f59e0b;
-  font-size: 1rem;
-  margin-bottom: 12px;
-  display: flex;
-  gap: 2px;
-}
-
-.review-comment {
-  font-size: 0.925rem;
-  color: #475569;
-  line-height: 1.7;
-  font-style: italic;
-  flex-grow: 1;
-}
-
-.review-pet-tag {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px dashed #fed7aa;
-  font-size: 0.8rem;
-  color: var(--primary-color);
-  font-weight: 600;
 }
 
 /* ================= Call To Action (CTA) ================= */

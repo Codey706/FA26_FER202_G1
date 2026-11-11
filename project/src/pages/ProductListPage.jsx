@@ -35,7 +35,6 @@ const SORT_OPTIONS = [
   { value: 'price-asc', label: 'Giá tăng dần' },
   { value: 'price-desc', label: 'Giá giảm dần' },
   { value: 'name', label: 'Tên A → Z' },
-  { value: 'rating', label: 'Đánh giá cao nhất' },
   { value: 'discount', label: 'Giảm giá nhiều nhất' }
 ];
 
@@ -152,8 +151,6 @@ function ProductListPage({ onAddToCart }) {
           return Number(pb.price) - Number(pa.price);
         case 'name':
           return String(pa.name).localeCompare(String(pb.name), 'vi');
-        case 'rating':
-          return Number(pb.rating || 0) - Number(pa.rating || 0);
         case 'discount':
           return Number(pb.discount || 0) - Number(pa.discount || 0);
         default:
